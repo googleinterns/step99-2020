@@ -1,0 +1,56 @@
+{
+  "extends": [
+    "google"
+  ],
+  "plugins": [
+    "jsdoc"
+  ],
+  "rules": {
+    // jsdoc validation should be handled by jsdoc plugin
+    "valid-jsdoc": ["off"],
+    "require-jsdoc": ["off"],
+
+    // jsdoc rules
+    "jsdoc/check-alignment": ["warn"],
+    "jsdoc/check-indentation": ["warn"],
+    "jsdoc/check-param-names": ["warn"],
+    "jsdoc/check-property-names": ["warn"],
+    "jsdoc/check-tag-names": ["error"],
+    "jsdoc/check-types": ["warn"],
+    "jsdoc/empty-tags": ["error"],
+    "jsdoc/implements-on-classes": ["warn"],
+    "jsdoc/newline-after-description": ["warn"],
+    "jsdoc/no-undefined-types": ["warn"],
+    "jsdoc/require-description": [
+      "warn",
+      {
+        "checkConstructors": false,
+        "checkGetters": false,
+        "checkSetters": false
+      }
+    ],
+    "jsdoc/require-jsdoc": ["warn"],
+    "jsdoc/require-param": ["error"],
+    "jsdoc/require-param-description": ["warn"],
+    "jsdoc/require-param-name": ["error"],
+    "jsdoc/require-param-type": ["error"],
+    "jsdoc/require-returns": ["warn", { "checkGetters": false }],
+    "jsdoc/require-returns-type": ["error"],
+    "jsdoc/require-returns-check": ["warn"],
+    "jsdoc/require-returns-description": ["warn"],
+    "jsdoc/valid-types": ["warn"],
+    "new-cap": ["off"],
+    "indent": ["warn", 2],
+    "max-len": ["warn", { "code": 80 }]
+  },
+  "settings": {
+    "jsdoc": {
+      "tagNamePreference": {
+        "augments": {
+          "message": "@extends is to be used over @augments as it is more evocative of classes than @augments",
+          "replacement": "extends"
+        }
+      }
+    }
+  }
+}
