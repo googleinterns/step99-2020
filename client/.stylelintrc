@@ -31,7 +31,7 @@
       "turn"
     ],
     "shorthand-property-no-redundant-values": true,
-    "custom-property-pattern": "[a-z]+(-[a-z]+)*",
+    "custom-property-pattern": "[a-z]+(-[a-z]+)*(-[0-9]+)?",
     "declaration-no-important": true,
     "declaration-property-unit-blacklist": {
       "width": [
