@@ -3,6 +3,12 @@
     "eslint:recommended",
     "google"
   ],
+  "env": {
+    "browser": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  },
   "plugins": [
     "jsdoc"
   ],
