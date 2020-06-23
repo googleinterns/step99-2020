@@ -3,6 +3,9 @@
     "eslint:recommended",
     "google"
   ],
+  "env": {
+    "browser": true
+  },
   "plugins": [
     "jsdoc"
   ],
