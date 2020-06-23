@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * This file was adapted from https://github.com/GoogleCloudPlatform/java-docs-samples/blob/master/appengine-java11/appengine-simple-jetty-main/src/main/java/com/example/appengine/demo/jettymain/Main.java
+ * It executes the WAR file, which is an archive that contains our Servlets.
  */
 
 package com.google.musicanalysis.jettymain;
@@ -60,7 +63,7 @@ public class Main {
     server.start();
 
     System.out.printf("\nMusic Analysis server started at port %d\n", port);
-    
+
     server.join();
   }
 }
