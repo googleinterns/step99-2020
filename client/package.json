@@ -18,9 +18,9 @@
   },
   "scripts": {
     "serve": "live-server --no-browser",
-    "lint:script": "eslint .",
+    "lint:script": "eslint --max-warnings 0 .",
     "lint:style": "stylelint .",
-    "lint:fix:script": "eslint --fix .",
+    "lint:fix:script": "eslint --max-warnings 0 --fix .",
     "lint:fix:style": "stylelint --fix .",
     "lint": "run-s lint:script lint:style",
     "lint:fix": "run-s lint:fix:*"
