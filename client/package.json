@@ -1,0 +1,42 @@
+{
+  "name": "step-capstone",
+  "version": "1.0.0",
+  "description": "2020 STEP Internship Capstone",
+  "main": "index.html",
+  "dependencies": {
+    "eslint-config-google": "^0.14.0",
+    "eslint": "^7.2.0",
+    "eslint-plugin-jsdoc": "^27.1.2",
+    "stylelint": "^13.6.1",
+    "stylelint-config-recommended": "^3.0.0",
+    "stylelint-config-rational-order": "^0.1.2",
+    "stylelint-order": "^4.1.0"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.1",
+    "npm-run-all": "^4.1.5"
+  },
+  "scripts": {
+    "serve": "live-server --no-browser",
+    "lint:script": "eslint --max-warnings 0 .",
+    "lint:style": "stylelint .",
+    "lint:fix:script": "eslint --max-warnings 0 --fix .",
+    "lint:fix:style": "stylelint --fix .",
+    "lint": "run-s lint:script lint:style",
+    "lint:fix": "run-s lint:fix:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/googleinterns/step99-2020.git"
+  },
+  "contributors": [
+    "Ibiyemi Abiodun <ibiyemi@google.com>",
+    "Seun Omonije <seunomonije@google.com>",
+    "Grace Tian <gtian@google.com>"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/googleinterns/step99-2020/issues"
+  },
+  "homepage": "https://github.com/googleinterns/step99-2020#readme"
+}
