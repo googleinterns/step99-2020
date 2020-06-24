@@ -37,14 +37,31 @@ public class OAuthCallbackServlet extends HttpServlet {
     }
 
     var sessionOauthState = req.getSession().getAttribute("oauth:state");
+    var sessionOauthService = req.getSession().getAttribute("oauth:service");
 
     if (!state.equals(sessionOauthState)) {
       res.setStatus(401);
       return;
     }
 
+    String clientSecret;
+    String clientId;
+    URI tokenUri;
+
+    if (sessionOauthService.equals("youtube")) {
+      clientSecret = System.getenv().get("YOUTUBE_CLIENT_SECRET");
+      clientId = Constants.YOUTUBE_CLIENT_ID;
+      tokenUri = URI.create("https://oauth2.googleapis.com/token");
+    } else if (sessionOauthService.equals("spotify")) {
+      clientSecret = System.getenv().get("SPOTIFY_CLIENT_SECRET");
+      clientId = Constants.SPOTIFY_CLIENT_ID;
+      tokenUri = URI.create("https://accounts.spotify.com/api/token");
+    } else {
+      res.setStatus(400);
+      return;
+    }
+
     var redirectUri = System.getenv().get("OAUTH_CALLBACK_URI");
-    var spotifyClientSecret = System.getenv().get("SPOTIFY_CLIENT_SECRET");
 
     var tokenRequestBody = new StringBuilder();
     tokenRequestBody.append("grant_type=authorization_code");
@@ -53,24 +70,22 @@ public class OAuthCallbackServlet extends HttpServlet {
     tokenRequestBody.append("&redirect_uri=");
     tokenRequestBody.append(URLEncoder.encode(redirectUri, "UTF-8"));
     tokenRequestBody.append("&client_id=");
-    tokenRequestBody.append(URLEncoder.encode(Constants.SPOTIFY_CLIENT_ID, "UTF-8"));
+    tokenRequestBody.append(URLEncoder.encode(clientId, "UTF-8"));
     tokenRequestBody.append("&client_secret=");
-    tokenRequestBody.append(URLEncoder.encode(spotifyClientSecret, "UTF-8"));
+    tokenRequestBody.append(URLEncoder.encode(clientSecret, "UTF-8"));
 
     var httpClient = HttpClient.newHttpClient();
-    var tokenReq = HttpRequest
-      .newBuilder(URI.create("https://accounts.spotify.com/api/token"))
-      .header("Content-Type", "application/x-www-form-urlencoded")
-      .POST(BodyPublishers.ofString(tokenRequestBody.toString()))
-      .build();
+    var tokenReq = HttpRequest.newBuilder(tokenUri)
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .POST(BodyPublishers.ofString(tokenRequestBody.toString())).build();
 
     var tokenRes = httpClient.sendAsync(tokenReq, BodyHandlers.ofString()).join();
     var tokenResBody = tokenRes.body();
 
     var tokenResObj = JsonParser.parseString(tokenResBody).getAsJsonObject();
     var accessToken = tokenResObj.get("access_token");
-    
+
     res.setContentType("text/html");
-    res.getWriter().printf("<h1>the access token is %s</h1>", accessToken);
+    res.getWriter().printf("<h1>the access token for %s is %s</h1>", sessionOauthService, accessToken);
   }
 }
