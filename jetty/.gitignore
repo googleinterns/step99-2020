@@ -1,0 +1,8 @@
+# Maven build output
+target/
+
+# VSCode Java generated files
+.classpath
+.project
+.settings
+.factorypath
