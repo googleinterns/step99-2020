@@ -11,16 +11,14 @@ import java.net.URL;
     This is structured the way it is becuase I will be adding more
     to each function.
 */
-public class RequestBuilder {
+public class MusixRequest {
 
   // Url building
-  private String baseUrl = "https://api.musixmatch.com/ws/1.1/";
+  private static final String BASE_URL = "https://api.musixmatch.com/ws/1.1/";
   private String operation;
-  private String outputReqs = "?format=jsonp&callback=callback&";
+  private static final String OUTPUT_REQS = "?format=jsonp&callback=callback&";
   private String parameters;
-  private final String apiKey = "&apikey=76aaf72ec2a763b4c7aaa7ea135f5ff0";
-
-  private String response;
+  private static final String apiKey = "&apikey=";
 
   /**
    * Constructor.
@@ -28,15 +26,14 @@ public class RequestBuilder {
    * @param operation the API method to send to Musixmatch
    * @param parameters the parameter string to be sent to Musixmatch
    */
-  public RequestBuilder(String operation, String parameters) {
+  public MusixRequest(String operation, String parameters) {
     this.operation = operation;
     this.parameters = parameters;
   }
 
-  /** @return the result from Musixmatch API */
+  /** @return the result from Musixmatch API as string */
   public String grabResponse() throws MalformedURLException, IOException {
-    getResult();
-    return this.response;
+    return getResult();
   }
 
   /**
@@ -46,7 +43,7 @@ public class RequestBuilder {
    * @param parameters The parameter string. See above.
    */
   private URL buildUrl(String operation, String parameters) throws MalformedURLException {
-    String urlString = baseUrl + operation + outputReqs + parameters + apiKey;
+    String urlString = BASE_URL + operation + OUTPUT_REQS + parameters + apiKey;
     URL url = new URL(urlString);
     return url;
   }
@@ -73,6 +70,6 @@ public class RequestBuilder {
 
     in.close();
 
-    this.response = buffer.toString();
+    return buffer.toString();
   }
 }

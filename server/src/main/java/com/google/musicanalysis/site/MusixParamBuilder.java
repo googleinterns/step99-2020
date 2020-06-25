@@ -5,7 +5,7 @@ package com.google.musicanalysis.site;
     This is structured the way it is becuase I will be adding more
     to each function. I will clean it up later as well.
 */
-public class ParametersBuilder {
+public class MusixParamBuilder {
 
   private String intendedUse;
 
@@ -22,7 +22,7 @@ public class ParametersBuilder {
    * @param params array of parameters which get assigned to different values depending on
    *     intendedUse
    */
-  public ParametersBuilder(String intendedUse, String... params) {
+  public MusixParamBuilder(String intendedUse, String... params) {
     this.intendedUse = intendedUse;
 
     switch (intendedUse) {
@@ -33,11 +33,13 @@ public class ParametersBuilder {
       case "track.lyrics.get":
         this.trackId = params[0];
         break;
+      default:
+        throw new IllegalArgumentException("arguments required");
     }
   }
 
   /** Filters out the correct parameter string and returns it */
-  public String filter() {
+  public String filterParamString() {
     switch (this.intendedUse) {
       case "track.search":
         return buildTrackString(this.trackName, this.artistName);
@@ -54,9 +56,9 @@ public class ParametersBuilder {
    * @param artistName name of the desired artist
    */
   private String buildTrackString(String trackName, String artistName) {
-    // avoids errors with spaces
-    trackName = trackName.replaceAll(" ", "%20");
-    artistName = artistName.replaceAll(" ", "%20");
+    // ready string for sending
+    trackName = URLEncoder.encode(trackName, "UTF-8");
+    artistName = URLEncoder.encode(artistName, "UTF-8");
     return "q_track=" + trackName + "&q_artist=" + artistName + "&quorum_factor=1";
   }
 
@@ -66,7 +68,7 @@ public class ParametersBuilder {
    * @param trackId id of the desired track
    */
   private String buildLyricsString(String trackId) {
-    trackId = trackId.replaceAll(" ", "%20");
+    trackId = URLEncoder.encode(trackId, "UTF-8");
     return "track_id=" + trackId;
   }
 }
