@@ -1,0 +1,2 @@
+runtime: java11
+entrypoint: 'java -cp "*" com.google.musicanalysis.jettymain.Main site.war'
