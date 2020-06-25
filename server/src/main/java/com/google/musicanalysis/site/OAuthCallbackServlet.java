@@ -2,7 +2,6 @@ package com.google.musicanalysis.site;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
@@ -13,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.google.gson.JsonParser;
+import com.google.musicanalysis.util.URLEncodedBuilder;
 
 @WebServlet("/api/oauth/callback")
 public class OAuthCallbackServlet extends HttpServlet {
@@ -63,21 +63,17 @@ public class OAuthCallbackServlet extends HttpServlet {
 
     var redirectUri = System.getenv().get("OAUTH_CALLBACK_URI");
 
-    var tokenRequestBody = new StringBuilder();
-    tokenRequestBody.append("grant_type=authorization_code");
-    tokenRequestBody.append("&code=");
-    tokenRequestBody.append(URLEncoder.encode(code, "UTF-8"));
-    tokenRequestBody.append("&redirect_uri=");
-    tokenRequestBody.append(URLEncoder.encode(redirectUri, "UTF-8"));
-    tokenRequestBody.append("&client_id=");
-    tokenRequestBody.append(URLEncoder.encode(clientId, "UTF-8"));
-    tokenRequestBody.append("&client_secret=");
-    tokenRequestBody.append(URLEncoder.encode(clientSecret, "UTF-8"));
+    var tokenReqBody = new URLEncodedBuilder()
+      .add("grant_type", "authorization_code")
+      .add("code", code)
+      .add("redirct_uri", redirectUri)
+      .add("client_id", clientId)
+      .add("client_secret", clientSecret);
 
     var httpClient = HttpClient.newHttpClient();
     var tokenReq = HttpRequest.newBuilder(tokenUri)
         .header("Content-Type", "application/x-www-form-urlencoded")
-        .POST(BodyPublishers.ofString(tokenRequestBody.toString())).build();
+        .POST(BodyPublishers.ofString(tokenReqBody.build())).build();
 
     var tokenRes = httpClient.sendAsync(tokenReq, BodyHandlers.ofString()).join();
     var tokenResBody = tokenRes.body();
