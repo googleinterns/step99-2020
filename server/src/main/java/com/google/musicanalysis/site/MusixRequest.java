@@ -18,7 +18,7 @@ public class MusixRequest {
   private String operation;
   private static final String OUTPUT_REQS = "?format=jsonp&callback=callback&";
   private String parameters;
-  private static final String apiKey = "&apikey=76aaf72ec2a763b4c7aaa7ea135f5ff0";
+  private static final String apiKey = "&apikey=";
 
   /**
    * Constructor.
