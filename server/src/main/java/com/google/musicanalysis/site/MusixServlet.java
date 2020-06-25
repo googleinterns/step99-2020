@@ -25,14 +25,14 @@ public class MusixServlet extends HttpServlet {
     // Getting id from song and artist name
     res.getWriter().write("\n<h3>Getting id from song and artist name</h3>");
     params = new MusixParamBuilder(use, trackName, artistName);
-    request = new MusixRequest(use, params.filterParamString());
+    request = new MusixRequest(use, params.grabFilteredParams());
     res.getWriter().println(request.grabResponse());
 
     // Getting lyrics from a given id
     res.getWriter().write("\n<h3>Getting lyrics from given id</h3>");
     use = "track.lyrics.get";
     params = new MusixParamBuilder(use, trackId);
-    request = new MusixRequest(use, params.filterParamString());
+    request = new MusixRequest(use, params.grabFilteredParams());
     res.getWriter().println(request.grabResponse());
   }
 }

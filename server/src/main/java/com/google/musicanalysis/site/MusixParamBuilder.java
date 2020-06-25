@@ -42,7 +42,7 @@ public class MusixParamBuilder {
   }
 
   /** Filters out the correct parameter string and returns it */
-  public String filterParamString() {
+  public String grabFilteredParams() {
     switch (this.intendedUse) {
       case "track.search":
         return buildTrackString(this.trackName, this.artistName);
