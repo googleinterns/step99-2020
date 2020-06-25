@@ -1,5 +1,9 @@
 package com.google.musicanalysis.site;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
+
 /*
     Builds parameter strings based off what the user wants.
     This is structured the way it is becuase I will be adding more
@@ -57,8 +61,13 @@ public class MusixParamBuilder {
    */
   private String buildTrackString(String trackName, String artistName) {
     // ready string for sending
-    trackName = URLEncoder.encode(trackName, "UTF-8");
-    artistName = URLEncoder.encode(artistName, "UTF-8");
+    try {
+        trackName = URLEncoder.encode(trackName, "UTF-8");
+        artistName = URLEncoder.encode(artistName, "UTF-8");
+    } catch(UnsupportedEncodingException err) {
+        throw new AssertionError("Invalid URL");
+    }
+
     return "q_track=" + trackName + "&q_artist=" + artistName + "&quorum_factor=1";
   }
 
@@ -67,8 +76,13 @@ public class MusixParamBuilder {
    *
    * @param trackId id of the desired track
    */
-  private String buildLyricsString(String trackId) {
-    trackId = URLEncoder.encode(trackId, "UTF-8");
+  private String buildLyricsString(String trackId){
+    try {
+        trackId = URLEncoder.encode(trackId, "UTF-8");
+    } catch(UnsupportedEncodingException err) {
+        throw new AssertionError("Invalid URL");
+    }
+
     return "track_id=" + trackId;
   }
 }
