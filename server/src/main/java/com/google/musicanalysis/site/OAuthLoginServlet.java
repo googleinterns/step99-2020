@@ -28,7 +28,7 @@ public class OAuthLoginServlet extends HttpServlet {
     String oauthLoginUriBase;
     URLEncodedBuilder oauthLoginUriParams;
 
-      // generate a nonce to prevent CSRF
+    // generate a nonce to prevent CSRF
     var state = new BigInteger(130, new SecureRandom()).toString(32);
     var session = req.getSession(true);
     session.setAttribute("oauth:state", state);
