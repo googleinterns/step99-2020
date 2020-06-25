@@ -18,7 +18,7 @@ public class RequestBuilder {
   private String operation;
   private String outputReqs = "?format=jsonp&callback=callback&";
   private String parameters;
-  private final String apiKey = "&apikey=76aaf72ec2a763b4c7aaa7ea135f5ff0";
+  private final String apiKey = "&apikey=";
 
   private String response;
 
