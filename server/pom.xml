@@ -54,6 +54,7 @@
           <deploy.version>1</deploy.version>
         </configuration>
       </plugin>
+
       <!-- Conforms Java code to Google style guide. 
            $ mvn com.coveo:fmt-maven-plugin:format -->
       <plugin>
