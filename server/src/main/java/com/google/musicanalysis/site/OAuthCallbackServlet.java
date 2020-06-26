@@ -66,7 +66,7 @@ public class OAuthCallbackServlet extends HttpServlet {
     var tokenReqBody = new URLEncodedBuilder()
       .add("grant_type", "authorization_code")
       .add("code", code)
-      .add("redirct_uri", redirectUri)
+      .add("redirect_uri", redirectUri)
       .add("client_id", clientId)
       .add("client_secret", clientSecret);
 
