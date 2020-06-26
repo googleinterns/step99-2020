@@ -38,6 +38,24 @@
         <artifactId>gson</artifactId>
         <version>2.8.6</version>
     </dependency>
+    <!-- Google API Client -->
+    <dependency>
+      <groupId>com.google.api-client</groupId>
+      <artifactId>google-api-client</artifactId>
+      <version>1.30.9</version>
+    </dependency>
+   <!-- Youtube API -->
+    <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-youtube</artifactId>
+      <version>v3-rev20200618-1.30.9</version>
+    </dependency>
+    <!-- Google OAuth API -->
+    <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-oauth2</artifactId>
+      <version>v2-rev20200213-1.30.9</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -56,7 +74,12 @@
       </plugin>
       <!-- Conforms Java code to Google style guide. 
            $ mvn com.coveo:fmt-maven-plugin:format -->
-      <plugin>
+    <!-- Google OAuth2 -->
+    <dependency>
+      <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-oauth2</artifactId>
+      <version>v2-rev20200213-1.30.9</version>
+    </dependency>      <plugin>
         <groupId>com.coveo</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
         <version>2.10</version>
