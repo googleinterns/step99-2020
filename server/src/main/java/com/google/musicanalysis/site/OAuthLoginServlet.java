@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -21,7 +20,7 @@ public class OAuthLoginServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
-    var path = req.getPathInfo().substring(1);
+    var path = req.getPathInfo();
 
     if (path == null) {
       res.setStatus(404);
@@ -34,11 +33,11 @@ public class OAuthLoginServlet extends HttpServlet {
     try {
       domainUri = new URI(System.getenv().get("DOMAIN"));
     } catch (URISyntaxException e) {
-      LOGGER.log(Level.SEVERE, "The DOMAIN environment variable is invalid.");
+      LOGGER.severe("The DOMAIN environment variable is invalid.");
       res.setStatus(500);
       return;
     } catch (NullPointerException e) {
-      LOGGER.log(Level.SEVERE, "The DOMAIN environment variable is not set.");
+      LOGGER.severe("The DOMAIN environment variable is not set.");
       res.setStatus(500);
       return;
     }
@@ -53,13 +52,13 @@ public class OAuthLoginServlet extends HttpServlet {
     var session = req.getSession(true);
     session.setAttribute("oauth:state", state);
 
-    if (path.equalsIgnoreCase("spotify")) {
+    if (path.equalsIgnoreCase("/spotify")) {
       session.setAttribute("oauth:service", "spotify");
 
       oauthLoginUriBase = "https://accounts.spotify.com/authorize";
       oauthLoginUriParams = new URLEncodedBuilder().add("client_id", Constants.SPOTIFY_CLIENT_ID)
           .add("scope", "user-read-private user-top-read user-library-read");
-    } else if (path.equalsIgnoreCase("youtube")) {
+    } else if (path.equalsIgnoreCase("/youtube")) {
       session.setAttribute("oauth:service", "youtube");
 
       oauthLoginUriBase = "https://accounts.google.com/o/oauth2/v2/auth";
