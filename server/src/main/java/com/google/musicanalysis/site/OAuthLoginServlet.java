@@ -2,7 +2,12 @@ package com.google.musicanalysis.site;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -12,6 +17,7 @@ import com.google.musicanalysis.util.URLEncodedBuilder;
 
 @WebServlet("/api/oauth/login/*")
 public class OAuthLoginServlet extends HttpServlet {
+  private static final Logger LOGGER = Logger.getLogger(OAuthLoginServlet.class.getName());
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
@@ -24,7 +30,22 @@ public class OAuthLoginServlet extends HttpServlet {
     }
 
     // URI that user should be redirected to after logging in
-    var redirectUri = System.getenv().get("OAUTH_CALLBACK_URI");
+    URI domainUri;
+
+    try {
+      domainUri = new URI(System.getenv().get("DOMAIN"));
+    } catch (URISyntaxException e) {
+      LOGGER.log(Level.SEVERE, "The DOMAIN environment variable is invalid.");
+      res.setStatus(500);
+      return;
+    } catch (NullPointerException e) {
+      LOGGER.log(Level.SEVERE, "The DOMAIN environment variable is not set.");
+      res.setStatus(500);
+      return;
+    }
+
+    var redirectUri = domainUri.resolve("/api/oauth/callback");
+
     String oauthLoginUriBase;
     URLEncodedBuilder oauthLoginUriParams;
 
@@ -37,25 +58,21 @@ public class OAuthLoginServlet extends HttpServlet {
       session.setAttribute("oauth:service", "spotify");
 
       oauthLoginUriBase = "https://accounts.spotify.com/authorize";
-      oauthLoginUriParams = new URLEncodedBuilder()
-        .add("client_id", Constants.SPOTIFY_CLIENT_ID)
-        .add("scope", "user-read-private user-top-read user-library-read");
+      oauthLoginUriParams = new URLEncodedBuilder().add("client_id", Constants.SPOTIFY_CLIENT_ID)
+          .add("scope", "user-read-private user-top-read user-library-read");
     } else if (path.equalsIgnoreCase("youtube")) {
       session.setAttribute("oauth:service", "youtube");
 
       oauthLoginUriBase = "https://accounts.google.com/o/oauth2/v2/auth";
-      oauthLoginUriParams = new URLEncodedBuilder()
-        .add("client_id", Constants.YOUTUBE_CLIENT_ID)
-        .add("scope", "https://www.googleapis.com/auth/youtube.readonly");
+      oauthLoginUriParams = new URLEncodedBuilder().add("client_id", Constants.YOUTUBE_CLIENT_ID)
+          .add("scope", "https://www.googleapis.com/auth/youtube.readonly");
     } else {
       res.setStatus(404);
       return;
     }
 
-    oauthLoginUriParams = oauthLoginUriParams
-        .add("response_type", "code")
-        .add("state", state)
-        .add("redirect_uri", redirectUri);
+    oauthLoginUriParams = oauthLoginUriParams.add("response_type", "code").add("state", state)
+        .add("redirect_uri", redirectUri.toString());
 
     // redirect to OAuth landing page
     res.sendRedirect(oauthLoginUriBase + "?" + oauthLoginUriParams.build());
