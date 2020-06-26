@@ -6,19 +6,19 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-/*
-    Handles gathering data from the Musixmatch API.
-    This is structured the way it is becuase I will be adding more
-    to each function.
-*/
+/**
+ * Handles gathering data from the Musixmatch API. This is structured the way it is becuase I will
+ * be adding more to each function. I will clean it up later as well.
+ */
 public class MusixRequest {
 
   // Url building
-  private static final String BASE_URL = "https://api.musixmatch.com/ws/1.1/";
   private String operation;
-  private static final String OUTPUT_REQS = "?format=jsonp&callback=callback&";
   private String parameters;
-  private static final String apiKey = "&apikey=";
+
+  private static final String BASE_URL = "https://api.musixmatch.com/ws/1.1/";
+  private static final String OUTPUT_REQS = "?format=jsonp&callback=callback&";
+  private static final String API_KEY = "&apikey=";
 
   /**
    * Constructor.
@@ -31,11 +31,6 @@ public class MusixRequest {
     this.parameters = parameters;
   }
 
-  /** @return the result from Musixmatch API as string */
-  public String grabResponse() throws MalformedURLException, IOException {
-    return getResult();
-  }
-
   /**
    * Builds an appropriate URL with the information given.
    *
@@ -43,7 +38,7 @@ public class MusixRequest {
    * @param parameters The parameter string. See above.
    */
   private URL buildUrl(String operation, String parameters) throws MalformedURLException {
-    String urlString = BASE_URL + operation + OUTPUT_REQS + parameters + apiKey;
+    String urlString = BASE_URL + operation + OUTPUT_REQS + parameters + API_KEY;
     URL url = new URL(urlString);
     return url;
   }
@@ -54,7 +49,7 @@ public class MusixRequest {
    *
    * @return string response.
    */
-  private String getResult() throws MalformedURLException, IOException {
+  public String getResult() throws MalformedURLException, IOException {
 
     StringBuffer buffer = new StringBuffer();
 

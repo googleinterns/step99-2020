@@ -3,11 +3,10 @@ package com.google.musicanalysis.site;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-/*
-    Builds parameter strings based off what the user wants.
-    This is structured the way it is becuase I will be adding more
-    to each function. I will clean it up later as well.
-*/
+/**
+ * Builds parameter strings based off what the user wants. This is structured the way it is becuase
+ * I will be adding more to each function. I will clean it up later as well.
+ */
 public class MusixParamBuilder {
 
   private String intendedUse;
@@ -42,7 +41,7 @@ public class MusixParamBuilder {
   }
 
   /** Filters out the correct parameter string and returns it */
-  public String grabFilteredParams() {
+  public String getFilteredParams() {
     switch (this.intendedUse) {
       case "track.search":
         return buildTrackString(this.trackName, this.artistName);
