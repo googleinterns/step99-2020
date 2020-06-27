@@ -15,3 +15,11 @@
 
 # Target directory for maven builds
 target/
+node_modules/
+.eslintignore
+.eslintrc
+.stylelintignore
+.stylelintrc
+package-lock.json
+package.json
+README.md
