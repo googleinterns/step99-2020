@@ -1,0 +1,31 @@
+/* base.css - styles that are common to all pages on this website */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans&family=Work+Sans:wght@700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+:root, html, body {
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  font-size: 16px;
+  font-family: 'Fira Sans', sans-serif;
+
+  --color-background: #1c1c1c; /* neutral almost-black */
+  --color-foreground: #ffffff; /* white */
+  --color-background-inverse: #e3e3e3; /* neutral almost-white */
+  --color-foreground-inverse: #000000; /* black */
+  --color-accent-primary-1: #9f86c0; /* purple */
+  --color-accent-primary-2: #be95c4; /* lilac */
+  --color-accent-secondary-1: #5bc0eb; /* cyan */
+  --color-accent-secondary-2: #64b6ac; /* sea green */
+  --color-accent-special: #f5d491; /* champagne */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  font-family: 'Work Sans', sans-serif;
+}
