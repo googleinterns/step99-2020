@@ -12,17 +12,17 @@ public class SpotifyCallbackServlet extends OAuthCallbackServlet {
   private static final Logger LOGGER = Logger.getLogger(SpotifyCallbackServlet.class.getName());
 
   @Override
-  public String getServiceName() {
+  protected String getServiceName() {
     return "spotify";
   }
 
   @Override
-  public String getClientId() {
+  protected String getClientId() {
     return Constants.SPOTIFY_CLIENT_ID;
   }
 
   @Override
-  public String getClientSecret() {
+  protected String getClientSecret() {
     try {
       return Secrets.getSecretString("SPOTIFY_CLIENT_SECRET");
     } catch (IOException e) {
@@ -32,12 +32,12 @@ public class SpotifyCallbackServlet extends OAuthCallbackServlet {
   }
 
   @Override
-  public String getTokenUri() {
+  protected String getTokenUri() {
     return "https://accounts.spotify.com/api/token";
   }
 
   @Override
-  public String getRedirectUri() {
+  protected String getRedirectUri() {
     // URI that user should be redirected to after logging in
     try {
       var domainUri = URI.create(System.getenv().get("DOMAIN"));

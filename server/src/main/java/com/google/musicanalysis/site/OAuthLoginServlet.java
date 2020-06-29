@@ -11,19 +11,19 @@ import javax.servlet.http.HttpServletResponse;
 
 public abstract class OAuthLoginServlet extends HttpServlet {
   /** @return The name of this OAuth service. Used for storing session cookies and the like. */
-  public abstract String getServiceName();
+  protected abstract String getServiceName();
 
   /** @return The client ID for this OAuth provider. */
-  public abstract String getClientId();
+  protected abstract String getClientId();
 
   /** @return The OAuth scopes that are to be requested. */
-  public abstract String[] getScopes();
+  protected abstract String[] getScopes();
 
   /** @return The URI of the OAuth provider's login page. */
-  public abstract String getAuthUri();
+  protected abstract String getAuthUri();
 
   /** @return The URI of the page the user is redirected to after logging in. */
-  public abstract String getRedirectUri();
+  protected abstract String getRedirectUri();
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)

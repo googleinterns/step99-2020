@@ -9,27 +9,27 @@ public class SpotifyLoginServlet extends OAuthLoginServlet {
   private static final Logger LOGGER = Logger.getLogger(SpotifyLoginServlet.class.getName());
 
   @Override
-  public String getServiceName() {
+  protected String getServiceName() {
     return "spotify";
   }
 
   @Override
-  public String getAuthUri() {
+  protected String getAuthUri() {
     return "https://accounts.spotify.com/authorize";
   }
 
   @Override
-  public String getClientId() {
+  protected String getClientId() {
     return Constants.SPOTIFY_CLIENT_ID;
   }
 
   @Override
-  public String[] getScopes() {
+  protected String[] getScopes() {
     return new String[] {"user-read-private", "user-top-read", "user-library-read"};
   }
 
   @Override
-  public String getRedirectUri() {
+  protected String getRedirectUri() {
     // URI that user should be redirected to after logging in
     try {
       var domainUri = URI.create(System.getenv().get("DOMAIN"));

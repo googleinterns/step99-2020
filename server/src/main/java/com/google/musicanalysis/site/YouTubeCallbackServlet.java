@@ -12,17 +12,17 @@ public class YouTubeCallbackServlet extends OAuthCallbackServlet {
   private static final Logger LOGGER = Logger.getLogger(YouTubeCallbackServlet.class.getName());
 
   @Override
-  public String getServiceName() {
+  protected String getServiceName() {
     return "youtube";
   }
 
   @Override
-  public String getClientId() {
+  protected String getClientId() {
     return Constants.YOUTUBE_CLIENT_ID;
   }
 
   @Override
-  public String getClientSecret() {
+  protected String getClientSecret() {
     try {
       return Secrets.getSecretString("OUTUBE_CLIENT_SECRET");
     } catch (IOException e) {
@@ -32,12 +32,12 @@ public class YouTubeCallbackServlet extends OAuthCallbackServlet {
   }
 
   @Override
-  public String getTokenUri() {
+  protected String getTokenUri() {
     return "https://oauth2.googleapis.com/token";
   }
 
   @Override
-  public String getRedirectUri() {
+  protected String getRedirectUri() {
     // URI that user should be redirected to after logging in
     try {
       var domainUri = URI.create(System.getenv().get("DOMAIN"));
