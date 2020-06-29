@@ -32,9 +32,7 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
    */
   protected abstract String getRedirectUri();
 
-  /**
-   * @return A key that is used to store authentication state in a session cookie.
-   */
+  /** @return A key that is used to store authentication state in a session cookie. */
   protected abstract String getSessionServiceKey();
 
   @Override
@@ -57,8 +55,7 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
       return;
     }
 
-    var sessionOauthState =
-        (String) req.getSession().getAttribute(getSessionServiceKey());
+    var sessionOauthState = (String) req.getSession().getAttribute(getSessionServiceKey());
 
     if (!state.equals(sessionOauthState)) {
       res.setStatus(401);

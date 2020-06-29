@@ -1,7 +1,7 @@
 package com.google.musicanalysis.site;
 
-import javax.servlet.annotation.WebServlet;
 import com.google.musicanalysis.util.Constants;
+import javax.servlet.annotation.WebServlet;
 
 @WebServlet("/api/oauth/callback/spotify")
 public class SpotifyCallbackServlet extends OAuthCallbackServlet {
