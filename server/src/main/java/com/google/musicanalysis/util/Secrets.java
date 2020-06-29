@@ -10,18 +10,15 @@ public final class Secrets {
   private static SecretManagerServiceClient client;
 
   private static SecretManagerServiceClient getClient() throws IOException {
-    var localRef = client;
-
-    if (localRef == null) {
+    if (client == null) {
       synchronized (SYNC_OBJECT) {
-        localRef = client;
-        if (localRef == null) {
-          client = localRef = SecretManagerServiceClient.create();
+        if (client == null) {
+          client = SecretManagerServiceClient.create();
         }
       }
     }
 
-    return localRef;
+    return client;
   }
 
   public static byte[] getSecretBytes(String name) throws IOException {
