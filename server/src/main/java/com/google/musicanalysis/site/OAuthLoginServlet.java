@@ -1,41 +1,53 @@
 package com.google.musicanalysis.site;
 
+import com.google.musicanalysis.util.URLEncodedBuilder;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URLEncoder;
 import java.security.SecureRandom;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet("/api/oauth/login")
-public class OAuthLoginServlet extends HttpServlet {
+public abstract class OAuthLoginServlet extends HttpServlet {
+  /** @return The name of this OAuth service. Used for storing session cookies and the like. */
+  protected abstract String getServiceName();
+
+  /** @return The client ID for this OAuth provider. */
+  protected abstract String getClientId();
+
+  /** @return The OAuth scopes that are to be requested. */
+  protected abstract String[] getScopes();
+
+  /** @return The URI of the OAuth provider's login page. */
+  protected abstract String getAuthUri();
+
+  /** @return The URI of the page the user is redirected to after logging in. */
+  protected abstract String getRedirectUri();
+
+  /** @return A key that is used to store authentication state in a session cookie. */
+  protected abstract String getSessionServiceKey();
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     // generate a nonce to prevent CSRF
     var state = new BigInteger(130, new SecureRandom()).toString(32);
-    req.getSession(true).setAttribute("oauth:state", state);
+    var session = req.getSession(true);
 
-    // URI that user should be redirected to after logging in
-    var redirectUri = System.getenv().get("OAUTH_CALLBACK_URI");
+    session.setAttribute(getSessionServiceKey(), state);
+
+    var oauthLoginUriBase = getAuthUri();
+    var params =
+        new URLEncodedBuilder()
+            .add("client_id", getClientId())
+            .add("scope", String.join(" ", getScopes()))
+            .add("response_type", "code")
+            .add("state", state)
+            .add("redirect_uri", getRedirectUri())
+            .build();
 
     // redirect to OAuth landing page
-    var oauthLoginUri = new StringBuilder();
-    oauthLoginUri.append("https://accounts.spotify.com/authorize");
-    oauthLoginUri.append("?client_id=");
-    oauthLoginUri.append(Constants.SPOTIFY_CLIENT_ID);
-    oauthLoginUri.append("&response_type=code");
-    oauthLoginUri.append("&redirect_uri=");
-    oauthLoginUri.append(URLEncoder.encode(redirectUri, "UTF-8"));
-    oauthLoginUri.append("&scope=");
-    oauthLoginUri.append(URLEncoder.encode("user-read-private user-top-read user-library-read", "UTF-8"));
-    oauthLoginUri.append("&state=");
-    oauthLoginUri.append(state);
-
-    res.sendRedirect(oauthLoginUri.toString());
+    res.sendRedirect(oauthLoginUriBase + "?" + params);
   }
 }
