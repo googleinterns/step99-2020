@@ -2,6 +2,7 @@ package com.google.musicanalysis.site;
 
 import java.net.URI;
 import java.util.logging.Logger;
+import com.google.musicanalysis.util.Constants;
 import javax.servlet.annotation.WebServlet;
 
 @WebServlet("/api/oauth/login/youtube")
@@ -38,5 +39,10 @@ public class YouTubeLoginServlet extends OAuthLoginServlet {
       LOGGER.severe("The DOMAIN environment variable is not set.");
       throw e;
     }
+  }
+
+  @Override
+  protected String getSessionServiceKey() {
+    return Constants.SPOTIFY_SESSION_KEY;
   }
 }

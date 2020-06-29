@@ -1,5 +1,6 @@
 package com.google.musicanalysis.site;
 
+import com.google.musicanalysis.util.Constants;
 import com.google.musicanalysis.util.Secrets;
 import java.io.IOException;
 import java.net.URI;
@@ -46,5 +47,10 @@ public class SpotifyCallbackServlet extends OAuthCallbackServlet {
       LOGGER.severe("The DOMAIN environment variable is not set.");
       throw e;
     }
+  }
+
+  @Override
+  protected String getSessionServiceKey() {
+    return Constants.SPOTIFY_SESSION_KEY;
   }
 }

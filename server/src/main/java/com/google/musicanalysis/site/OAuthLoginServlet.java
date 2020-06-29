@@ -1,7 +1,5 @@
 package com.google.musicanalysis.site;
 
-import com.google.musicanalysis.util.Constants;
-import com.google.musicanalysis.util.URLEncodedBuilder;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -9,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.musicanalysis.util.URLEncodedBuilder;
 
 public abstract class OAuthLoginServlet extends HttpServlet {
   /** @return The name of this OAuth service. Used for storing session cookies and the like. */
@@ -26,9 +25,8 @@ public abstract class OAuthLoginServlet extends HttpServlet {
   /** @return The URI of the page the user is redirected to after logging in. */
   protected abstract String getRedirectUri();
 
-  protected String getSessionServiceKey() {
-    return Constants.SESSION_KEY_SPOTIFY;
-  }
+  /** @return A key that is used to store authentication state in a session cookie. */
+  protected abstract String getSessionServiceKey();
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
