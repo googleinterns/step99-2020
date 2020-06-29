@@ -1,6 +1,7 @@
 package com.google.musicanalysis.site;
 
 import javax.servlet.annotation.WebServlet;
+import com.google.musicanalysis.util.Constants;
 
 @WebServlet("/api/oauth/callback/spotify")
 public class SpotifyCallbackServlet extends OAuthCallbackServlet {
@@ -27,5 +28,10 @@ public class SpotifyCallbackServlet extends OAuthCallbackServlet {
   @Override
   protected String getRedirectUri() {
     return System.getenv().get("SPOTIFY_CALLBACK_URI");
+  }
+
+  @Override
+  protected String getSessionServiceKey() {
+    return Constants.SPOTIFY_SESSION_KEY;
   }
 }

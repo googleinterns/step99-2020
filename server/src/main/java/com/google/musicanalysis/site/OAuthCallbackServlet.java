@@ -32,9 +32,10 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
    */
   protected abstract String getRedirectUri();
 
-  protected String getSessionServiceKey() {
-    return "oauth-state-" + getServiceName();
-  }
+  /**
+   * @return A key that is used to store authentication state in a session cookie.
+   */
+  protected abstract String getSessionServiceKey();
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
