@@ -1,5 +1,5 @@
 #!/bin/bash
-mvn package
+mvn clean package || { echo "build failed"; exit 1; } 
 cd ../jetty
 
 export APP_ENV=development

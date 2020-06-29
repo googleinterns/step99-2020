@@ -5,9 +5,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-/**
- * A builder for creating URL-encoded query strings.
- */
+/** A builder for creating URL-encoded query strings. */
 public class URLEncodedBuilder {
   private final StringBuilder sb = new StringBuilder();
 
@@ -40,7 +38,7 @@ public class URLEncodedBuilder {
   public URLEncodedBuilder add(String key, String value, Charset charset) {
     var encodedKey = URLEncoder.encode(key, charset);
     var encodedVal = URLEncoder.encode(value, charset);
-    
+
     if (sb.length() > 0) {
       sb.append("&");
     }

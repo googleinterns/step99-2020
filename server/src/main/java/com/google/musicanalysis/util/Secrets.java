@@ -1,9 +1,9 @@
 package com.google.musicanalysis.util;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import com.google.cloud.secretmanager.v1.SecretManagerServiceClient;
 import com.google.cloud.secretmanager.v1.SecretVersionName;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public final class Secrets {
   private static Object SYNC_OBJECT = new Object();
@@ -13,7 +13,7 @@ public final class Secrets {
     var localRef = CLIENT;
 
     if (localRef == null) {
-      synchronized(SYNC_OBJECT) {
+      synchronized (SYNC_OBJECT) {
         localRef = CLIENT;
         if (localRef == null) {
           CLIENT = localRef = SecretManagerServiceClient.create();
@@ -26,7 +26,7 @@ public final class Secrets {
 
   public static byte[] getSecretBytes(String name) throws IOException {
     var secretClient = getClient();
-    var secretVersionName = SecretVersionName.of("capstone-t99-2020", name, "latest"); 
+    var secretVersionName = SecretVersionName.of("capstone-t99-2020", name, "latest");
     return secretClient.accessSecretVersion(secretVersionName).getPayload().getData().toByteArray();
   }
 
