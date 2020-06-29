@@ -28,8 +28,10 @@ This is where all of the server-side code for this project will live.
 ## faq
 
 - **Q: Why do I have to log in using `gcloud`?**
-- A: The server retrieves secrets, such as the Spotify API client secret, using the [Secrets Manager](https://cloud.google.com/secret-manager). You need to either be running on Google Cloud,
+- A: The server retrieves secrets, such as the Spotify API client secret, using the [Secret Manager](https://cloud.google.com/secret-manager). You need to either be running on Google Cloud,
   or be authenticated, in order to access the secrets.
+- **Q: How do I add a new secret?**
+- A: Go to the [Secret Manager](https://cloud.google.com/secret-manager), click Go to Console, and then click "Create Secret".
 - **Q: How do I change the port where the server runs?**
 - A: Set the `PORT` environment variable. Keep in mind that you will need to change the `DOMAIN`
   environment variable too, if you do this. And if you don't run the server on port 8080, then you
