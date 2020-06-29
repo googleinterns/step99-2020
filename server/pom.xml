@@ -58,6 +58,18 @@
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-oauth2</artifactId>
       <version>v2-rev20200213-1.30.9</version>
+
+    <!-- Gcloud logging -->
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-logging</artifactId>
+      <version>1.101.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-secretmanager</artifactId>
+      <version>1.1.0</version>
     </dependency>
   </dependencies>
 
@@ -75,6 +87,7 @@
           <deploy.version>1</deploy.version>
         </configuration>
       </plugin>
+
       <!-- Conforms Java code to Google style guide. 
            $ mvn com.coveo:fmt-maven-plugin:format -->
       <plugin>

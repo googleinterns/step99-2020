@@ -2,20 +2,25 @@ package com.google.musicanalysis.site;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.google.gson.JsonParser;
+import com.google.musicanalysis.util.Secrets;
 import com.google.musicanalysis.util.URLEncodedBuilder;
 
 @WebServlet("/api/oauth/callback")
 public class OAuthCallbackServlet extends HttpServlet {
+  private static final Logger LOGGER = Logger.getLogger(OAuthCallbackServlet.class.getName());
+  
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
@@ -49,11 +54,11 @@ public class OAuthCallbackServlet extends HttpServlet {
     URI tokenUri;
 
     if (sessionOauthService.equals("youtube")) {
-      clientSecret = System.getenv().get("YOUTUBE_CLIENT_SECRET");
+      clientSecret = Secrets.getSecretString("YOUTUBE_CLIENT_SECRET");
       clientId = Constants.YOUTUBE_CLIENT_ID;
       tokenUri = URI.create("https://oauth2.googleapis.com/token");
     } else if (sessionOauthService.equals("spotify")) {
-      clientSecret = System.getenv().get("SPOTIFY_CLIENT_SECRET");
+      clientSecret = Secrets.getSecretString("SPOTIFY_CLIENT_SECRET");
       clientId = Constants.SPOTIFY_CLIENT_ID;
       tokenUri = URI.create("https://accounts.spotify.com/api/token");
     } else {
@@ -61,12 +66,27 @@ public class OAuthCallbackServlet extends HttpServlet {
       return;
     }
 
-    var redirectUri = System.getenv().get("OAUTH_CALLBACK_URI");
+     // URI that user should be redirected to after logging in
+     URI domainUri;
+
+     try {
+       domainUri = new URI(System.getenv().get("DOMAIN"));
+     } catch (URISyntaxException e) {
+       LOGGER.severe("The DOMAIN environment variable is invalid.");
+       res.setStatus(500);
+       return;
+     } catch (NullPointerException e) {
+       LOGGER.severe("The DOMAIN environment variable is not set.");
+       res.setStatus(500);
+       return;
+     }
+
+    var redirectUri = domainUri.resolve("/api/oauth/callback");
 
     var tokenReqBody = new URLEncodedBuilder()
       .add("grant_type", "authorization_code")
       .add("code", code)
-      .add("redirct_uri", redirectUri)
+      .add("redirect_uri", redirectUri.toString())
       .add("client_id", clientId)
       .add("client_secret", clientSecret);
 
