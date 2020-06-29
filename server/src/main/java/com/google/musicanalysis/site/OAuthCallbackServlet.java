@@ -32,6 +32,10 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
    */
   protected abstract String getRedirectUri();
 
+  protected String getSessionServiceKey() {
+    return "oauth-state-" + getServiceName();
+  }
+
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
@@ -53,7 +57,7 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
     }
 
     var sessionOauthState =
-        (String) req.getSession().getAttribute("oauth-state-" + getServiceName());
+        (String) req.getSession().getAttribute(getSessionServiceKey());
 
     if (!state.equals(sessionOauthState)) {
       res.setStatus(401);
