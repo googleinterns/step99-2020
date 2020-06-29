@@ -1,5 +1,7 @@
 package com.google.musicanalysis.site;
 
+import com.google.gson.JsonParser;
+import com.google.musicanalysis.util.URLEncodedBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -7,15 +9,29 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.google.gson.JsonParser;
-import com.google.musicanalysis.util.URLEncodedBuilder;
 
-@WebServlet("/api/oauth/callback")
-public class OAuthCallbackServlet extends HttpServlet {
+public abstract class OAuthCallbackServlet extends HttpServlet {
+  /** @return The name of this OAuth service. Used for storing session cookies and the like. */
+  public abstract String getServiceName();
+
+  /** @return The client ID for this OAuth provider. */
+  public abstract String getClientId();
+
+  /** @return The client secret for this OAuth provider. */
+  public abstract String getClientSecret();
+
+  /** @return The URI of the OAuth provider's token generator. */
+  public abstract String getTokenUri();
+
+  /**
+   * @return The URI of the page the user is redirected to after logging in. Should be the same as
+   *     the URI of this servlet.
+   */
+  public abstract String getRedirectUri();
+
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
@@ -36,44 +52,28 @@ public class OAuthCallbackServlet extends HttpServlet {
       return;
     }
 
-    var sessionOauthState = req.getSession().getAttribute("oauth:state");
-    var sessionOauthService = req.getSession().getAttribute("oauth:service");
+    var sessionOauthState =
+        (String) req.getSession().getAttribute("oauth-state-" + getServiceName());
 
     if (!state.equals(sessionOauthState)) {
       res.setStatus(401);
       return;
     }
 
-    String clientSecret;
-    String clientId;
-    URI tokenUri;
-
-    if (sessionOauthService.equals("youtube")) {
-      clientSecret = System.getenv().get("YOUTUBE_CLIENT_SECRET");
-      clientId = Constants.YOUTUBE_CLIENT_ID;
-      tokenUri = URI.create("https://oauth2.googleapis.com/token");
-    } else if (sessionOauthService.equals("spotify")) {
-      clientSecret = System.getenv().get("SPOTIFY_CLIENT_SECRET");
-      clientId = Constants.SPOTIFY_CLIENT_ID;
-      tokenUri = URI.create("https://accounts.spotify.com/api/token");
-    } else {
-      res.setStatus(400);
-      return;
-    }
-
-    var redirectUri = System.getenv().get("OAUTH_CALLBACK_URI");
-
-    var tokenReqBody = new URLEncodedBuilder()
-      .add("grant_type", "authorization_code")
-      .add("code", code)
-      .add("redirect_uri", redirectUri)
-      .add("client_id", clientId)
-      .add("client_secret", clientSecret);
+    var tokenReqBody =
+        new URLEncodedBuilder()
+            .add("grant_type", "authorization_code")
+            .add("code", code)
+            .add("redirect_uri", getRedirectUri())
+            .add("client_id", getClientId())
+            .add("client_secret", getClientSecret());
 
     var httpClient = HttpClient.newHttpClient();
-    var tokenReq = HttpRequest.newBuilder(tokenUri)
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .POST(BodyPublishers.ofString(tokenReqBody.build())).build();
+    var tokenReq =
+        HttpRequest.newBuilder(URI.create(getTokenUri()))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .POST(BodyPublishers.ofString(tokenReqBody.build()))
+            .build();
 
     var tokenRes = httpClient.sendAsync(tokenReq, BodyHandlers.ofString()).join();
     var tokenResBody = tokenRes.body();
@@ -82,6 +82,6 @@ public class OAuthCallbackServlet extends HttpServlet {
     var accessToken = tokenResObj.get("access_token");
 
     res.setContentType("text/html");
-    res.getWriter().printf("<h1>the access token for %s is %s</h1>", sessionOauthService, accessToken);
+    res.getWriter().printf("<h1>the access token for %s is %s</h1>", getServiceName(), accessToken);
   }
 }
