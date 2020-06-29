@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public final class Secrets {
-  private static Object SYNC_OBJECT = new Object();
+  private static final Object SYNC_OBJECT = new Object();
   private static SecretManagerServiceClient CLIENT;
 
   private static SecretManagerServiceClient getClient() throws IOException {
