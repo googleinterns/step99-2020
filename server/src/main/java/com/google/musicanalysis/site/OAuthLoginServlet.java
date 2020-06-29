@@ -1,5 +1,6 @@
 package com.google.musicanalysis.site;
 
+import com.google.musicanalysis.util.Constants;
 import com.google.musicanalysis.util.URLEncodedBuilder;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -25,15 +26,18 @@ public abstract class OAuthLoginServlet extends HttpServlet {
   /** @return The URI of the page the user is redirected to after logging in. */
   protected abstract String getRedirectUri();
 
+  protected String getSessionServiceKey() {
+    return Constants.SESSION_KEY_SPOTIFY;
+  }
+
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     // generate a nonce to prevent CSRF
     var state = new BigInteger(130, new SecureRandom()).toString(32);
     var session = req.getSession(true);
-    var service = getServiceName();
 
-    session.setAttribute("oauth-state-" + service, state);
+    session.setAttribute(getSessionServiceKey(), state);
 
     var oauthLoginUriBase = getAuthUri();
     var params =
