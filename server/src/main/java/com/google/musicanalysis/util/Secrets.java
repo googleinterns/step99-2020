@@ -7,16 +7,16 @@ import java.nio.charset.StandardCharsets;
 
 public final class Secrets {
   private static final Object SYNC_OBJECT = new Object();
-  private static SecretManagerServiceClient CLIENT;
+  private static SecretManagerServiceClient client;
 
   private static SecretManagerServiceClient getClient() throws IOException {
-    var localRef = CLIENT;
+    var localRef = client;
 
     if (localRef == null) {
       synchronized (SYNC_OBJECT) {
-        localRef = CLIENT;
+        localRef = client;
         if (localRef == null) {
-          CLIENT = localRef = SecretManagerServiceClient.create();
+          client = localRef = SecretManagerServiceClient.create();
         }
       }
     }
