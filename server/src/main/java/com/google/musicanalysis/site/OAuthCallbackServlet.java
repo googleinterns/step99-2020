@@ -15,22 +15,22 @@ import javax.servlet.http.HttpServletResponse;
 
 public abstract class OAuthCallbackServlet extends HttpServlet {
   /** @return The name of this OAuth service. Used for storing session cookies and the like. */
-  public abstract String getServiceName();
+  protected abstract String getServiceName();
 
   /** @return The client ID for this OAuth provider. */
-  public abstract String getClientId();
+  protected abstract String getClientId();
 
   /** @return The client secret for this OAuth provider. */
-  public abstract String getClientSecret();
+  protected abstract String getClientSecret();
 
   /** @return The URI of the OAuth provider's token generator. */
-  public abstract String getTokenUri();
+  protected abstract String getTokenUri();
 
   /**
    * @return The URI of the page the user is redirected to after logging in. Should be the same as
    *     the URI of this servlet.
    */
-  public abstract String getRedirectUri();
+  protected abstract String getRedirectUri();
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
