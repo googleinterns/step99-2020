@@ -3,7 +3,7 @@ package com.google.musicanalysis.site;
 import javax.servlet.annotation.WebServlet;
 
 @WebServlet("/api/oauth/callback/spotify")
-public abstract class SpotifyCallbackServlet extends OAuthCallbackServlet {
+public class SpotifyCallbackServlet extends OAuthCallbackServlet {
   @Override
   public String getServiceName() {
     return "spotify";

@@ -3,7 +3,7 @@ package com.google.musicanalysis.site;
 import javax.servlet.annotation.WebServlet;
 
 @WebServlet("/api/oauth/callback/youtube")
-public abstract class YouTubeCallbackServlet extends OAuthCallbackServlet {
+public class YouTubeCallbackServlet extends OAuthCallbackServlet {
   @Override
   public String getServiceName() {
     return "youtube";
