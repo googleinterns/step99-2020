@@ -17,7 +17,7 @@ public class SentimentRequest {
   }
 
   /**
-   * Sends out request JSON Object and returns the JSON response from Perspective API.
+   * Sends out request JSON Object and returns the JSON response from Natural Language API.
    *
    * @return the JSON response as string
    */
