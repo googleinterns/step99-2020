@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class MusixParamBuilder {
 
-  private String intendedUse;
+  private String requestType;
 
   // All possible parameters I can receive
   private String trackId;
@@ -20,14 +20,14 @@ public class MusixParamBuilder {
   /**
    * Constructor.
    *
-   * @param intendedUse determines what action we will send to the API
+   * @param requestType determines what action we will send to the API
    * @param params array of parameters which get assigned to different values depending on
-   *     intendedUse
+   *     requestType
    */
-  public MusixParamBuilder(String intendedUse, String... params) {
-    this.intendedUse = intendedUse;
+  public MusixParamBuilder(String requestType, String... params) {
+    this.requestType = requestType;
 
-    switch (intendedUse) {
+    switch (requestType) {
       case "track.search":
         this.trackName = params[0];
         this.artistName = params[1];
@@ -42,7 +42,7 @@ public class MusixParamBuilder {
 
   /** Filters out the correct parameter string and returns it */
   public String getFilteredParams() {
-    switch (this.intendedUse) {
+    switch (this.requestType) {
       case "track.search":
         return buildTrackString(this.trackName, this.artistName);
       case "track.lyrics.get":

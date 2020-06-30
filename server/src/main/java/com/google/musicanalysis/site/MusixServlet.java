@@ -36,11 +36,4 @@ public class MusixServlet extends HttpServlet {
     request = new MusixRequest(callType, params.getFilteredParams());
     res.getWriter().println(request.getResult());
   }
-
-  /** @param user the user that will be converted to json */
-  private String convertToJsonUsingGson(String response) {
-    Gson gson = new Gson();
-    String json = gson.toJson(response);
-    return json;
-  }
 }
