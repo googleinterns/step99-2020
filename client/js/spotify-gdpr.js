@@ -64,6 +64,19 @@ const latest = [
 const changes = [
   [{type: 'move', from: 2, to: 4}],
   [{type: 'replace', oldItem: 'song4', newItem: 'song7'}],
+  [{type: 'move', from: 3, to: 4}],
+  [{type: 'move', from: 5, to: 4}],
+  [{type: 'move', from: 3, to: 4}],
+  [],
+  [],
+  [{type: 'replace', oldItem: 'song30', newItem: 'song23'}],
+  [{type: 'move', from: 6, to: 5}],
+  [{type: 'move', from: 7, to: 6}],
+  [{type: 'move', from: 9, to: 10}],
+  [{type: 'move', from: 20, to: 21}],
+  [],
+  [{type: 'move', from: 20, to: 21}],
+  [{type: 'move', from: 12, to: 13}],
   [],
   [],
   [],
@@ -110,7 +123,7 @@ for (const changeSet of changes.reverse()) {
       indexHistory = indicesHistory.get(id);
       indexHistory.push(index);
     } else {
-      // this song wasn't in the record, backfill all of the nulls
+      // this song wasn't in the record, backfill all of the indices
       indexHistory = [];
 
       for (let i = 0; i < generation; i++) {
@@ -132,8 +145,17 @@ const data =
     .from(indicesHistory.entries())
     .map(([id, history]) => [id, ...history]));
 
+const dateFormat = new Intl.DateTimeFormat('en', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+});
+
 const chart = c3.generate({
   bindto: '#chart',
+  size: {
+    height: 700,
+  },
   data: {
     x: 'x',
     columns: [['x', ...x], ...data],
@@ -153,15 +175,24 @@ const chart = c3.generate({
     },
     y: {
       show: false,
+      inverted: true,
     },
   },
   tooltip: {
     grouped: false,
+    contents: (d) =>
+      `<span class='c3-tooltip'>
+        <span class='c3-tooltip-rank'>#${d[0].value + 1}</span>
+        <span class='c3-tooltip-thumbnail'>TODO</span>
+        <span class='c3-tooltip-track-name'>${d[0].id}</span>
+        <span class='c3-tooltip-artist-name'>unknown artist</span>
+        <span class='c3-tooltip-date'>${dateFormat.format(d[0].x)}</span>
+      </span>`,
   },
   legend: {
     show: false,
   },
-  zoom: {
+  zoom: { 
     enabled: true,
   },
 });
