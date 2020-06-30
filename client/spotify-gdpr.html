@@ -7,6 +7,8 @@
     <base target="_blank">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/spotify-gdpr.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/c3@0.7.18/c3.min.css" integrity="sha256-6keM3+sDUFwuiB+tXRq/HV8tqQYlvarrsoWkx53dSgY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/chart.css">
   </head>
   <body>
     <main>
@@ -20,6 +22,9 @@
         <button id="btn-get-started" class="btn btn-big" type="button">
           Sign in with Spotify
         </button>
+      </div>
+
+      <div id="chart">
       </div>
 
       <h2 class="header">How it works</h2>
@@ -48,5 +53,9 @@
         this permission</a> in order to search for songs.
       </p>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@5.16.0/dist/d3.min.js" integrity="sha256-Xb6SSzhH3wEPC4Vy3W70Lqh9Y3Du/3KxPqI2JHQSpTw=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/c3@0.7.18/c3.min.js" integrity="sha256-Cm4WCqNXIU+tJa5x6RWhn6MYIjZC9I9RKkZ2HfbFi7M=" crossorigin="anonymous"></script>
+    <script src="js/spotify-gdpr.js" type="module"></script>
   </body>
 </html>
