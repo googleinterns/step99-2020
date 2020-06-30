@@ -12,6 +12,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 
 public abstract class OAuthCallbackServlet extends HttpServlet {
   /** @return The name of this OAuth service. Used for storing session cookies and the like. */
@@ -85,5 +87,8 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
 
     res.setContentType("text/html");
     res.getWriter().printf("<h1>the access token for %s is %s</h1>", getServiceName(), accessToken);
+    HttpSession session = req.getSession();
+    // set as "yt_access_token" instead and "sp_access_token"
+    session.setAttribute("access_token", accessToken.toString());
   }
 }

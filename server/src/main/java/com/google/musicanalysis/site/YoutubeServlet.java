@@ -3,65 +3,34 @@
  * See instructions for running these code samples locally:
  * https://developers.google.com/explorer-help/guides/code_samples#java
  */
+package com.google.musicanalysis.site;
 
-import com.google.api.client.auth.oauth2.Credential; 
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp; // 
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver; // 
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport; 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException; 
-import com.google.api.client.http.javanet.NetHttpTransport; 
-import com.google.api.client.json.JsonFactory; 
-import com.google.api.client.json.jackson2.JacksonFactory; 
-
-import com.google.api.services.youtube.YouTube; 
-import com.google.api.services.youtube.model.VideoListResponse; 
-
+import com.google.gson.JsonParser;
+import com.google.musicanalysis.util.URLEncodedBuilder;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.Collection;
-
-public class YoutubeServlet {
-    private static final String CLIENT_SECRETS= "client_secret.json";
-    private static final Collection<String> SCOPES =
-        Arrays.asList("https://www.googleapis.com/auth/youtube.readonly");
-
-    private static final String APPLICATION_NAME = "API code samples";
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse.BodyHandlers;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.annotation.WebServlet;
 
 
+@WebServlet("/api/youtube")
+public class YoutubeServlet extends HttpServlet {
 
-    /**
-     * Build and return an authorized API client service.
-     *
-     * @return an authorized API client service
-     * @throws GeneralSecurityException, IOException
-     */
-    public static YouTube getService() throws GeneralSecurityException, IOException {
-        final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        Credential credential = new GoogleCredential().setAccessToken(""); //deprecated API!!!
-        return new YouTube.Builder(httpTransport, JSON_FACTORY, credential)
-            .setApplicationName(APPLICATION_NAME)
-            .build();
-    }
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) 
+        throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        String accessToken = (String) session.getAttribute("access_token");
 
-    /**
-     * Call function to create API service object. Define and
-     * execute API request. Print API response.
-     *
-     * @throws GeneralSecurityException, IOException, GoogleJsonResponseException
-     */
-    public static void main(String[] args)
-        throws GeneralSecurityException, IOException, GoogleJsonResponseException {
-        YouTube youtubeService = getService(); // calls fn above 
-        // Define and execute the API request
-        YouTube.Videos.List request = youtubeService.videos()
-            .list("topicDetails");
-        VideoListResponse response = request.setId("EG16dFYK0gw").execute();
-        System.out.println(response);
+        res.getWriter().printf("%s", accessToken);
+    
     }
 }
