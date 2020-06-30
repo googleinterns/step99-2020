@@ -25,7 +25,7 @@ public class YouTubeCallbackServlet extends OAuthCallbackServlet {
   @Override
   protected String getClientSecret() {
     try {
-      return Secrets.getSecretString("OUTUBE_CLIENT_SECRET");
+      return Secrets.getSecretString("YOUTUBE_CLIENT_SECRET");
     } catch (IOException e) {
       LOGGER.log(Level.SEVERE, e, () -> "Could not get YouTube client secret");
       return null;
