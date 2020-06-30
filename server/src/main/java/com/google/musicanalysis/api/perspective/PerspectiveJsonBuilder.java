@@ -1,4 +1,4 @@
-package com.google.musicanalysis.site;
+package com.google.musicanalysis.api.perspective;
 
 import com.google.gson.JsonObject;
 import java.util.ArrayList;

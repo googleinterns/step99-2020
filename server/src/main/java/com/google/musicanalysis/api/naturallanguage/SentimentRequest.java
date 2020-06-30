@@ -1,4 +1,4 @@
-package com.google.musicanalysis.api.perspective;
+package com.google.musicanalysis.api.naturallanguage;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,16 +7,13 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 
-public class PerspectiveRequest {
+public class SentimentRequest {
 
   private String text;
-  private ArrayList<String> attributes;
 
-  public PerspectiveRequest(String text, ArrayList<String> attributes) {
+  public SentimentRequest(String text) {
     this.text = text;
-    this.attributes = attributes;
   }
 
   /**
@@ -25,9 +22,7 @@ public class PerspectiveRequest {
    * @return the JSON response as string
    */
   public String getResponse() throws MalformedURLException, IOException {
-
-    String jsonString = buildJson(this.text, this.attributes);
-    URL url = new URL("https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=");
+    URL url = new URL("https://language.googleapis.com/v1/documents:analyzeSentiment?key=");
 
     // Open up the connection
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -35,6 +30,8 @@ public class PerspectiveRequest {
     con.setRequestProperty("Content-Type", "application/json; utf-8");
     con.setRequestProperty("Accept", "application/json");
     con.setDoOutput(true);
+
+    String jsonString = new SentimentJsonBuilder(this.text).buildJson();
 
     // Send out the json string
     try (OutputStream out = con.getOutputStream()) {
@@ -54,24 +51,5 @@ public class PerspectiveRequest {
     in.close();
 
     return response.toString();
-  }
-
-  /**
-   * Builds the JSON Object to be sent out.
-   *
-   * @param textToAnalyze The text that will be analyzed by the Perspective API.
-   * @param requestedAttributes the attributes requested.
-   */
-  private String buildJson(String textToAnalyze, ArrayList<String> requestedAttributes) {
-
-    ArrayList<String> wantedArgs = new ArrayList<String>();
-    for (String el : requestedAttributes) {
-      wantedArgs.add(el);
-    }
-
-    PerspectiveJsonBuilder json = new PerspectiveJsonBuilder(textToAnalyze, wantedArgs);
-    String jsonString = json.buildJson();
-
-    return jsonString;
   }
 }
