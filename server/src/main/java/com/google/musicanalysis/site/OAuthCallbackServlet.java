@@ -87,8 +87,9 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
 
     res.setContentType("text/html");
     res.getWriter().printf("<h1>the access token for %s is %s</h1>", getServiceName(), accessToken);
+    
+    // store access token in a session
     HttpSession session = req.getSession();
-    // set as "yt_access_token" instead and "sp_access_token"
-    session.setAttribute("access_token", accessToken.toString());
+    session.setAttribute(getServiceName() + "_access_token", accessToken.toString());
   }
 }

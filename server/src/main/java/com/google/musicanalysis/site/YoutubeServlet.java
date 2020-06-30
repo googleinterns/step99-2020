@@ -27,10 +27,10 @@ public class YoutubeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException {
+        // retrieve youtube access token 
         HttpSession session = req.getSession();
-        String accessToken = (String) session.getAttribute("access_token");
-
-        res.getWriter().printf("%s", accessToken);
+        String accessToken = (String) session.getAttribute("youtube_access_token");
+        res.getWriter().printf("YOUTUBE: %s", accessToken);
     
     }
 }
