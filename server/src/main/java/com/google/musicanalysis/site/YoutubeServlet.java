@@ -30,7 +30,7 @@ public class YoutubeServlet extends HttpServlet {
         // retrieve Youtube API key and access token 
         String API_KEY = Secrets.getSecretString("YOUTUBE_API_KEY");
         HttpSession session = req.getSession();
-        var accessToken = session.getAttribute("youtube_access_token");
+        var accessToken = session.getAttribute("oauth-access-token-youtube");
         if (session == null || accessToken == null) {
             res.setStatus(401);
             return;
