@@ -67,6 +67,7 @@ function update(map, key, fn) {
   return map;
 }
 
+
 /**
  * Takes a blob containing zipped GDPR data and outputs a list of GDPR streaming
  * records.
@@ -141,52 +142,74 @@ export async function getStreamingData(data) {
   });
 }
 
+/** @typedef {Map<string, Map<string, number>>} ArtistTrackTimeMap */
+/** @typedef {{
+ * start: Date,
+ * totals: ArtistTrackTimeMap
+ * }} ArtistTrackTimeWindow */
+
 /**
+ * Calculates aggregates from a list of GDPR records.
  *
- * @param {GDPRRecord[]} data
+ * @param {GDPRRecord[]} data The list of GDPR records to aggregate.
+ * @returns {{totals: ArtistTrackTimeMap, windows: ArtistTrackTimeWindow[]}} An
+ * object with two properties: `totals` and `windows`. `totals` is a map whose
+ * keys are artists and whose values are maps from track names to duration
+ * listened. `windows` is an array of window objects. Each window object has a
+ * `start` representing the start of that window, and a `totals`, representing
+ * the durations listened to each song during that window.
  */
 export function collateStreamingData(data) {
   let index = 0;
   let currentRecord = data[0];
 
   const windowSize = 86400000;
-  const windowStart = currentRecord.endTime;
+  // round down to the start of the day of the first record
+  let windowStart =
+    +currentRecord.endTime - (+currentRecord.endTime % windowSize);
+
   const windows = [];
+
+  // a map of maps: key is artist name, value is a map where key
+  // is track name and value is time listened to that song in total
+  /** @type {ArtistTrackTimeMap} */
+  const totals = new Map();
 
   // each window is a map of maps: key is artist name, value is a map where key
   // is track name and value is time listened to that song during this window
-  let currentWindow = new Map();
+  /** @type {ArtistTrackTimeMap} */
+  let window = new Map();
 
   while (index < data.length) {
-    while (currentRecord && +currentRecord.endTime < +windowStart + windowSize) {
-      const {artistName, trackName} = currentRecord;
+    while (currentRecord && +currentRecord.endTime < windowStart + windowSize) {
+      const {artistName, trackName, msPlayed} = currentRecord;
 
-      let value = map.get(key);
-  if (value === undefined) {
-    value = fn(key);
-    map.set(key, value);
-  }
-  return value;
-      update(artistMap, trackName, (time = 0) => time + currentRecord.msPlayed);
+      const windowArtistTracks = getOrDefault(
+        window, artistName, () => new Map(),
+      );
+      const totalArtistTracks = getOrDefault(
+        totals, artistName, () => new Map(),
+      );
 
-      let trackMap;
-      if (artistMap.has(trackName)) {
-        trackMap = artistMap.get(trackName);
-      } else {
-        trackMap = new Map();
-        artistMap.set(trackName, trackMap);
-      }
+      update(
+        windowArtistTracks,
+        trackName,
+        (windowTrackTime = 0) => windowTrackTime + msPlayed,
+      );
 
-      if (trackMap.has()) {
-        currentRecord = data[++index];
-      }
+      update(
+        totalArtistTracks,
+        trackName,
+        (totalTrackTime = 0) => totalTrackTime + msPlayed,
+      );
+
+      currentRecord = data[++index];
     }
 
-    windowStart.setTime(windowStart.getTime() + windowSize);
-    windows.push(currentWindow);
-    currentWindow = new Map();
-    console.log(`index: ${index}`);
+    windows.push({start: new Date(windowStart), totals: window});
+    windowStart += windowSize;
+    window = new Map();
   }
 
-  return windows;
+  return {windows, totals};
 }
