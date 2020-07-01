@@ -16,9 +16,9 @@ public class MusixRequest {
   // Url building
   private static final String BASE_URL = "https://api.musixmatch.com/ws/1.1/";
   private String operation;
-  private static final String OUTPUT_REQS = "?format=jsonp&callback=callback&";
+  private static final String OUTPUT_REQS = "?format=json&";
   private String parameters;
-  private static final String apiKey = "&apikey=";
+  private static final String apiKey = "&apikey=76aaf72ec2a763b4c7aaa7ea135f5ff0";
 
   /**
    * Constructor.
