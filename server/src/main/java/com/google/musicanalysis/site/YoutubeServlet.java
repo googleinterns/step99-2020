@@ -28,14 +28,10 @@ public class YoutubeServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException {
         // retrieve Youtube API key and access token 
-        String API_KEY = ""; 
-        HttpSession session = null;
-        String accessToken = "";
-        try {
-            API_KEY = Secrets.getSecretString("YOUTUBE_API_KEY");
-            session = req.getSession();
-            accessToken = session.getAttribute("youtube_access_token").toString();
-        } catch (NullPointerException e) {
+        String API_KEY = Secrets.getSecretString("YOUTUBE_API_KEY");
+        HttpSession session = req.getSession();
+        var accessToken = session.getAttribute("youtube_access_token");
+        if (session == null || accessToken == null) {
             res.setStatus(401);
             return;
         }
@@ -49,7 +45,7 @@ public class YoutubeServlet extends HttpServlet {
 
         var httpClient = HttpClient.newHttpClient();
         var youtubeReq = HttpRequest.newBuilder(youtubeUri)
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", "Bearer " + accessToken.toString())
                 .header("Accept", "application/json")
                 .GET()
                 .build();
