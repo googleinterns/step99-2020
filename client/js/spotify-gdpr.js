@@ -1,10 +1,9 @@
 // @ts-check
-/* global c3 */
-/* global d3 */
+import {getStreamingData, collateStreamingData} from './analysis/gdpr.js';
 
-import {getStreamingData} from './analysis/gdpr.js';
+const {c3, zip} = window;
 
-window.zip.workerScriptsPath = '/js/zip/';
+zip.workerScriptsPath = '/js/zip/';
 
 const btnUpload =
   /** @type {HTMLButtonElement} */
@@ -14,6 +13,17 @@ btnUpload.addEventListener('click', async () => {
   const inputUpload =
       /** @type {HTMLInputElement} */
       (document.getElementById('input-data-upload'));
+
+  inputUpload.click();
+
+  await new Promise(
+    (resolve) => inputUpload.addEventListener(
+      'change',
+      resolve,
+      {once: true},
+    ),
+  );
+
   if (!inputUpload.files) return;
 
   const fileUpload = inputUpload.files.item(0);
@@ -21,6 +31,9 @@ btnUpload.addEventListener('click', async () => {
 
   const records = await getStreamingData(fileUpload);
   console.log(records);
+
+  const collatedRecords = collateStreamingData(records);
+  console.log(collatedRecords);
 });
 
 
