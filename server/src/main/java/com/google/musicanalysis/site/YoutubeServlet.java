@@ -7,9 +7,7 @@ package com.google.musicanalysis.site;
 import com.google.musicanalysis.util.Secrets;
 import com.google.musicanalysis.util.URLEncodedBuilder;
 
-
 import com.google.gson.JsonParser;
-import com.google.musicanalysis.util.URLEncodedBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -26,7 +24,6 @@ import javax.servlet.annotation.WebServlet;
 
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
-
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException {

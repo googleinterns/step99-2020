@@ -6,4 +6,6 @@ public final class Constants {
       "343396465743-a46pc8ds6cquiatmdnvf88o6aaf3jcdo.apps.googleusercontent.com";
   public static final String SPOTIFY_SESSION_KEY = "oauth-service-spotify";
   public static final String YOUTUBE_SESSION_KEY = "oauth-service-youtube";
+  public static final String YOUTUBE_SESSION_TOKEN_KEY = "youtube_access_token";
+  public static final String SPOTIFY_SESSION_TOKEN_KEY = "spotify_access_token";
 }

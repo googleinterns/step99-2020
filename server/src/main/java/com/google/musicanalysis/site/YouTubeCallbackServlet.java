@@ -51,6 +51,6 @@ public class YouTubeCallbackServlet extends OAuthCallbackServlet {
 
   @Override
   protected String getSessionServiceKey() {
-    return Constants.SPOTIFY_SESSION_KEY;
+    return Constants.YOUTUBE_SESSION_KEY;
   }
 }

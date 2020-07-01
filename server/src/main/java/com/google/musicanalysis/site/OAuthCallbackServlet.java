@@ -1,4 +1,5 @@
 package com.google.musicanalysis.site;
+import com.google.musicanalysis.util.Constants;
 
 import com.google.gson.JsonParser;
 import com.google.musicanalysis.util.URLEncodedBuilder;
@@ -36,6 +37,11 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
 
   /** @return A key that is used to store authentication state in a session cookie. */
   protected abstract String getSessionServiceKey();
+
+  /** @return A key that is used to store authentication state in a session cookie. */
+  protected String getSessionTokenKey() {
+    return Constants.YOUTUBE_SESSION_TOKEN_KEY;
+  }
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
@@ -90,6 +96,6 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
     
     // store access token in a session as youtube_access_token or spotify_access_token
     HttpSession session = req.getSession();
-    session.setAttribute(getServiceName() + "_access_token", accessToken.toString());
+    session.setAttribute(getSessionTokenKey(), accessToken.toString());
   }
 }
