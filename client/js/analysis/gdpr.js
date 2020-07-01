@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * @typedef {object} GDPRRecord
  * @property {string} endTime Date and time of when the stream ended in UTC
@@ -10,6 +11,7 @@
  * track was listened.
  */
 
+// global variables are not available in ES modules
 const {zip} = window;
 
 /**
@@ -26,14 +28,32 @@ export async function getStreamingData(data) {
     zip.createReader(
       new zip.BlobReader(data),
       (reader) => {
-        reader.getEntries(async (files) => {
-          const filePromises =
-            files.map((file) => {
-              const result = streamingDataPattern.exec(file.filename);
-              if (!result) return Promise.resolve(null);
+        reader.getEntries((files) => {
+          /** @typedef {{ index: number; file: zip.Entry; }} EntryWithIndex */
 
-              const index = parseInt(result[1]);
+          // get only entries named StreamingHistoryX.json and pair them with
+          // their index so they can be sorted
+          const entriesWithIndices =
+            files
+              .reduce((
+                /** @type {EntryWithIndex[]} */ arr,
+                /** @type {zip.Entry} */ file,
+              ) => {
+                const match = streamingDataPattern.exec(file.filename);
 
+                if (match) {
+                  const index = parseInt(match[1]);
+                  arr.push({index, file});
+                }
+
+                return arr;
+              }, [])
+              .sort((a, b) => a.index < b.index ? -1 : 1);
+
+          // create a Promise for each StreamingHistoryX.json to read & parse
+          // its content
+          const contentPromises =
+            entriesWithIndices.map(({index, file}) => {
               return new Promise((resolve) => {
                 file.getData(
                   new zip.TextWriter('utf-8'),
@@ -42,21 +62,16 @@ export async function getStreamingData(data) {
               });
             });
 
-          /** @type {GDPRRecord[]} */
-          const fileContents =
-            await Promise
-              .all(filePromises)
-              .then((fileEntries) =>
-                fileEntries
-                  .filter((entry) => entry !== null)
-                  .sort(
-                    (entryA, entryB) => entryA.index < entryB.index ? -1 : 1,
-                  )
-                  .map((entry) => entry.data)
-                  .reduce((dataA, dataB) => dataA.concat(dataB), []),
-              );
-
-          resolve(fileContents);
+          // content of each file should be an array of GDPR records, once all
+          // of the reading is done, concatenate the arrays and return
+          Promise
+            .all(contentPromises)
+            .then((contentWithIndices) => {
+              const content = contentWithIndices
+                .map((entry) => entry.data)
+                .reduce((dataA, dataB) => dataA.concat(dataB), []);
+              resolve(content);
+            });
         });
       },
       (error) => reject(error),
