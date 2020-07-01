@@ -30,12 +30,18 @@ public class YoutubeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException {
-        // don't know how to catch null pointer exception
-
         // retrieve Youtube API key and access token 
-        String API_KEY = Secrets.getSecretString("YOUTUBE_API_KEY");
-        HttpSession session = req.getSession();
-        String accessToken = session.getAttribute("youtube_access_token").toString();
+        String API_KEY = ""; 
+        HttpSession session = null;
+        String accessToken = "";
+        try {
+            API_KEY = Secrets.getSecretString("YOUTUBE_API_KEY");
+            session = req.getSession();
+            accessToken = session.getAttribute("youtube_access_token").toString();
+        } catch (NullPointerException e) {
+            res.setStatus(401);
+            return;
+        }
     
         // make http request to youtube API
         var youtubeParam = new URLEncodedBuilder()
