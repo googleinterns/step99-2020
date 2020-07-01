@@ -39,10 +39,17 @@
         <version>2.8.6</version>
     </dependency>
 
+    <!-- Gcloud logging -->
     <dependency>
-      <groupId>com.sachinhandiekar</groupId>
-      <artifactId>jMusixMatch</artifactId>
-      <version>1.1.4</version>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-logging</artifactId>
+      <version>1.101.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.cloud</groupId>
+      <artifactId>google-cloud-secretmanager</artifactId>
+      <version>1.1.0</version>
     </dependency>
   </dependencies>
 
@@ -60,6 +67,7 @@
           <deploy.version>1</deploy.version>
         </configuration>
       </plugin>
+
       <!-- Conforms Java code to Google style guide. 
            $ mvn com.coveo:fmt-maven-plugin:format -->
       <plugin>

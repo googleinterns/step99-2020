@@ -1,10 +1,14 @@
 package com.google.musicanalysis.site;
 
+import java.net.URI;
+import java.util.logging.Logger;
 import com.google.musicanalysis.util.Constants;
 import javax.servlet.annotation.WebServlet;
 
 @WebServlet("/api/oauth/login/spotify")
 public class SpotifyLoginServlet extends OAuthLoginServlet {
+  private static final Logger LOGGER = Logger.getLogger(SpotifyLoginServlet.class.getName());
+
   @Override
   protected String getServiceName() {
     return "spotify";
@@ -27,7 +31,14 @@ public class SpotifyLoginServlet extends OAuthLoginServlet {
 
   @Override
   protected String getRedirectUri() {
-    return System.getenv().get("SPOTIFY_CALLBACK_URI");
+    // URI that user should be redirected to after logging in
+    try {
+      var domainUri = URI.create(System.getenv().get("DOMAIN"));
+      return domainUri.resolve("/api/oauth/callback/spotify").toString();
+    } catch (NullPointerException e) {
+      LOGGER.severe("The DOMAIN environment variable is not set.");
+      throw e;
+    }
   }
 
   @Override
