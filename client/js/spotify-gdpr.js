@@ -2,85 +2,26 @@
 /* global c3 */
 /* global d3 */
 
-const songs = [
-  {id: 'song1'},
-  {id: 'song2'},
-  {id: 'song3'},
-  {id: 'song4'},
-  {id: 'song5'},
-  {id: 'song6'},
-  {id: 'song7'},
-];
+import {getStreamingData} from './analysis/gdpr.js';
 
-const latest = [
-  'song3',
-  'song2',
-  'song5',
-  'song7',
-  'song1',
-  'song10',
-  'song11',
-  'song12',
-  'song13',
-  'song14',
-  'song15',
-  'song16',
-  'song17',
-  'song18',
-  'song19',
-  'song20',
-  'song21',
-  'song22',
-  'song23',
-  'song24',
-  'song25',
-  'song26',
-  'song27',
-  'song28',
-  'song29',
-];
+window.zip.workerScriptsPath = '/js/zip/';
 
-/**
- * @typedef {object} MoveChange
- * @property {'move'} type
- * @property {number} from
- * @property {number} to
- */
+const btnUpload =
+  /** @type {HTMLButtonElement} */
+  (document.getElementById('btn-data-upload'));
 
-/**
- * @typedef {object} ReplaceChange
- * @property {'replace'} type
- * @property {string} oldItem
- * @property {string} newItem
- */
+btnUpload.addEventListener('click', async () => {
+  const inputUpload =
+      /** @type {HTMLInputElement} */
+      (document.getElementById('input-data-upload'));
+  if (!inputUpload.files) return;
 
-/**
- * @typedef {MoveChange | ReplaceChange} Change
- */
+  const fileUpload = inputUpload.files.item(0);
+  if (!fileUpload) return;
 
-/**
- * @type {Change[][]}
- */
-const changes = [
-  [{type: 'move', from: 2, to: 4}],
-  [{type: 'replace', oldItem: 'song4', newItem: 'song7'}],
-  [{type: 'move', from: 3, to: 4}],
-  [{type: 'move', from: 5, to: 4}],
-  [{type: 'move', from: 3, to: 4}],
-  [],
-  [],
-  [{type: 'replace', oldItem: 'song30', newItem: 'song23'}],
-  [{type: 'move', from: 6, to: 5}],
-  [{type: 'move', from: 7, to: 6}],
-  [{type: 'move', from: 9, to: 10}],
-  [{type: 'move', from: 20, to: 21}],
-  [],
-  [{type: 'move', from: 20, to: 21}],
-  [{type: 'move', from: 12, to: 13}],
-  [],
-  [],
-  [],
-];
+  const records = await getStreamingData(fileUpload);
+  console.log(records);
+});
 
 
 let generation = 1;
@@ -192,7 +133,7 @@ const chart = c3.generate({
   legend: {
     show: false,
   },
-  zoom: { 
+  zoom: {
     enabled: true,
   },
 });
