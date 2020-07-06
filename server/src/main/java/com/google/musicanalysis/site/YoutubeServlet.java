@@ -7,7 +7,7 @@ package com.google.musicanalysis.site;
 import com.google.musicanalysis.util.Secrets;
 import com.google.musicanalysis.util.URLEncodedBuilder;
 
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -53,6 +53,22 @@ public class YoutubeServlet extends HttpServlet {
         // get response to Youtube API 
         var youtubeRes = httpClient.sendAsync(youtubeReq, BodyHandlers.ofString()).join();
         var youtubeResBody = youtubeRes.body();
+        System.out.println("DATA TYPE");
+        System.out.println(youtubeResBody.getClass().getName());
+
+
+        JsonElement jElement = JsonParser.parseString(youtubeResBody);
+        JsonObject jObject = jElement.getAsJsonObject();
+        JsonArray videos = jObject.getAsJsonArray("items");
+        for (int i = 0; i < videos.size(); i++){
+            JsonObject video = videos.get(i).getAsJsonObject();
+            JsonObject topicDetails = video.getAsJsonObject("topicDetails");
+            JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
+            System.out.println(topicCategories);
+            System.out.println(topicCategories.getClass().getName());
+        }
+
+
         res.getWriter().write(youtubeResBody);
     }
 }
