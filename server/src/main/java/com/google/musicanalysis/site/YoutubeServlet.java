@@ -56,7 +56,7 @@ public class YoutubeServlet extends HttpServlet {
         System.out.println("DATA TYPE");
         System.out.println(youtubeResBody.getClass().getName());
 
-
+        // rename these better
         JsonElement jElement = JsonParser.parseString(youtubeResBody);
         JsonObject jObject = jElement.getAsJsonObject();
         JsonArray videos = jObject.getAsJsonArray("items");
@@ -66,6 +66,8 @@ public class YoutubeServlet extends HttpServlet {
             JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
             System.out.println(topicCategories);
             System.out.println(topicCategories.getClass().getName());
+
+            // next step: parse wikipedia links => music genres
         }
 
 
