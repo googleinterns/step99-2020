@@ -1,0 +1,146 @@
+/* base.css - styles that are common to all pages on this website */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans&family=Work+Sans:wght@500;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+:root, html, body {
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  font-size: 16px;
+  font-family: 'Fira Sans', sans-serif;
+
+  --color-background: #1c1c1c; /* neutral almost-black */
+  --color-foreground: #ffffff; /* white */
+  --color-background-inverse: #e3e3e3; /* neutral almost-white */
+  --color-foreground-inverse: #000000; /* black */
+  --color-accent-primary-1: #9f86c0; /* purple */
+  --color-accent-primary-2: #be95c4; /* lilac */
+  --color-accent-secondary-1: #5bc0eb; /* cyan */
+  --color-accent-secondary-2: #64b6ac; /* sea green */
+  --color-accent-special: #f5d491; /* champagne */
+}
+
+body {
+  color: var(--color-foreground);
+
+  background-color: var(--color-background);
+}
+
+/* THEME */
+
+a {
+  color: var(--color-accent-secondary-1);
+}
+
+a:hover {
+  color: var(--color-accent-secondary-2);
+  text-decoration: underline dashed;
+}
+
+a:focus, a:active {
+  color: var(--color-accent-secondary-2);
+
+  outline: 2px solid var(--color-accent-secondary-2);
+}
+
+.highlight-primary-1 {
+  margin: 0 -0.25em;
+  padding: 0 0.25em;
+
+  color: var(--color-foreground);
+
+  background-color: var(--color-accent-primary-1);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+::selection {
+  color: var(--color-foreground);
+
+  background-color: var(--color-accent-special);
+}
+
+/* TYPOGRAPHY */
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0.75em 0 0.25em;
+  padding: 0;
+
+  font-weight: 700;
+  font-family: 'Work Sans', sans-serif;
+  line-height: 1.1;
+}
+
+#title { font-size: 4rem; }
+
+.subtitle {
+  display: block;
+
+  font-size: 1.5rem;
+  letter-spacing: 0.25ex;
+  text-transform: lowercase;
+
+  opacity: 0.75;
+}
+
+.title + .subtitle {
+  margin-top: -1rem;
+}
+
+h1.header { font-size: 3rem; }
+
+h2.header { font-size: 2.25rem; }
+
+h3.header { font-size: 1.75rem; }
+
+h4.header { font-size: 1.25rem; }
+
+p {
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+/* INTERACTIVES */
+
+.btn {
+  padding: 0.5rem 1rem;
+
+  color: var(--color-foreground);
+  font-family: 'Work Sans', sans-serif;
+
+  background-color: var(--color-accent-primary-1);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: var(--color-accent-primary-1);
+
+}
+
+.btn-big {
+  padding: 1rem 1.5rem;
+
+  font-size: 1.25rem;
+
+  border-radius: 1rem;
+
+  box-shadow: 0 0 2rem rgba(0 0 0 0.25);
+}
+
+/* LAYOUT */
+
+main {
+  max-width: 70rem;
+  margin: 0 auto;
+  padding: 5rem;
+
+  background-color: var(--color-background);
+  box-shadow: 0 0 2rem rgba(0 0 0 0.25);
+}
