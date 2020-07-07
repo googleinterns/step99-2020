@@ -66,7 +66,7 @@ public class YoutubeServlet extends HttpServlet {
             JsonObject topicDetails = video.getAsJsonObject("topicDetails");
             JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
             for (int j = 0; j < topicCategories.size(); j++) {
-                // parse wikipedia links (json primitive) => music genres
+                // extract music genre out of wikipedia links
                 String link = topicCategories.get(j).toString();
                 String topic = link.substring(link.lastIndexOf('/') + 1);
                 topic = topic.replaceAll("\"", "");
