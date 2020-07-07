@@ -56,18 +56,21 @@ public class YoutubeServlet extends HttpServlet {
         System.out.println("DATA TYPE");
         System.out.println(youtubeResBody.getClass().getName());
 
-        // rename these better
-        JsonElement jElement = JsonParser.parseString(youtubeResBody);
-        JsonObject jObject = jElement.getAsJsonObject();
+        // parse JSON response for topic Categories
+        JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
         JsonArray videos = jObject.getAsJsonArray("items");
         for (int i = 0; i < videos.size(); i++){
             JsonObject video = videos.get(i).getAsJsonObject();
             JsonObject topicDetails = video.getAsJsonObject("topicDetails");
             JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
-            System.out.println(topicCategories);
-            System.out.println(topicCategories.getClass().getName());
-
-            // next step: parse wikipedia links => music genres
+            for (int j = 0; j < topicCategories.size(); j++) {
+                // parse wikipedia links (json primitive) => music genres
+                String link = topicCategories.get(j).toString();
+                String topic = link.substring(link.lastIndexOf('/') + 1);
+                topic = topic.replaceAll("\"", "");
+                topic = topic.replaceAll("_", " ");
+                System.out.println(topic);
+            }
         }
 
 
