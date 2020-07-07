@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.annotation.WebServlet;
-
+import java.util.HashMap;
 
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
@@ -56,6 +56,8 @@ public class YoutubeServlet extends HttpServlet {
         System.out.println("DATA TYPE");
         System.out.println(youtubeResBody.getClass().getName());
 
+
+        HashMap<String, Integer> genreCount = new HashMap<String, Integer>();
         // parse JSON response for topic Categories
         JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
         JsonArray videos = jObject.getAsJsonArray("items");
@@ -69,10 +71,13 @@ public class YoutubeServlet extends HttpServlet {
                 String topic = link.substring(link.lastIndexOf('/') + 1);
                 topic = topic.replaceAll("\"", "");
                 topic = topic.replaceAll("_", " ");
-                System.out.println(topic);
+
+                // update genreCount hashmap
+                int count = genreCount.containsKey(topic) ? genreCount.get(topic) : 0;
+                genreCount.put(topic, count + 1);
             }
         }
-
+        System.out.println(genreCount.toString());
 
         res.getWriter().write(youtubeResBody);
     }
