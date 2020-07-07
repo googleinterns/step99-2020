@@ -24,6 +24,37 @@ import java.util.HashMap;
 
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
+
+    /***
+     * parses through youtube liked videos json string,
+     * updates hash map to contain frequency count of each music genre
+     * @param youtubeResBody 
+     * @param genreCount
+     */
+    protected void updateMusicCount(String youtubeResBody, HashMap<String, Integer> genreCount) {
+        // parse JSON response for topic Categories
+        JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
+        JsonArray videos = jObject.getAsJsonArray("items");
+        for (int i = 0; i < videos.size(); i++){
+            JsonObject video = videos.get(i).getAsJsonObject();
+            JsonObject topicDetails = video.getAsJsonObject("topicDetails");
+            JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
+            for (int j = 0; j < topicCategories.size(); j++) {
+                // extract music genre out of wikipedia links
+                String link = topicCategories.get(j).toString();
+                String topic = link.substring(link.lastIndexOf('/') + 1);
+                topic = topic.replaceAll("\"", "");
+                topic = topic.replaceAll("_", " ");
+
+                // update genreCount hashmap
+                int count = genreCount.containsKey(topic) ? genreCount.get(topic) : 0;
+                genreCount.put(topic, count + 1);
+            }
+        }
+        System.out.println(genreCount.toString());
+        return;
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException {
@@ -52,33 +83,12 @@ public class YoutubeServlet extends HttpServlet {
 
         // get response to Youtube API 
         var youtubeRes = httpClient.sendAsync(youtubeReq, BodyHandlers.ofString()).join();
-        var youtubeResBody = youtubeRes.body();
-        System.out.println("DATA TYPE");
-        System.out.println(youtubeResBody.getClass().getName());
-
+        String youtubeResBody = youtubeRes.body();
 
         HashMap<String, Integer> genreCount = new HashMap<String, Integer>();
-        // parse JSON response for topic Categories
-        JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
-        JsonArray videos = jObject.getAsJsonArray("items");
-        for (int i = 0; i < videos.size(); i++){
-            JsonObject video = videos.get(i).getAsJsonObject();
-            JsonObject topicDetails = video.getAsJsonObject("topicDetails");
-            JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
-            for (int j = 0; j < topicCategories.size(); j++) {
-                // extract music genre out of wikipedia links
-                String link = topicCategories.get(j).toString();
-                String topic = link.substring(link.lastIndexOf('/') + 1);
-                topic = topic.replaceAll("\"", "");
-                topic = topic.replaceAll("_", " ");
-
-                // update genreCount hashmap
-                int count = genreCount.containsKey(topic) ? genreCount.get(topic) : 0;
-                genreCount.put(topic, count + 1);
-            }
-        }
-        System.out.println(genreCount.toString());
+        updateMusicCount(youtubeResBody, genreCount);
 
         res.getWriter().write(youtubeResBody);
+        res.getWriter().write(genreCount.toString());
     }
 }
