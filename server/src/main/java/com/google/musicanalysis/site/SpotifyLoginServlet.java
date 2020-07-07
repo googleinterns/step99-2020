@@ -45,9 +45,4 @@ public class SpotifyLoginServlet extends OAuthLoginServlet {
   protected String getSessionServiceKey() {
     return Constants.SPOTIFY_SESSION_KEY;
   }
-
-  @Override
-  protected String getSessionTokenKey() {
-    return Constants.SPOTIFY_SESSION_TOKEN_KEY;
-  }
 }

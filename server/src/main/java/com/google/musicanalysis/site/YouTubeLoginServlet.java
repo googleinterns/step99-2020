@@ -45,9 +45,4 @@ public class YouTubeLoginServlet extends OAuthLoginServlet {
   protected String getSessionServiceKey() {
     return Constants.YOUTUBE_SESSION_KEY;
   }
-  
-  @Override
-  protected String getSessionTokenKey() {
-    return Constants.YOUTUBE_SESSION_TOKEN_KEY;
-  }
 }

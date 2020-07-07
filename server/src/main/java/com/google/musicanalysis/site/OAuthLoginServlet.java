@@ -28,9 +28,6 @@ public abstract class OAuthLoginServlet extends HttpServlet {
   /** @return A key that is used to store authentication state in a session cookie. */
   protected abstract String getSessionServiceKey();
 
-  /** @return A key that is used to store authentication token in a session cookie. */
-  protected abstract String getSessionTokenKey();
-
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
