@@ -1,9 +1,9 @@
 package com.google.musicanalysis.site;
 
 import com.google.gson.*;
-import com.google.musicanalysis.api.musixmatch.*;
 import com.google.musicanalysis.api.naturallanguage.*;
 import com.google.musicanalysis.api.perspective.*;
+import com.google.musicanalysis.api.youtube.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,17 +23,22 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    res.getWriter().write("<h1>Song Analysis</h1>\n");
+    res.getWriter().write("<h1>Comment Analysis</h1>\n");
 
-    String trackName = "baby";
-    String artistName = "justin bieber";
+    String videoName = "seun omonije";
 
-    res.getWriter().write("<h3>Lyrics</h3>");
-    String trimmedLyrics = getLyrics(trackName, artistName);
-    res.getWriter().println(trimmedLyrics);
+    String videoIdJson = new YoutubeRequest("search", videoName).getResult();
+    String videoId = getVideoId(videoIdJson);
+    String commentsJson = new YoutubeRequest("commentThreads", "snippet", videoId).getResult();
+
+    res.getWriter().write(commentsJson);
+
+    res.getWriter().write("<h3>Comments</h3>");
+    String comment = "I love you.";
+    res.getWriter().println(comment);
 
     res.getWriter().write("<h3>Perspective</h3>");
-    HashMap<String, String> perspectiveMap = analyzeWithPerspective(trimmedLyrics);
+    HashMap<String, String> perspectiveMap = analyzeWithPerspective(comment);
     // Print on the screen (won't make it in final cut)
     Set set = perspectiveMap.entrySet();
     Iterator mapIterator = set.iterator();
@@ -43,7 +48,7 @@ public class AnalysisServlet extends HttpServlet {
     }
 
     res.getWriter().write("<h3>NLP</h3>");
-    MagnitudeAndScore nlpObject = analyzeWithNLP(trimmedLyrics);
+    MagnitudeAndScore nlpObject = analyzeWithNLP(comment);
     res.getWriter().println("Magnitude: " + nlpObject.magnitude + "Score: " + nlpObject.score);
   }
 
@@ -112,46 +117,27 @@ public class AnalysisServlet extends HttpServlet {
     return perspectiveResults;
   }
 
-  private String getLyrics(String trackName, String artistName) throws IOException {
+  private String getVideoId(String response) {
+    ArrayList<String> searchResults = new ArrayList<>();
 
-    /** Getting the track id from Musixmatch */
-
-    // Calling the API
-    MusixParamBuilder params = new MusixParamBuilder("track.search", trackName, artistName);
-    MusixRequest musixReq = new MusixRequest("track.search", params.filterParamString());
-    String response = musixReq.grabResponse();
-
-    // Extracting the track id
+    // Traversing to the items array
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
-    JsonArray resultList =
-        jObject.getAsJsonObject("message").getAsJsonObject("body").getAsJsonArray("track_list");
-    Iterator<JsonElement> iterator = resultList.iterator();
-    JsonElement firstResult = iterator.next();
-    String trackId =
-        firstResult.getAsJsonObject().getAsJsonObject("track").get("track_id").toString();
+    JsonArray itemsArray = jObject.getAsJsonArray("items");
 
-    /** Getting the lyrics from the extracted id */
+    for (JsonElement el : itemsArray) {
 
-    // Calling the API
-    params = new MusixParamBuilder("track.lyrics.get", trackId);
-    musixReq = new MusixRequest("track.lyrics.get", params.filterParamString());
-    response = musixReq.grabResponse();
+      // Traversing each item in the array
+      JsonObject object = el.getAsJsonObject();
+      JsonObject data = object.getAsJsonObject("id");
+      JsonElement videoId = data.get("videoId");
 
-    // Extracting the lyrics
-    jElement = JsonParser.parseString(response);
-    jObject = jElement.getAsJsonObject();
-    String lyricsBody =
-        jObject
-            .getAsJsonObject("message")
-            .getAsJsonObject("body")
-            .getAsJsonObject("lyrics")
-            .get("lyrics_body")
-            .toString();
+      if (videoId != null) {
+        searchResults.add(videoId.toString().replace("\"", ""));
+      }
+    }
 
-    // Get rid of all newLines
-    String trimmedLyrics = lyricsBody.replace("\\n", " ");
-
-    return trimmedLyrics;
+    // Only returning the first for now, potential to change if I optimize search results.
+    return searchResults.get(0);
   }
 }
