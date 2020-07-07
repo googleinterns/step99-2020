@@ -24,7 +24,16 @@ import java.util.HashMap;
 
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
-
+    /***
+     * checks whether topic is categorized as music
+     * by checking is last word is "music" or "Music"
+     * @param topic
+     * @return Boolean
+     */
+    protected Boolean isMusic(String topic) {
+        String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);
+        return lastWord.equals("Music") || lastWord.equals("music");
+    }
     /***
      * parses through youtube liked videos json string,
      * updates hash map to contain frequency count of each music genre
@@ -45,6 +54,11 @@ public class YoutubeServlet extends HttpServlet {
                 String topic = link.substring(link.lastIndexOf('/') + 1);
                 topic = topic.replaceAll("\"", "");
                 topic = topic.replaceAll("_", " ");
+
+                // skip if topic is not music
+                if (!isMusic(topic)) {
+                    break;
+                }
 
                 // update genreCount hashmap
                 int count = genreCount.containsKey(topic) ? genreCount.get(topic) : 0;
