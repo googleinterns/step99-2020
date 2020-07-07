@@ -38,7 +38,7 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
   /** @return A key that is used to store authentication state in a session cookie. */
   protected abstract String getSessionServiceKey();
 
-  /** @return A key that is used to store authentication token in a session cookie. */
+  /** @return A key that is used to store auth token in a session cookie. */
   protected abstract String getSessionTokenKey();
 
   @Override
