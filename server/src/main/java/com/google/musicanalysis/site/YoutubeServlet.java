@@ -1,8 +1,3 @@
-/**
- * Sample Java code for youtube.videos.list
- * See instructions for running these code samples locally:
- * https://developers.google.com/explorer-help/guides/code_samples#java
- */
 package com.google.musicanalysis.site;
 import com.google.musicanalysis.util.Secrets;
 import com.google.musicanalysis.util.URLEncodedBuilder;
