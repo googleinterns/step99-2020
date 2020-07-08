@@ -1,3 +1,6 @@
+// this file is part of zip.js
+/* eslint-disable */
+// @ts-nocheck
 /* jshint worker:true */
 (function main(global) {
 	"use strict";

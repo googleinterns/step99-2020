@@ -1,6 +1,5 @@
 // @ts-check
 /* global c3 */
-/* global d3 */
 
 import {getStreamingData} from './analysis/gdpr.js';
 
@@ -22,17 +21,6 @@ btnUpload.addEventListener('click', async () => {
   const records = await getStreamingData(fileUpload);
   console.log(records);
 });
-
-// list of songs
-const songs = [
-  {id: 'song1'},
-  {id: 'song2'},
-  {id: 'song3'},
-  {id: 'song4'},
-  {id: 'song5'},
-  {id: 'song6'},
-  {id: 'song7'},
-];
 
 // most recent ordering of top songs
 const latest = [
@@ -84,6 +72,7 @@ const latest = [
 /**
  * each array is a list of changes to the top songs list that happened on a
  * given day
+ *
  * @type {Change[][]}
  */
 const changes = [
