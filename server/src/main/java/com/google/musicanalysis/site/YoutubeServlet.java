@@ -19,6 +19,28 @@ import java.util.HashMap;
 
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
+
+    protected String getYoutubeRes(HttpServletRequest req, HttpServletResponse res, String API_KEY, String accessToken) 
+        throws ServletException, IOException {
+        // make http request to youtube API
+        var youtubeParam = new URLEncodedBuilder()
+            .add("part", "topicDetails")
+            .add("myRating", "like")
+            .add("key", API_KEY);
+        URI youtubeUri = URI.create("https://www.googleapis.com/youtube/v3/videos?" + youtubeParam.build());
+
+        var httpClient = HttpClient.newHttpClient();
+        var youtubeReq = HttpRequest.newBuilder(youtubeUri)
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Accept", "application/json")
+                .GET()
+                .build();
+
+        // get response to Youtube API 
+        var youtubeRes = httpClient.sendAsync(youtubeReq, BodyHandlers.ofString()).join();
+        return youtubeRes.body();
+    }
+
     /***
      * checks whether topic is categorized as music
      * by checking is last word is "music" or "Music"
@@ -29,11 +51,12 @@ public class YoutubeServlet extends HttpServlet {
         String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);
         return lastWord.equals("Music") || lastWord.equals("music");
     }
+
     /***
      * parses through youtube liked videos json string,
      * updates hash map to contain frequency count of each music genre
-     * @param youtubeResBody 
-     * @param genreCount
+     * @param youtubeResBody json response of youtube liked videos
+     * @param genreCount hash map of frequency count of each music genre
      */
     protected void updateMusicCount(String youtubeResBody, HashMap<String, Integer> genreCount) {
         // parse JSON response for topic Categories
@@ -60,7 +83,6 @@ public class YoutubeServlet extends HttpServlet {
                 genreCount.put(topic, count + 1);
             }
         }
-        System.out.println(genreCount.toString());
         return;
     }
 
@@ -75,29 +97,11 @@ public class YoutubeServlet extends HttpServlet {
             res.setStatus(401);
             return;
         }
-    
-        // make http request to youtube API
-        var youtubeParam = new URLEncodedBuilder()
-            .add("part", "topicDetails")
-            .add("myRating", "like")
-            .add("key", API_KEY);
-        URI youtubeUri = URI.create("https://www.googleapis.com/youtube/v3/videos?" + youtubeParam.build());
-
-        var httpClient = HttpClient.newHttpClient();
-        var youtubeReq = HttpRequest.newBuilder(youtubeUri)
-                .header("Authorization", "Bearer " + accessToken.toString())
-                .header("Accept", "application/json")
-                .GET()
-                .build();
-
-        // get response to Youtube API 
-        var youtubeRes = httpClient.sendAsync(youtubeReq, BodyHandlers.ofString()).join();
-        String youtubeResBody = youtubeRes.body();
+        String youtubeResBody = getYoutubeRes(req, res, API_KEY, accessToken.toString());
 
         HashMap<String, Integer> genreCount = new HashMap<String, Integer>();
         updateMusicCount(youtubeResBody, genreCount);
 
-        res.getWriter().write(youtubeResBody);
         res.getWriter().write(genreCount.toString());
     }
 }
