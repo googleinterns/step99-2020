@@ -1,12 +1,9 @@
-
-
 <!DOCTYPE html>
 
 <html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="description" content="STEP Capstone">
-        <script src="js/analysis.js"></script>
         <link rel="stylesheet" href="css/analysis.css">
         <title>Song Analysis</title>
     </head>
@@ -14,13 +11,13 @@
     <body>
         <h1>Enter a song name and artist name</h1>
 
-        <p>Insert Song name</p>
-        <input type="text" placeholder="Song" name="song"/>
-        <p>Insert Artist name</p>
-        <input type="text" placeholder="Artist" name="artist"/>
+        <label for="video-name">Insert Video name</label>
+        <input type="text" placeholder="Video name" name="video-name"/>
+
         <input type="submit" value="Submit" id="formSubmit" />
 
         <h1>Response</h1>
         <div id="response"></div>
     </body>
+    <script src="js/analysis.js"></script>
 </html>
