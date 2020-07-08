@@ -19,7 +19,16 @@ import java.util.HashMap;
 
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
-
+    /**
+     * makes http request of youtube api, gets json string of youtube res
+     * @param req
+     * @param res
+     * @param API_KEY
+     * @param accessToken
+     * @return JSON string of youtube response
+     * @throws ServletException
+     * @throws IOException
+     */
     protected String getYoutubeRes(HttpServletRequest req, HttpServletResponse res, String API_KEY, String accessToken) 
         throws ServletException, IOException {
         // make http request to youtube API
@@ -41,7 +50,7 @@ public class YoutubeServlet extends HttpServlet {
         return youtubeRes.body();
     }
 
-    /***
+    /**
      * checks whether topic is categorized as music
      * by checking if the last word is "music" or "Music"
      * @param topic 
@@ -52,7 +61,7 @@ public class YoutubeServlet extends HttpServlet {
         return lastWord.equals("Music") || lastWord.equals("music");
     }
 
-    /***
+    /**
      * parses through youtube liked videos json string,
      * updates hash map to contain frequency count of each music genre
      * @param youtubeResBody json response of youtube liked videos
