@@ -1,8 +1,3 @@
-/**
- * Sample Java code for youtube.videos.list
- * See instructions for running these code samples locally:
- * https://developers.google.com/explorer-help/guides/code_samples#java
- */
 package com.google.musicanalysis.site;
 import com.google.musicanalysis.util.Secrets;
 import com.google.musicanalysis.util.URLEncodedBuilder;
@@ -76,7 +71,7 @@ public class YoutubeServlet extends HttpServlet {
         String API_KEY = Secrets.getSecretString("YOUTUBE_API_KEY");
         HttpSession session = req.getSession();
         var accessToken = session.getAttribute("oauth-access-token-youtube");
-        if (session == null || accessToken == null) {
+        if (accessToken == null) {
             res.setStatus(401);
             return;
         }

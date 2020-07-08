@@ -38,10 +38,8 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
   /** @return A key that is used to store authentication state in a session cookie. */
   protected abstract String getSessionServiceKey();
 
-  /** @return A key that is used to store authentication state in a session cookie. */
-  protected String getSessionTokenKey() {
-    return Constants.YOUTUBE_SESSION_TOKEN_KEY;
-  }
+  /** @return A key that is used to store auth token in a session cookie. */
+  protected abstract String getSessionTokenKey();
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
