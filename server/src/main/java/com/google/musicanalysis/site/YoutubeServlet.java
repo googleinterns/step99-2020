@@ -114,7 +114,7 @@ public class YoutubeServlet extends HttpServlet {
         updateMusicCount(youtubeResBody, genreCount);
 
         Gson gson = new Gson();
-        res.setContentType("application/json"); // changed 
+        res.setContentType("application/json"); 
         res.getWriter().println(gson.toJson(genreCount));
         // send genreCount to javascript 
     }
