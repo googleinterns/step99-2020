@@ -43,8 +43,8 @@ public class YoutubeServlet extends HttpServlet {
 
     /***
      * checks whether topic is categorized as music
-     * by checking is last word is "music" or "Music"
-     * @param topic
+     * by checking if the last word is "music" or "Music"
+     * @param topic 
      * @return Boolean
      */
     protected Boolean isMusic(String topic) {
@@ -59,15 +59,18 @@ public class YoutubeServlet extends HttpServlet {
      * @param genreCount hash map of frequency count of each music genre
      */
     protected void updateMusicCount(String youtubeResBody, HashMap<String, Integer> genreCount) {
-        // parse JSON response for topic Categories
         JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
         JsonArray videos = jObject.getAsJsonArray("items");
-        for (int i = 0; i < videos.size(); i++){
+
+        // iterates through each liked video
+        for (int i = 0; i < videos.size(); i++) {
+            // extracts array of topicCategories in video
             JsonObject video = videos.get(i).getAsJsonObject();
             JsonObject topicDetails = video.getAsJsonObject("topicDetails");
             JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
+
             for (int j = 0; j < topicCategories.size(); j++) {
-                // extract music genre out of wikipedia links
+                // extract music genre out of wikipedia links of topic categories
                 String link = topicCategories.get(j).toString();
                 String topic = link.substring(link.lastIndexOf('/') + 1);
                 topic = topic.replaceAll("\"", "");
@@ -98,10 +101,8 @@ public class YoutubeServlet extends HttpServlet {
             return;
         }
         String youtubeResBody = getYoutubeRes(req, res, API_KEY, accessToken.toString());
-
         HashMap<String, Integer> genreCount = new HashMap<String, Integer>();
         updateMusicCount(youtubeResBody, genreCount);
-
         res.getWriter().write(genreCount.toString());
     }
 }
