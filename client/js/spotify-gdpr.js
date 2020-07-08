@@ -129,7 +129,7 @@ for (const changeSet of changes.reverse()) {
     }
   }
 
-  // take the current ordering of the songs and store it in the historical idnex
+  // take the current ordering of the songs and store it in the historical index
   // list
   for (const [id, index] of indices.entries()) {
     let indexHistory;
