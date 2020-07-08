@@ -27,48 +27,6 @@
 const {zip} = window;
 
 /**
- * Gets the value associated with `key` from `map`. If `key` is not in `map`,
- * then `fn` will be called and the value it returns will be placed in the map
- * and returned from this function.
- *
- * @template K
- * @template V
- * @param {Map<K, V>} map The map to retrieve a value from.
- * @param {K} key The key associated with the value to retrieve.
- * @param {(key: K) => V} fn Generates a default value if the key was not in the
- * map.
- * @returns {V} The value associated with `key` in `map`, or the return value of
- * `fn` if there was no such value.
- */
-function getOrDefault(map, key, fn) {
-  let value = map.get(key);
-  if (value === undefined) {
-    value = fn(key);
-    map.set(key, value);
-  }
-  return value;
-}
-
-/**
- * Updates the value associated with `key` in `map`. If `key` is not in `map`,
- * then `fn` will be called with `undefined` as the value.
- *
- * @template K
- * @template V
- * @param {Map<K, V>} map The map to update.
- * @param {K} key The key associated with the value to update.
- * @param {(value: V | undefined, key: K) => V} fn Returns the new value to be
- * associated with `key` in `map`.
- * @returns {Map<K, V>} `map`
- */
-function update(map, key, fn) {
-  const value = map.get(key);
-  map.set(key, fn(value, key));
-  return map;
-}
-
-
-/**
  * Takes a blob containing zipped GDPR data and outputs a list of GDPR streaming
  * records.
  *
@@ -129,7 +87,8 @@ export async function getStreamingData(data) {
                     // dates are strings in JSON, convert to JS date
                     let endTime = new Date(entry.endTime);
                     // move according to UTC offset
-                    endTime = new Date(+endTime - endTime.getTimezoneOffset() * 60000);
+                    endTime =
+                      new Date(+endTime - endTime.getTimezoneOffset() * 60000);
                     entry.endTime = endTime;
                     return entry;
                   }),
@@ -184,24 +143,41 @@ export function collateStreamingData(data) {
     while (currentRecord && +currentRecord.endTime < windowStart + windowSize) {
       const {artistName, trackName, msPlayed} = currentRecord;
 
-      const windowArtistTracks = getOrDefault(
-        window, artistName, () => new Map(),
-      );
-      const totalArtistTracks = getOrDefault(
-        totals, artistName, () => new Map(),
-      );
+      // update time in window
+      let windowArtistTracks = window.get(artistName);
 
-      update(
-        windowArtistTracks,
-        trackName,
-        (windowTrackTime = 0) => windowTrackTime + msPlayed,
-      );
+      if (!windowArtistTracks) {
+        windowArtistTracks = new Map();
+        window.set(artistName, windowArtistTracks);
+      }
 
-      update(
-        totalArtistTracks,
-        trackName,
-        (totalTrackTime = 0) => totalTrackTime + msPlayed,
-      );
+      let windowTrackTime = windowArtistTracks.get(trackName);
+
+      if (!windowTrackTime) {
+        windowTrackTime = 0;
+      }
+
+      windowTrackTime += msPlayed;
+
+      windowArtistTracks.set(trackName, windowTrackTime);
+
+      // update total time
+      let totalArtistTracks = totals.get(artistName);
+
+      if (!totalArtistTracks) {
+        totalArtistTracks = new Map();
+        totals.set(artistName, totalArtistTracks);
+      }
+
+      let totalTrackTime = totalArtistTracks.get(trackName);
+
+      if (!totalTrackTime) {
+        totalTrackTime = 0;
+      }
+
+      totalTrackTime += msPlayed;
+
+      totalArtistTracks.set(trackName, totalTrackTime);
 
       currentRecord = data[++index];
     }
