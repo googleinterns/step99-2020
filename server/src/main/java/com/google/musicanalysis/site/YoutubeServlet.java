@@ -21,30 +21,30 @@ import java.util.HashMap;
 public class YoutubeServlet extends HttpServlet {
     /**
      * makes http request of youtube api to retrieve topics of liked videos, 
-     *  gets json string of youtube res
-     * @param API_KEY
-     * @param accessToken
-     * @return JSON string of youtube response
+     *  gets json string of youtube response
+     * @param apiKey youtube api key
+     * @param accessToken youtube access token from login
+     * @return JSON string of youtube response of liked video topics
      * @throws ServletException
      * @throws IOException
      */
     protected String getYoutubeRes(String apiKey, String accessToken) 
         throws ServletException, IOException {
         // make http request to youtube API
-        var youtubeParam = new URLEncodedBuilder()
+        URLEncodedBuilder youtubeParam = new URLEncodedBuilder()
             .add("part", "topicDetails")
             .add("myRating", "like")
             .add("key", apiKey);
         URI youtubeUri = URI.create("https://www.googleapis.com/youtube/v3/videos?" + youtubeParam.build());
 
         var httpClient = HttpClient.newHttpClient();
-        var youtubeReq = HttpRequest.newBuilder(youtubeUri)
+        HttpRequest youtubeReq = HttpRequest.newBuilder(youtubeUri)
                 .header("Authorization", "Bearer " + accessToken)
                 .header("Accept", "application/json")
                 .GET()
                 .build();
 
-        // get response to Youtube API 
+        // get response from Youtube API 
         var youtubeRes = httpClient.sendAsync(youtubeReq, BodyHandlers.ofString()).join();
         return youtubeRes.body();
     }
@@ -52,8 +52,8 @@ public class YoutubeServlet extends HttpServlet {
     /**
      * checks whether topic is categorized as music
      * by checking if the last word is "music" or "Music"
-     * @param topic 
-     * @return Boolean
+     * @param topic identifies youtube video category e.g. Knowledge or Pop music
+     * @return whether topic is categorized as music
      */
     protected Boolean isMusic(String topic) {
         String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);
