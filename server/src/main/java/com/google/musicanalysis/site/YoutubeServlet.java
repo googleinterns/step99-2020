@@ -76,6 +76,10 @@ public class YoutubeServlet extends HttpServlet {
             // extracts array of topicCategories in video
             JsonObject video = videos.get(i).getAsJsonObject();
             JsonObject topicDetails = video.getAsJsonObject("topicDetails");
+            if (topicDetails == null) {
+                // skip this video if it doesn't have topic details
+                continue;
+            }
             JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
 
             for (int j = 0; j < topicCategories.size(); j++) {
