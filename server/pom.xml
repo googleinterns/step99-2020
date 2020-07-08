@@ -110,6 +110,16 @@
         </executions>
       </plugin>
 
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.3.0</version>
+        <configuration>
+          <packagingExcludes>
+            node_modules/
+          </packagingExcludes>
+        </configuration>
+      </plugin>
+
       <!-- copy jetty dependency to correct folder on deployment -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
