@@ -17,6 +17,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.annotation.WebServlet;
 import java.util.HashMap;
 
+/** Servlet handles youtube api call to get genres of liked videos */
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
     /**
@@ -111,6 +112,10 @@ public class YoutubeServlet extends HttpServlet {
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString());
         var genreCount = new HashMap<String, Integer>();
         updateMusicCount(youtubeResBody, genreCount);
-        res.getWriter().write(genreCount.toString());
+
+        Gson gson = new Gson();
+        res.setContentType("application/json"); // changed 
+        res.getWriter().println(gson.toJson(genreCount));
+        // send genreCount to javascript 
     }
 }
