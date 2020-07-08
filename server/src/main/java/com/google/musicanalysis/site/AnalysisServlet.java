@@ -62,6 +62,12 @@ public class AnalysisServlet extends HttpServlet {
     }
   }
 
+  /**
+   * Analyzes the given string with the Natural Language API.
+   *
+   * @param text The text that will be analyzed by the Natural Language API.
+   * @return A MagnitudeAndScore object with the results
+   */
   private MagnitudeAndScore analyzeWithNLP(String text) throws IOException {
 
     // Calling the API
@@ -80,6 +86,12 @@ public class AnalysisServlet extends HttpServlet {
     return nlpResults;
   }
 
+  /**
+   * Analyzes the given string with the Perspective API.
+   *
+   * @param text The text that will be analyzed by the Perspective API.
+   * @return A hashmap with the results
+   */
   private HashMap<String, String> analyzeWithPerspective(String text) throws IOException {
 
     ArrayList<String> attributes =
