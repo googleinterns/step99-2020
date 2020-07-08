@@ -1,3 +1,5 @@
+/* eslint-disable */
+// @ts-nocheck
 /*
  Copyright (c) 2013 Gildas Lormeau. All rights reserved.
 

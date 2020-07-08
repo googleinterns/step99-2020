@@ -122,10 +122,10 @@ export function collateStreamingData(data) {
   let index = 0;
   let currentRecord = data[0];
 
-  const windowSize = 86400000;
+  const WINDOW_SIZE = 86400000;
   // round down to the start of the day of the first record
   let windowStart =
-    +currentRecord.endTime - (+currentRecord.endTime % windowSize);
+    +currentRecord.endTime - (+currentRecord.endTime % WINDOW_SIZE);
 
   const windows = [];
 
@@ -140,7 +140,7 @@ export function collateStreamingData(data) {
   let window = new Map();
 
   while (index < data.length) {
-    while (currentRecord && +currentRecord.endTime < windowStart + windowSize) {
+    while (currentRecord && +currentRecord.endTime < windowStart + WINDOW_SIZE) {
       const {artistName, trackName, msPlayed} = currentRecord;
 
       // update time in window
@@ -183,7 +183,7 @@ export function collateStreamingData(data) {
     }
 
     windows.push({start: new Date(windowStart), totals: window});
-    windowStart += windowSize;
+    windowStart += WINDOW_SIZE;
     window = new Map();
   }
 
