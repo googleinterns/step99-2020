@@ -27,7 +27,9 @@ public class PerspectiveRequest {
   public String getResponse() throws MalformedURLException, IOException {
 
     String jsonString = buildJson(this.text, this.attributes);
-    URL url = new URL("https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=");
+    URL url =
+        new URL(
+            "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=");
 
     // Open up the connection
     HttpURLConnection con = (HttpURLConnection) url.openConnection();

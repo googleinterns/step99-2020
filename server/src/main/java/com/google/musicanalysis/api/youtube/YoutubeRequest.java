@@ -29,7 +29,7 @@ public class YoutubeRequest {
     StringBuffer buffer = new StringBuffer();
 
     URL url = buildUrl();
-
+    System.out.println(url);
     BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
 
     // reading chunks of response into the buffer

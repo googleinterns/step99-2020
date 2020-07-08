@@ -8,9 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -23,33 +20,21 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    res.getWriter().write("<h1>Comment Analysis</h1>\n");
+    // Video name from the front-end
+    String videoName = "sharks 101";
 
-    String videoName = "seun omonije";
-
+    // Get response from Youtube API
     String videoIdJson = new YoutubeRequest("search", videoName).getResult();
     String videoId = getVideoId(videoIdJson);
     String commentsJson = new YoutubeRequest("commentThreads", "snippet", videoId).getResult();
 
-    res.getWriter().write(commentsJson);
+    // Convert response into a large string to be passed through for analysis
+    ArrayList<String> commentArray = retrieveComments(commentsJson);
+    String bigCommentString = convertToString(commentArray);
 
-    res.getWriter().write("<h3>Comments</h3>");
-    String comment = "I love you.";
-    res.getWriter().println(comment);
-
-    res.getWriter().write("<h3>Perspective</h3>");
-    HashMap<String, String> perspectiveMap = analyzeWithPerspective(comment);
-    // Print on the screen (won't make it in final cut)
-    Set set = perspectiveMap.entrySet();
-    Iterator mapIterator = set.iterator();
-    while (mapIterator.hasNext()) {
-      Map.Entry entry = (Map.Entry) mapIterator.next();
-      res.getWriter().println(entry.getKey() + ": " + entry.getValue());
-    }
-
-    res.getWriter().write("<h3>NLP</h3>");
-    MagnitudeAndScore nlpObject = analyzeWithNLP(comment);
-    res.getWriter().println("Magnitude: " + nlpObject.magnitude + "Score: " + nlpObject.score);
+    // Analyze with the Perspective and Natural Language APIs
+    HashMap<String, String> perspectiveMap = analyzeWithPerspective(bigCommentString);
+    MagnitudeAndScore nlpObject = analyzeWithNLP(bigCommentString);
   }
 
   private class MagnitudeAndScore {
@@ -151,5 +136,61 @@ public class AnalysisServlet extends HttpServlet {
 
     // Only returning the first for now, potential to change if I optimize search results.
     return searchResults.get(0);
+  }
+
+  /**
+   * Parses the comment JSON string and retrieves the comments.
+   *
+   * @param response The JSON string to be parsed.
+   * @return An ArrayList with each comment
+   */
+  private ArrayList<String> retrieveComments(String response) {
+    ArrayList<String> commentList = new ArrayList<>();
+
+    // Traversing to the items array
+    JsonElement jElement = JsonParser.parseString(response);
+    JsonObject jObject = jElement.getAsJsonObject();
+    JsonArray itemsArray = jObject.getAsJsonArray("items");
+
+    for (JsonElement el : itemsArray) {
+      // Traversing each item in the array
+      String topComment =
+          el.getAsJsonObject()
+              .getAsJsonObject("snippet")
+              .getAsJsonObject("topLevelComment")
+              .getAsJsonObject("snippet")
+              .get("textOriginal")
+              .toString();
+
+      // Remove all non-ASCII characters
+      commentList.add(topComment.replaceAll("[^\\x00-\\x7F]", ""));
+    }
+
+    return commentList;
+  }
+
+  /**
+   * Condenses array of comments into one large string, formatting it along the way.
+   *
+   * @param comments The array to be condensed.
+   * @return A properly formatted Strin
+   */
+  private String convertToString(ArrayList<String> comments) {
+    StringBuilder res = new StringBuilder();
+
+    for (String string : comments) {
+      string = string.replace("\"", "");
+      // Make sure each comment is treated as its own sentence
+      // Not sure char datatype works with regex so used String
+      String lastCharacter = string.substring(string.length() - 1);
+      if (!lastCharacter.matches(".|!|\\?")) {
+        string += ". ";
+      } else {
+        string += " ";
+      }
+      res.append(string);
+    }
+
+    return res.toString();
   }
 }

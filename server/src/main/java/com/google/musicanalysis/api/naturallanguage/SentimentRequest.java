@@ -22,7 +22,9 @@ public class SentimentRequest {
    * @return the JSON response as string
    */
   public String getResponse() throws MalformedURLException, IOException {
-    URL url = new URL("https://language.googleapis.com/v1/documents:analyzeSentiment?key=");
+    URL url =
+        new URL(
+            "https://language.googleapis.com/v1/documents:analyzeSentiment?key=");
 
     // Open up the connection
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
