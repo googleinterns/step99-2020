@@ -20,22 +20,21 @@ import java.util.HashMap;
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
     /**
-     * makes http request of youtube api, gets json string of youtube res
-     * @param req
-     * @param res
+     * makes http request of youtube api to retrieve topics of liked videos, 
+     *  gets json string of youtube res
      * @param API_KEY
      * @param accessToken
      * @return JSON string of youtube response
      * @throws ServletException
      * @throws IOException
      */
-    protected String getYoutubeRes(HttpServletRequest req, HttpServletResponse res, String API_KEY, String accessToken) 
+    protected String getYoutubeRes(String apiKey, String accessToken) 
         throws ServletException, IOException {
         // make http request to youtube API
         var youtubeParam = new URLEncodedBuilder()
             .add("part", "topicDetails")
             .add("myRating", "like")
-            .add("key", API_KEY);
+            .add("key", apiKey);
         URI youtubeUri = URI.create("https://www.googleapis.com/youtube/v3/videos?" + youtubeParam.build());
 
         var httpClient = HttpClient.newHttpClient();
@@ -58,7 +57,7 @@ public class YoutubeServlet extends HttpServlet {
      */
     protected Boolean isMusic(String topic) {
         String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);
-        return lastWord.equals("Music") || lastWord.equals("music");
+        return lastWord.equalsIgnoreCase("music");
     }
 
     /**
@@ -109,8 +108,8 @@ public class YoutubeServlet extends HttpServlet {
             res.setStatus(401);
             return;
         }
-        String youtubeResBody = getYoutubeRes(req, res, API_KEY, accessToken.toString());
-        HashMap<String, Integer> genreCount = new HashMap<String, Integer>();
+        String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString());
+        var genreCount = new HashMap<String, Integer>();
         updateMusicCount(youtubeResBody, genreCount);
         res.getWriter().write(genreCount.toString());
     }
