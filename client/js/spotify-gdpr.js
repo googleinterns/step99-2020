@@ -2,6 +2,7 @@
 /* global c3 */
 /* global d3 */
 
+// list of songs
 const songs = [
   {id: 'song1'},
   {id: 'song2'},
@@ -12,6 +13,7 @@ const songs = [
   {id: 'song7'},
 ];
 
+// most recent ordering of top songs
 const latest = [
   'song3',
   'song2',
@@ -59,6 +61,8 @@ const latest = [
  */
 
 /**
+ * each array is a list of changes to the top songs list that happened on a
+ * given day
  * @type {Change[][]}
  */
 const changes = [
@@ -82,13 +86,21 @@ const changes = [
   [],
 ];
 
-
+// number of days we have backtracked
 let generation = 1;
 const x = [new Date()];
+
+// current position of each song (list of songs in order)
 const current = latest;
+// current position of each song (map from song id to current index)
 const indices = new Map(current.map((id, idx) => [id, idx]));
+// historical position of each song (map from song id to array of historical
+// indices)
 const indicesHistory = new Map(current.map((id, idx) => [id, [idx]]));
 
+// for each changeset (set of changes that occurred on a day) apply the opposite
+// change so that we can reconstruct the ordering of the top songs list on that
+// day
 for (const changeSet of changes.reverse()) {
   for (const change of changeSet.reverse()) {
     switch (change.type) {
@@ -135,10 +147,12 @@ for (const changeSet of changes.reverse()) {
     }
   }
 
+  // x-value of this on the chart is the current date minus 86,400,000ms (1 day)
   x.push(new Date(+x[x.length - 1] - 86400000));
   generation++;
 }
 
+// format of a chart series in c3 is ['name of series', point1, point2, ...]
 const data =
   /** @type {Array<[string, ...number[]]>} */
   (Array
