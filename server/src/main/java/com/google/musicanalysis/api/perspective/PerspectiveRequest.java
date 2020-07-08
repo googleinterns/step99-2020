@@ -1,5 +1,6 @@
 package com.google.musicanalysis.site;
 
+import com.google.gson.JsonObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -69,9 +70,24 @@ public class PerspectiveRequest {
       wantedArgs.add(el);
     }
 
-    PerspectiveJsonBuilder json = new PerspectiveJsonBuilder(textToAnalyze, wantedArgs);
-    String jsonString = json.buildJson();
+    String jsonString = buildFinalJson(textToAnalyze, wantedArgs);
 
     return jsonString;
+  }
+
+  private String buildFinalJson(String textToAnalyze, ArrayList<String> wantedArgs) {
+    JsonObject innerTextObject = new JsonObject();
+    innerTextObject.addProperty("text", textToAnalyze);
+
+    JsonObject innerAttributeObject = new JsonObject();
+    for (String el : wantedArgs) {
+      innerAttributeObject.add(el, new JsonObject());
+    }
+
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.add("comment", innerTextObject);
+    jsonObject.add("requestedAttributes", innerAttributeObject);
+
+    return jsonObject.toString();
   }
 }
