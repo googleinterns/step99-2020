@@ -1,27 +1,6 @@
 // @ts-check
 /* global c3 */
 
-import {getStreamingData} from './analysis/gdpr.js';
-
-window.zip.workerScriptsPath = '/js/zip/';
-
-const btnUpload =
-  /** @type {HTMLButtonElement} */
-  (document.getElementById('btn-data-upload'));
-
-btnUpload.addEventListener('click', async () => {
-  const inputUpload =
-      /** @type {HTMLInputElement} */
-      (document.getElementById('input-data-upload'));
-  if (!inputUpload.files) return;
-
-  const fileUpload = inputUpload.files.item(0);
-  if (!fileUpload) return;
-
-  const records = await getStreamingData(fileUpload);
-  console.log(records);
-});
-
 // most recent ordering of top songs
 const latest = [
   'song3',
@@ -114,28 +93,28 @@ const indicesHistory = new Map(current.map((id, idx) => [id, [idx]]));
 for (const changeSet of changes.reverse()) {
   for (const change of changeSet.reverse()) {
     switch (change.type) {
-    case 'move': {
-      const {from, to} = change;
+      case 'move': {
+        const {from, to} = change;
 
-      const a = current[from];
-      const b = current[to];
-      current[from] = b;
-      current[to] = a;
+        const a = current[from];
+        const b = current[to];
+        current[from] = b;
+        current[to] = a;
 
-      indices.set(a, to);
-      indices.set(b, from);
-      break;
-    }
-    case 'replace': {
-      const {oldItem, newItem} = change;
+        indices.set(a, to);
+        indices.set(b, from);
+        break;
+      }
+      case 'replace': {
+        const {oldItem, newItem} = change;
 
-      const idx = indices.get(newItem);
-      current[idx] = oldItem;
+        const idx = indices.get(newItem);
+        current[idx] = oldItem;
 
-      indices.set(newItem, null);
-      indices.set(oldItem, idx);
-      break;
-    }
+        indices.set(newItem, null);
+        indices.set(oldItem, idx);
+        break;
+      }
     }
   }
 
@@ -168,8 +147,8 @@ for (const changeSet of changes.reverse()) {
 const data =
   /** @type {Array<[string, ...number[]]>} */
   (Array
-    .from(indicesHistory.entries())
-    .map(([id, history]) => [id, ...history]));
+      .from(indicesHistory.entries())
+      .map(([id, history]) => [id, ...history]));
 
 const dateFormat = new Intl.DateTimeFormat('en', {
   day: 'numeric',
