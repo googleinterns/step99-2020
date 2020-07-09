@@ -9,6 +9,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
+/**
+ * Handles all Perspective API requests. Takes text string and list of attributes and returns a JSON
+ * response as string.
+ */
 public class PerspectiveRequest {
 
   private String text;

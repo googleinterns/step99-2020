@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+/** Handles all NLP API requests. Takes text string and returns a JSON response as string. */
 public class SentimentRequest {
 
   private String text;

@@ -27,9 +27,17 @@ public class AnalysisServlet extends HttpServlet {
 
     String videoName = "seun omonije";
 
-    String videoIdJson = new YoutubeRequest("search", videoName).getResult();
+    // Use like this: {url_parameter, value}
+    HashMap<String, String> args = new HashMap<>();
+
+    args.put("q", videoName);
+    String videoIdJson = new YoutubeRequest("search", args).getResult();
     String videoId = getVideoId(videoIdJson);
-    String commentsJson = new YoutubeRequest("commentThreads", "snippet", videoId).getResult();
+
+    args.remove("q");
+    args.put("part", "snippet");
+    args.put("videoId", videoId);
+    String commentsJson = new YoutubeRequest("commentThreads", args).getResult();
 
     res.getWriter().write(commentsJson);
 
@@ -48,15 +56,15 @@ public class AnalysisServlet extends HttpServlet {
     }
 
     res.getWriter().write("<h3>NLP</h3>");
-    MagnitudeAndScore nlpObject = analyzeWithNLP(comment);
+    NLPResult nlpObject = analyzeWithNLP(comment);
     res.getWriter().println("Magnitude: " + nlpObject.magnitude + "Score: " + nlpObject.score);
   }
 
-  private class MagnitudeAndScore {
+  private class NLPResult {
     Double magnitude;
     Double score;
 
-    public MagnitudeAndScore(Double magnitude, Double score) {
+    public NLPResult(Double magnitude, Double score) {
       this.magnitude = magnitude;
       this.score = score;
     }
@@ -66,11 +74,9 @@ public class AnalysisServlet extends HttpServlet {
    * Analyzes the given string with the Natural Language API.
    *
    * @param text The text that will be analyzed by the Natural Language API.
-   * @return A MagnitudeAndScore object with the results
+   * @return A NLPResult object with the results
    */
-  private MagnitudeAndScore analyzeWithNLP(String text) throws IOException {
-
-    // Calling the API
+  private NLPResult analyzeWithNLP(String text) throws IOException {
     String response = new SentimentRequest(text).getResponse();
 
     // Extracting the sentiment
@@ -78,8 +84,8 @@ public class AnalysisServlet extends HttpServlet {
     JsonObject jObject = jElement.getAsJsonObject();
     JsonObject sentimentObject = jObject.getAsJsonObject("documentSentiment");
 
-    MagnitudeAndScore nlpResults =
-        new MagnitudeAndScore(
+    NLPResult nlpResults =
+        new NLPResult(
             Double.valueOf(sentimentObject.get("magnitude").toString()),
             Double.valueOf(sentimentObject.get("score").toString()));
 
@@ -114,7 +120,6 @@ public class AnalysisServlet extends HttpServlet {
     JsonObject jObject = jElement.getAsJsonObject();
     JsonObject attributeObject = jObject.getAsJsonObject("attributeScores");
 
-    // Placing them in a Hash Map
     HashMap<String, String> perspectiveResults = new HashMap<String, String>();
     for (String el : attributes) {
       perspectiveResults.put(
@@ -132,14 +137,13 @@ public class AnalysisServlet extends HttpServlet {
   private String getVideoId(String response) {
     ArrayList<String> searchResults = new ArrayList<>();
 
-    // Traversing to the items array
+    // Accessing the items JSON Array
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
     JsonArray itemsArray = jObject.getAsJsonArray("items");
 
     for (JsonElement el : itemsArray) {
-
-      // Traversing each item in the array
+      // Grabbing each item and adding to a result array
       JsonObject object = el.getAsJsonObject();
       JsonObject data = object.getAsJsonObject("id");
       JsonElement videoId = data.get("videoId");
