@@ -170,10 +170,11 @@ public class AnalysisServlet extends HttpServlet {
   }
 
   /**
-   * Condenses array of comments into one large string, formatting it along the way.
+   * Condenses array of comments into one large string, formatting it along the way
+   * and separating unpunctuated sentences with a period
    *
    * @param comments The array to be condensed.
-   * @return A properly formatted Strin
+   * @return A properly formatted String
    */
   private String convertToString(ArrayList<String> comments) {
     StringBuilder res = new StringBuilder();
