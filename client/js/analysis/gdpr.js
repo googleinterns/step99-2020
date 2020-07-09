@@ -74,29 +74,29 @@ export async function getStreamingData(data) {
               });
             });
 
-          // content of each file should be an array of GDPR records, once all
-          // of the reading is done, concatenate the arrays and return
-          Promise
-            .all(contentPromises)
-            .then((contentWithIndices) => {
-              resolve(
-                contentWithIndices
-                  .map((entry) => entry.data)
-                  .reduce((dataA, dataB) => dataA.concat(dataB), [])
-                  .map((entry) => {
-                    // dates are strings in JSON, convert to JS date
-                    let endTime = new Date(entry.endTime);
-                    // move according to UTC offset
-                    endTime =
+            // content of each file should be an array of GDPR records, once all
+            // of the reading is done, concatenate the arrays and return
+            Promise
+                .all(contentPromises)
+                .then((contentWithIndices) => {
+                  resolve(
+                      contentWithIndices
+                          .map((entry) => entry.data)
+                          .reduce((dataA, dataB) => dataA.concat(dataB), [])
+                          .map((entry) => {
+                            // dates are strings in JSON, convert to JS date
+                            let endTime = new Date(entry.endTime);
+                            // move according to UTC offset
+                            endTime =
                       new Date(+endTime - endTime.getTimezoneOffset() * 60000);
-                    entry.endTime = endTime;
-                    return entry;
-                  }),
-              );
-            });
-        });
-      },
-      (error) => reject(error),
+                            entry.endTime = endTime;
+                            return entry;
+                          }),
+                  );
+                });
+          });
+        },
+        (error) => reject(error),
     );
   });
 }
@@ -140,7 +140,8 @@ export function collateStreamingData(data) {
   let window = new Map();
 
   while (index < data.length) {
-    while (currentRecord && +currentRecord.endTime < windowStart + WINDOW_SIZE) {
+    while (currentRecord &&
+        +currentRecord.endTime < windowStart + WINDOW_SIZE) {
       const {artistName, trackName, msPlayed} = currentRecord;
 
       // update time in window

@@ -17,11 +17,11 @@ btnUpload.addEventListener('click', async () => {
   inputUpload.click();
 
   await new Promise(
-    (resolve) => inputUpload.addEventListener(
-      'change',
-      resolve,
-      {once: true},
-    ),
+      (resolve) => inputUpload.addEventListener(
+          'change',
+          resolve,
+          {once: true},
+      ),
   );
 
   if (!inputUpload.files) return;
