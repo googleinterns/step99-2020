@@ -8,11 +8,13 @@
     "stylelint-config-rational-order/plugin"
   ],
   "rules": {
+    "order/properties-order": [[], { "severity": "error" }],
     "plugin/rational-order": [
       true,
       {
         "border-in-box-model": false,
-        "empty-line-between-groups": true
+        "empty-line-between-groups": true,
+        "severity": "error"
       }
     ],
     "alpha-value-notation": "number",

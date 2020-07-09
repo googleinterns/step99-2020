@@ -1,0 +1,9 @@
+/* spotify-gdpr.css - styles for spotify-gdpr.html */
+body {
+  background-image: url('/img/bg/spotify-gdpr.svg');
+  background-size: 24rem;
+}
+
+#get-started {
+  padding: 1rem 0;
+}
