@@ -1,18 +1,17 @@
-console.log("Display text on /api/youtube");
-/* returns a promise */
-async function getMusicGenre() {
-  let response = await fetch("/api/youtube");
-  return await response.text();
-}
-
-console.log(getMusicGenre());
+/** fetches youtube api calls from YoutubeServlet.java
+    and displays on youtube-genre.html
+*/
 
 const genreBlock = document.getElementById('genres');
-getMusicGenre().then(genre => genreBlock.innerHTML = genre);
+async function displayMusicGenre() {
+  const response = await fetch("/api/youtube");
+  console.log(response.status);
+  if (response.status != 200) {
+    // redirect to login if there are errors 
+    window.location.href = "/api/oauth/login/youtube";
+  }
+  const genreCount = await response.text();
+  genreBlock.innerHTML = genreCount;
+}
 
-/* the return value of an async function is always a promise, so you need to do
-  .then to unwrap the promise. Within the .then then you can do the desired fns
-  because you will have access to the unwrapped fn
-
-  
- */
+displayMusicGenre();
