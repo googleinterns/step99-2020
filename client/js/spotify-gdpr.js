@@ -128,28 +128,28 @@ const indicesHistory = new Map(current.map((id, idx) => [id, [idx]]));
 for (const changeSet of changes.reverse()) {
   for (const change of changeSet.reverse()) {
     switch (change.type) {
-    case 'move': {
-      const {from, to} = change;
+      case 'move': {
+        const {from, to} = change;
 
-      const a = current[from];
-      const b = current[to];
-      current[from] = b;
-      current[to] = a;
+        const a = current[from];
+        const b = current[to];
+        current[from] = b;
+        current[to] = a;
 
-      indices.set(a, to);
-      indices.set(b, from);
-      break;
-    }
-    case 'replace': {
-      const {oldItem, newItem} = change;
+        indices.set(a, to);
+        indices.set(b, from);
+        break;
+      }
+      case 'replace': {
+        const {oldItem, newItem} = change;
 
-      const idx = indices.get(newItem);
-      current[idx] = oldItem;
+        const idx = indices.get(newItem);
+        current[idx] = oldItem;
 
-      indices.set(newItem, null);
-      indices.set(oldItem, idx);
-      break;
-    }
+        indices.set(newItem, null);
+        indices.set(oldItem, idx);
+        break;
+      }
     }
   }
 
@@ -182,8 +182,8 @@ for (const changeSet of changes.reverse()) {
 const data =
   /** @type {Array<[string, ...number[]]>} */
   (Array
-    .from(indicesHistory.entries())
-    .map(([id, history]) => [id, ...history]));
+      .from(indicesHistory.entries())
+      .map(([id, history]) => [id, ...history]));
 
 const dateFormat = new Intl.DateTimeFormat('en', {
   day: 'numeric',
