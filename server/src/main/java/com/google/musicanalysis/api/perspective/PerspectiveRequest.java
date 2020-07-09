@@ -75,6 +75,7 @@ public class PerspectiveRequest {
     return jsonString;
   }
 
+  /* Helper function for buildJson */
   private String buildFinalJson(String textToAnalyze, ArrayList<String> wantedArgs) {
     JsonObject innerTextObject = new JsonObject();
     innerTextObject.addProperty("text", textToAnalyze);
