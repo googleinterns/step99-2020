@@ -28,15 +28,15 @@ public class AnalysisServlet extends HttpServlet {
     String videoName = "seun omonije";
 
     // Use like this: {url_parameter, value}
-    HashMap<String, String> args = new HashMap<>();
+    HashMap<String, String> videoArgs = new HashMap<>();
+    HashMap<String, String> commentArgs = new HashMap<>();
 
-    args.put("q", videoName);
-    String videoIdJson = new YoutubeRequest("search", args).getResult();
+    videoArgs.put("q", videoName);
+    String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
     String videoId = getVideoId(videoIdJson);
 
-    args.remove("q");
-    args.put("part", "snippet");
-    args.put("videoId", videoId);
+    commentArgs.put("part", "snippet");
+    commentArgs.put("videoId", videoId);
     String commentsJson = new YoutubeRequest("commentThreads", args).getResult();
 
     res.getWriter().write(commentsJson);
