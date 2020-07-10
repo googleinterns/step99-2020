@@ -23,6 +23,8 @@ import java.util.HashMap;
 /** Servlet handles youtube api call to get genres of liked videos */
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
+
+    static final String DEFAULT_NUM_VIDS = "10";
     /**
      * makes http request of youtube api to retrieve topics of liked videos, 
      *  gets json string of youtube response
@@ -129,8 +131,10 @@ public class YoutubeServlet extends HttpServlet {
     public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
       // Get the input from the form.
       String numVideos = req.getParameter("numVideos");
+      if (numVideos.equals("")) {
+          numVideos = DEFAULT_NUM_VIDS;
+      }
       System.out.println("Retrieve " + numVideos + " videos");
       res.sendRedirect("/youtube-genre.html?num_videos=" + numVideos); 
-      // cannot GET genre-form.html
     }
 }

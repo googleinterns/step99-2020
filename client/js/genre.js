@@ -2,8 +2,8 @@
     and displays on youtube-genre.html
 */
 
-const genreBlock = document.getElementById('genres');
 async function displayMusicGenre() {
+  const genreBlock = document.getElementById('genres');
   const response = await fetch("/api/youtube");
   console.log(response.status);
   if (response.status != 200) {
@@ -15,3 +15,14 @@ async function displayMusicGenre() {
 }
 
 displayMusicGenre();
+
+function updateNumVids() {
+  const numVideosInput = document.getElementById('numVideos');
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  console.log(queryString);
+  console.log(urlParams.get('num_videos'));
+  numVideosInput.value = urlParams.get('num_videos');
+}
+
+updateNumVids();
