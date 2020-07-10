@@ -192,6 +192,7 @@ const chart = c3.generate({
   },
   data: {
     x: 'date',
+    columns: [],
     onmouseover: (d) => chart.focus(d.id),
     onmouseout: () => chart.focus(),
   },
