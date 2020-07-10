@@ -130,7 +130,7 @@ public class YoutubeServlet extends HttpServlet {
       // Get the input from the form.
       String numVideos = req.getParameter("numVideos");
       System.out.println("Retrieve " + numVideos + " videos");
-      res.sendRedirect("/genre-form.html?numVideos=" + numVideos); 
+      res.sendRedirect("/youtube-genre.html?num_videos=" + numVideos); 
       // cannot GET genre-form.html
     }
 }
