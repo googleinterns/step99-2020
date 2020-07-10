@@ -71,8 +71,9 @@ public class YoutubeServlet extends HttpServlet {
      * updates hash map to contain frequency count of each music genre
      * @param youtubeResBody json response of youtube liked videos
      * @param genreCount hash map of frequency count of each music genre
+     * @param numVideos maximum number of videos to retrieve
      */
-    protected void updateMusicCount(String youtubeResBody, HashMap<String, Integer> genreCount) {
+    protected void updateMusicCount(String youtubeResBody, HashMap<String, Integer> genreCount, int numVideos) {
         JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
         JsonArray videos = jObject.getAsJsonArray("items");
 
@@ -118,9 +119,12 @@ public class YoutubeServlet extends HttpServlet {
             res.setStatus(401);
             return;
         }
+
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString());
+        int numVideos = Integer.parseInt(req.getParameter("num_videos"));
+        System.out.println(numVideos);
         var genreCount = new HashMap<String, Integer>();
-        updateMusicCount(youtubeResBody, genreCount);
+        updateMusicCount(youtubeResBody, genreCount, numVideos);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
