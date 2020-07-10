@@ -122,7 +122,7 @@ public class YoutubeServlet extends HttpServlet {
 
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString());
         int numVideos = Integer.parseInt(req.getParameter("num_videos"));
-        System.out.println(numVideos);
+
         var genreCount = new HashMap<String, Integer>();
         updateMusicCount(youtubeResBody, genreCount, numVideos);
 
@@ -138,7 +138,6 @@ public class YoutubeServlet extends HttpServlet {
       if (numVideos.equals("")) {
           numVideos = DEFAULT_NUM_VIDS;
       }
-      System.out.println("Retrieve " + numVideos + " videos");
       res.sendRedirect("/youtube-genre.html?num_videos=" + numVideos); 
     }
 }
