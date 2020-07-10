@@ -48,7 +48,7 @@ export async function getStreamingData(data) {
             const entriesWithIndices =
             files
                 .reduce((
-                /** @type {EntryWithIndex[]} */ arr,
+                    /** @type {EntryWithIndex[]} */ arr,
                     /** @type {zip.Entry} */ file,
                 ) => {
                   const match = streamingDataPattern.exec(file.filename);
@@ -85,11 +85,14 @@ export async function getStreamingData(data) {
                           .reduce((dataA, dataB) => dataA.concat(dataB), [])
                           .map((entry) => {
                             // dates are strings in JSON, convert to JS date
-                            let endTime = new Date(entry.endTime);
+                            const endTime = new Date(entry.endTime);
+
                             // move according to UTC offset
-                            endTime =
-                      new Date(+endTime - endTime.getTimezoneOffset() * 60000);
-                            entry.endTime = endTime;
+                            const endTimeMs = +endTime;
+                            const endTimeOffset =
+                              endTime.getTimezoneOffset() * 60000;
+
+                            entry.endTime = new Date(endTimeMs - endTimeOffset);
                             return entry;
                           }),
                   );
