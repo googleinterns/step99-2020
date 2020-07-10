@@ -12,8 +12,8 @@ const DEFAULT_NUM_VIDS = 10;
  * @returns {number} num videos user wants to retrieve
  */
 function getNumVids() {
-  const numVids = numVideosInput.value;
-  return numVids || DEFAULT_NUM_VIDS;
+  const numVideos = numVideosInput.value;
+  return numVideos || DEFAULT_NUM_VIDS;
 }
 
 /**
@@ -21,8 +21,8 @@ function getNumVids() {
  */
 async function displayMusicGenre() {
   const genreBlock = document.getElementById('genres');
-  const numVids = getNumVids();
-  const response = await fetch(`/api/youtube?num_videos=${numVids}`);
+  const numVideos = getNumVids();
+  const response = await fetch(`/api/youtube?num_videos=${numVideos}`);
   if (response.status != 200) {
     // redirect to login if there are errors 
     window.location.href = "/api/oauth/login/youtube";
