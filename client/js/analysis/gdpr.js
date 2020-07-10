@@ -79,23 +79,22 @@ export async function getStreamingData(data) {
             Promise
                 .all(contentPromises)
                 .then((contentWithIndices) => {
-                  resolve(
-                      contentWithIndices
-                          .map((entry) => entry.data)
-                          .reduce((dataA, dataB) => dataA.concat(dataB), [])
-                          .map((entry) => {
-                            // dates are strings in JSON, convert to JS date
-                            const endTime = new Date(entry.endTime);
+                  const final = contentWithIndices
+                      .map((entry) => entry.data)
+                      .reduce((dataA, dataB) => dataA.concat(dataB), [])
+                      .map((entry) => {
+                        // dates are strings in JSON, convert to JS date
+                        const endTime = new Date(entry.endTime);
 
-                            // move according to UTC offset
-                            const endTimeMs = +endTime;
-                            const endTimeOffset =
-                              endTime.getTimezoneOffset() * 60000;
+                        // move according to UTC offset
+                        const endTimeMs = +endTime;
+                        const endTimeOffset =
+                      endTime.getTimezoneOffset() * 60000;
 
-                            entry.endTime = new Date(endTimeMs - endTimeOffset);
-                            return entry;
-                          }),
-                  );
+                        entry.endTime = new Date(endTimeMs - endTimeOffset);
+                        return entry;
+                      });
+                  resolve(final);
                 });
           });
         },
@@ -108,62 +107,62 @@ export async function getStreamingData(data) {
 /** @typedef {{
  * start: Date,
  * totals: ArtistTrackTimeMap
- * }} ArtistTrackTimeWindow */
+ * }} ArtistTrackTimeInterval */
 
 /**
  * Calculates aggregates from a list of GDPR records.
  *
  * @param {GDPRRecord[]} data The list of GDPR records to aggregate.
- * @returns {{totals: ArtistTrackTimeMap, windows: ArtistTrackTimeWindow[]}} An
- * object with two properties: `totals` and `windows`. `totals` is a map whose
- * keys are artists and whose values are maps from track names to duration
- * listened. `windows` is an array of window objects. Each window object has a
- * `start` representing the start of that window, and a `totals`, representing
- * the durations listened to each song during that window.
+ * @returns {{totals: ArtistTrackTimeMap, intervals: ArtistTrackTimeInterval[]}}
+ * An object with two properties: `totals` and `intervals`. `totals` is a map
+ * whose keys are artists and whose values are maps from track names to duration
+ * listened. `intervals` is an array of interval objects. Each interval object
+ * has a `start` representing the start of that interval, and a `totals`,
+ * representing the durations listened to each song during that interval.
  */
 export function collateStreamingData(data) {
-  let index = 0;
-  let currentRecord = data[0];
-
-  const WINDOW_SIZE = 86400000;
-  // round down to the start of the day of the first record
-  let windowStart =
-    +currentRecord.endTime - (+currentRecord.endTime % WINDOW_SIZE);
-
-  const windows = [];
+  const intervals = [];
 
   // a map of maps: key is artist name, value is a map where key
   // is track name and value is time listened to that song in total
   /** @type {ArtistTrackTimeMap} */
   const totals = new Map();
 
-  // each window is a map of maps: key is artist name, value is a map where key
-  // is track name and value is time listened to that song during this window
+  // each interval is a map of maps: key is artist name, value is a map where key
+  // is track name and value is time listened to that song during this interval
   /** @type {ArtistTrackTimeMap} */
-  let window = new Map();
+  let interval = new Map();
+
+  let index = 0;
+  let currentRecord = data[index];
+
+  const INTERVAL_SIZE = 86400000;
+  // round down to the start of the day of the first record
+  let intervalStart =
+    +currentRecord.endTime - (+currentRecord.endTime % INTERVAL_SIZE);
 
   while (index < data.length) {
     while (currentRecord &&
-        +currentRecord.endTime < windowStart + WINDOW_SIZE) {
+        +currentRecord.endTime < intervalStart + INTERVAL_SIZE) {
       const {artistName, trackName, msPlayed} = currentRecord;
 
-      // update time in window
-      let windowArtistTracks = window.get(artistName);
+      // update time in interval
+      let intervalArtistTracks = interval.get(artistName);
 
-      if (!windowArtistTracks) {
-        windowArtistTracks = new Map();
-        window.set(artistName, windowArtistTracks);
+      if (!intervalArtistTracks) {
+        intervalArtistTracks = new Map();
+        interval.set(artistName, intervalArtistTracks);
       }
 
-      let windowTrackTime = windowArtistTracks.get(trackName);
+      let intervalTrackTime = intervalArtistTracks.get(trackName);
 
-      if (!windowTrackTime) {
-        windowTrackTime = 0;
+      if (!intervalTrackTime) {
+        intervalTrackTime = 0;
       }
 
-      windowTrackTime += msPlayed;
+      intervalTrackTime += msPlayed;
 
-      windowArtistTracks.set(trackName, windowTrackTime);
+      intervalArtistTracks.set(trackName, intervalTrackTime);
 
       // update total time
       let totalArtistTracks = totals.get(artistName);
@@ -186,10 +185,10 @@ export function collateStreamingData(data) {
       currentRecord = data[++index];
     }
 
-    windows.push({start: new Date(windowStart), totals: window});
-    windowStart += WINDOW_SIZE;
-    window = new Map();
+    intervals.push({start: new Date(intervalStart), totals: interval});
+    intervalStart += INTERVAL_SIZE;
+    interval = new Map();
   }
 
-  return {windows, totals};
+  return {intervals: intervals, totals};
 }
