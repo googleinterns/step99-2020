@@ -41,7 +41,7 @@ export async function getStreamingData(data) {
         new zip.BlobReader(data),
         (reader) => {
           reader.getEntries((files) => {
-          /** @typedef {{ index: number; file: zip.Entry; }} EntryWithIndex */
+            /** @typedef {{ index: number; file: zip.Entry; }} EntryWithIndex */
 
             // get only entries named StreamingHistoryX.json and pair them with
             // their index so they can be sorted
@@ -79,22 +79,25 @@ export async function getStreamingData(data) {
             Promise
                 .all(contentPromises)
                 .then((contentWithIndices) => {
-                  const final = contentWithIndices
+                  const collatedEntries = contentWithIndices
                       .map((entry) => entry.data)
-                      .reduce((dataA, dataB) => dataA.concat(dataB), [])
+                      .reduce((acc, data) => acc.concat(data), [])
                       .map((entry) => {
+                        const MS_PER_MINUTE = 60 * 1000;
+
                         // dates are strings in JSON, convert to JS date
                         const endTime = new Date(entry.endTime);
 
                         // move according to UTC offset
                         const endTimeMs = +endTime;
-                        const endTimeOffset =
-                      endTime.getTimezoneOffset() * 60000;
+                        const endTimeOffsetMs =
+                          endTime.getTimezoneOffset() * MS_PER_MINUTE;
 
-                        entry.endTime = new Date(endTimeMs - endTimeOffset);
+                        entry.endTime = new Date(endTimeMs - endTimeOffsetMs);
                         return entry;
                       });
-                  resolve(final);
+
+                  resolve(collatedEntries);
                 });
           });
         },
@@ -110,7 +113,7 @@ export async function getStreamingData(data) {
  * }} ArtistTrackTimeInterval */
 
 /**
- * Calculates aggregates from a list of GDPR records.
+ * Calculates aggregate per-track listening times from a list of GDPR records.
  *
  * @param {GDPRRecord[]} data The list of GDPR records to aggregate.
  * @returns {{totals: ArtistTrackTimeMap, intervals: ArtistTrackTimeInterval[]}}
@@ -128,15 +131,16 @@ export function collateStreamingData(data) {
   /** @type {ArtistTrackTimeMap} */
   const totals = new Map();
 
-  // each interval is a map of maps: key is artist name, value is a map where key
-  // is track name and value is time listened to that song during this interval
+  // each interval is a map of maps: key is artist name, value is a map where
+  // key is track name and value is time listened to that song during this
+  // interval
   /** @type {ArtistTrackTimeMap} */
   let interval = new Map();
 
   let index = 0;
   let currentRecord = data[index];
 
-  const INTERVAL_SIZE = 86400000;
+  const INTERVAL_SIZE = 24 * 60 * 60 * 1000;
   // round down to the start of the day of the first record
   let intervalStart =
     +currentRecord.endTime - (+currentRecord.endTime % INTERVAL_SIZE);
