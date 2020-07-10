@@ -1,5 +1,3 @@
-
-
 // Listen for on submit click
 let formSubmit = document.getElementById("formSubmit");
 formSubmit.addEventListener("click", fetchAndShowResponse, false);
