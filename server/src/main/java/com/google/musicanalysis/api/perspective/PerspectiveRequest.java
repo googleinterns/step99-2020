@@ -61,22 +61,9 @@ public class PerspectiveRequest {
    * Builds the JSON Object to be sent out.
    *
    * @param textToAnalyze The text that will be analyzed by the Perspective API.
-   * @param requestedAttributes the attributes requested.
+   * @param wantedArgs the attributes requested.
    */
-  private String buildJson(String textToAnalyze, ArrayList<String> requestedAttributes) {
-
-    ArrayList<String> wantedArgs = new ArrayList<String>();
-    for (String el : requestedAttributes) {
-      wantedArgs.add(el);
-    }
-
-    String jsonString = buildFinalJson(textToAnalyze, wantedArgs);
-
-    return jsonString;
-  }
-
-  /* Helper function for buildJson */
-  private String buildFinalJson(String textToAnalyze, ArrayList<String> wantedArgs) {
+  private String buildJson(String textToAnalyze, ArrayList<String> wantedArgs) {
     JsonObject innerTextObject = new JsonObject();
     innerTextObject.addProperty("text", textToAnalyze);
 

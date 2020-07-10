@@ -14,7 +14,6 @@ public class PerspectiveServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
-    PerspectiveRequest request;
     ArrayList<String> attributes =
         new ArrayList<>(
             Arrays.asList(
@@ -25,7 +24,7 @@ public class PerspectiveServlet extends HttpServlet {
                 "THREAT",
                 "SEXUALLY_EXPLICIT",
                 "FLIRTATION"));
-    request = new PerspectiveRequest("I love you.", attributes);
+    PerspectiveRequest request = new PerspectiveRequest("I love you.", attributes);
     res.getWriter().println(request.getResponse());
   }
 }
