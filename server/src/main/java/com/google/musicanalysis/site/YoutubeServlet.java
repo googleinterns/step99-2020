@@ -72,13 +72,11 @@ public class YoutubeServlet extends HttpServlet {
         JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
         JsonArray videos = jObject.getAsJsonArray("items");
 
-        // iterates through each liked video
         for (int i = 0; i < videos.size(); i++) {
             // extracts array of topicCategories in video
             JsonObject video = videos.get(i).getAsJsonObject();
             JsonObject topicDetails = video.getAsJsonObject("topicDetails");
             if (topicDetails == null) {
-                // skip this video if it doesn't have topic details
                 continue;
             }
             JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
@@ -90,12 +88,10 @@ public class YoutubeServlet extends HttpServlet {
                 topic = topic.replaceAll("\"", "");
                 topic = topic.replaceAll("_", " ");
 
-                // skip if topic is not music
                 if (!isMusic(topic)) {
                     break;
                 }
 
-                // update genreCount hashmap
                 int count = genreCount.containsKey(topic) ? genreCount.get(topic) : 0;
                 genreCount.put(topic, count + 1);
             }
