@@ -124,4 +124,13 @@ public class YoutubeServlet extends HttpServlet {
         res.setContentType("application/json"); 
         res.getWriter().println(gson.toJson(genreCount));
     }
+
+    @Override
+    public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
+      // Get the input from the form.
+      String numVideos = req.getParameter("numVideos");
+      System.out.println("Retrieve " + numVideos + " videos");
+      res.sendRedirect("/genre-form.html?numVideos=" + numVideos); 
+      // cannot GET genre-form.html
+    }
 }
