@@ -3,214 +3,106 @@
  * chart works.
  */
 // @ts-check
+// eslint-disable-next-line max-len
+/** @typedef {import('./analysis/gdpr.js').CollatedGDPRRecords} CollatedGDPRRecords */
+
+import {sleep} from './util.js';
 import {getStreamingData, collateStreamingData} from './analysis/gdpr.js';
 
 const {c3, zip} = window;
 
 zip.workerScriptsPath = '/js/zip/';
 
-const btnUpload =
-  /** @type {HTMLButtonElement} */
-  (document.getElementById('btn-data-upload'));
-
-btnUpload.addEventListener('click', async () => {
-  const inputUpload =
-      /** @type {HTMLInputElement} */
-      (document.getElementById('input-data-upload'));
-
-  inputUpload.click();
-
-  await new Promise(
-      (resolve) => inputUpload.addEventListener(
-          'change',
-          resolve,
-          {once: true},
-      ),
-  );
-
-  if (!inputUpload.files) return;
-
-  const fileUpload = inputUpload.files.item(0);
-  if (!fileUpload) return;
-
-  const records = await getStreamingData(fileUpload);
-  console.log(records);
-
-  const collatedRecords = collateStreamingData(records);
-  console.log(collatedRecords);
-});
-
-/**
- * @typedef {object} MoveChange
- * @property {'move'} type
- * @property {number} from
- * @property {number} to
- */
-
-/**
- * @typedef {object} ReplaceChange
- * @property {'replace'} type
- * @property {string} oldItem
- * @property {string} newItem
- */
-
-/**
- * @typedef {MoveChange | ReplaceChange} Change
- */
-
-/**
- * Get the most recent ranking of top songs.
- *
- * @returns {string[]} most recent ordering of top songs (dummy data)
- */
-function getLatestSongRanking() {
-  return [
-    'song3',
-    'song2',
-    'song5',
-    'song7',
-    'song1',
-    'song10',
-    'song11',
-    'song12',
-    'song13',
-    'song14',
-    'song15',
-    'song16',
-    'song17',
-    'song18',
-    'song19',
-    'song20',
-    'song21',
-    'song22',
-    'song23',
-    'song24',
-    'song25',
-    'song26',
-    'song27',
-    'song28',
-    'song29',
-  ];
-}
-
-/**
- * Get the historical changes that have been made to the ranking of songs.
- *
- * @returns {Change[][]} An array of arrays where each sub-array is a list of
- * changes to the top songs list that happened on a given day
- */
-function getChangeHistory() {
-  return [
-    [{type: 'move', from: 2, to: 4}],
-    [{type: 'replace', oldItem: 'song4', newItem: 'song7'}],
-    [{type: 'move', from: 3, to: 4}],
-    [{type: 'move', from: 5, to: 4}],
-    [{type: 'move', from: 3, to: 4}],
-    [],
-    [],
-    [{type: 'replace', oldItem: 'song30', newItem: 'song23'}],
-    [{type: 'move', from: 6, to: 5}],
-    [{type: 'move', from: 7, to: 6}],
-    [{type: 'move', from: 9, to: 10}],
-    [{type: 'move', from: 20, to: 21}],
-    [],
-    [{type: 'move', from: 20, to: 21}],
-    [{type: 'move', from: 12, to: 13}],
-    [],
-    [],
-    [],
-  ];
-}
-
-const MS_PER_DAY = 24 * 60 * 60 * 100;
 
 /**
  * Populates `chart` with historical track data derived from `latest` and
  * `changes`.
  *
- * @param {string[]} latest The most recent ranking of tracks.
- * @param {Change[][]} changes The list of historical changes to the track
- * ranking.
+ * @param {CollatedGDPRRecords} collatedRecords Information about the amount of
+ * time each track has been listened to on each day.
  * @param {c3.ChartAPI} chart The chart to populate.
  */
-function populateChart(latest, changes, chart) {
-// number of days we have backtracked
-  let generation = 1;
-  const xAxis = [new Date()];
+async function populateChart(collatedRecords, chart) {
+  const ROLLING_WINDOW_SIZE = 28;
 
-  // current position of each song (list of songs in order)
-  const current = latest;
-  // current position of each song (map from song id to current index)
-  const indices = new Map(current.map((id, idx) => [id, idx]));
-  // historical position of each song (map from song id to array of historical
-  // indices)
-  const indicesHistory = new Map(current.map((id, idx) => [id, [idx]]));
+  // calculate song rankings based on 28-day rolling sums
+  const rankingHistory = new Map();
+  const rankingDates = [];
+  const rollingSums = new Map();
 
-  // for each changeset (set of changes that occurred on a day) apply the
-  // opposite change so that we can reconstruct the ordering of the top songs
-  // list on that day
-  for (const changeSet of changes.reverse()) {
-    for (const change of changeSet.reverse()) {
-      switch (change.type) {
-        case 'move': {
-          const {from, to} = change;
+  for (let i = 0; i < collatedRecords.intervals.length; i++) {
+    rankingDates.push(collatedRecords.intervals[i].start);
 
-          const trackFrom = current[from];
-          const trackTo = current[to];
-          current[from] = trackTo;
-          current[to] = trackFrom;
+    const entering = collatedRecords.intervals[i].totals;
+    const exiting = i >= ROLLING_WINDOW_SIZE ?
+      collatedRecords.intervals[i - ROLLING_WINDOW_SIZE].totals :
+      null;
 
-          indices.set(trackFrom, to);
-          indices.set(trackTo, from);
-          break;
-        }
-        case 'replace': {
-          const {oldItem, newItem} = change;
+    for (const [artist, tracks] of entering) {
+      for (const [track, added] of tracks) {
+        const key = `${track} - ${artist}`;
+        const current = rollingSums.get(key) || 0;
+        rollingSums.set(key, current + added);
+      }
+    }
 
-          const idx = indices.get(newItem);
-          current[idx] = oldItem;
-
-          indices.set(newItem, null);
-          indices.set(oldItem, idx);
-          break;
+    if (exiting) {
+      for (const [artist, tracks] of exiting) {
+        for (const [track, removed] of tracks) {
+          const key = `${track} - ${artist}`;
+          const current = rollingSums.get(key) || 0;
+          rollingSums.set(key, current - removed);
         }
       }
     }
 
-    // take the current ordering of the songs and store it in the historical
-    // index list
-    for (const [id, index] of indices.entries()) {
-      let indexHistory;
-      if (indicesHistory.has(id)) {
-        indexHistory = indicesHistory.get(id);
-        indexHistory.push(index);
-      } else {
-      // this song wasn't in the record, backfill all of the indices
-        indexHistory = [];
+    // turn into array of entries
+    [...rollingSums]
+        // sort by play time in the last 28 days
+        .sort((entryA, entryB) => {
+          if (entryA[1] > entryB[1]) return -1;
+          if (entryA[1] < entryB[1]) return 1;
+          return 0;
+        })
+        // select top 50
+        .slice(0, 15)
+        // add indexes to track history
+        .forEach((entry, index) => {
+          const [key] = entry;
 
-        for (let i = 0; i < generation; i++) {
-          indexHistory.push(null);
-        }
+          let trackHistory = rankingHistory.get(key);
 
-        indexHistory.push(index);
-        indicesHistory.set(id, indexHistory);
-      }
-    }
+          if (!trackHistory) {
+            trackHistory = [];
+            rankingHistory.set(key, trackHistory);
+          }
 
-    xAxis.push(new Date(+xAxis[xAxis.length - 1] - MS_PER_DAY));
-    generation++;
+          while (trackHistory.length < i) {
+            // if the track was missing from the chart, add null values
+            trackHistory.push(null);
+          }
+
+          trackHistory.push(index);
+        });
   }
 
   // format of a chart series in c3 is ['name of series', point1, point2, ...]
-  const chartData =
-    /** @type {Array<[string, ...number[]]>} */
-    (Array
-        .from(indicesHistory.entries())
-        .map(([id, history]) => [id, ...history]));
+  const chartData = Array
+      .from(rankingHistory.entries())
+      .map(([id, history]) => [id, ...history]);
 
-  chart.load({
-    columns: [['date', ...xAxis], ...chartData],
-  });
+  // load data in segments to avoid hanging the browser
+  for (let i = 0; i < chartData.length; i++) {
+    const chartDataSegment = chartData.slice(i, i + 15);
+    await new Promise((resolve) => chart.load({
+      columns: [
+        ['date', ...rankingDates],
+        ...chartDataSegment,
+      ],
+      done: resolve,
+    }));
+    await sleep(400);
+  }
 }
 
 
@@ -266,6 +158,34 @@ const chart = c3.generate({
   },
 });
 
-const rankingLatest = getLatestSongRanking();
-const rankingHistory = getChangeHistory();
-populateChart(rankingLatest, rankingHistory, chart);
+
+const btnUpload =
+  /** @type {HTMLButtonElement} */
+  (document.getElementById('btn-data-upload'));
+
+btnUpload.addEventListener('click', async () => {
+  const inputUpload =
+      /** @type {HTMLInputElement} */
+      (document.getElementById('input-data-upload'));
+
+  inputUpload.click();
+
+  await new Promise(
+      (resolve) => inputUpload.addEventListener(
+          'change',
+          resolve,
+          {once: true},
+      ),
+  );
+
+  if (!inputUpload.files) return;
+
+  const fileUpload = inputUpload.files.item(0);
+  if (!fileUpload) return;
+
+  const records = await getStreamingData(fileUpload);
+
+  const collatedRecords = collateStreamingData(records);
+
+  populateChart(collatedRecords, chart);
+});
