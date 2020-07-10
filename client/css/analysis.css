@@ -1,0 +1,43 @@
+:root {
+    /* the higher the number, the less filled */
+  --percent: 8;
+}
+
+.item {
+    display: block;
+}
+
+.item h2 {
+    text-align:center;
+    width: 100%;
+}
+
+svg {
+   -webkit-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+    display: block; /* svg is auto display-inline*/
+    margin: auto;
+    overflow: visible;
+}
+
+.circle_animation {
+  stroke-dasharray: 440; /* circumference of the circle */
+  stroke-dashoffset: 440;
+}
+
+.donut .circle_animation {
+    -webkit-animation: donut 1s ease-out forwards;
+    animation: donut 1s ease-out forwards;
+}
+
+@-webkit-keyframes donut {
+  to {
+    stroke-dashoffset: var(--percent); /* half filled is 220*/
+  }
+}
+
+@keyframes donut {
+  to {
+    stroke-dashoffset: var(--percent);
+  }
+}
