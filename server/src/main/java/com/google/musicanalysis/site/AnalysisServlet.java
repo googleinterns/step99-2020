@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.google.musicanalysis.api.naturallanguage.*;
 import com.google.musicanalysis.api.perspective.*;
 import com.google.musicanalysis.api.youtube.*;
+import com.google.musicanalysis.types.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,16 +35,17 @@ public class AnalysisServlet extends HttpServlet {
 
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     MagnitudeAndScore nlpObject = analyzeWithNLP(cumulativeComments);
+
+    String json = convertToJsonUsingGson(new Tuple(perspectiveMap, nlpObject));
+    res.setContentType("application/json;");
+    res.getWriter().println(json);
   }
 
-  private class MagnitudeAndScore {
-    Double magnitude;
-    Double score;
-
-    public MagnitudeAndScore(Double magnitude, Double score) {
-      this.magnitude = magnitude;
-      this.score = score;
-    }
+  /** @param arr the array that will be converted to json */
+  private String convertToJsonUsingGson(Tuple tuple) {
+    Gson gson = new Gson();
+    String json = gson.toJson(tuple);
+    return json;
   }
 
   /**
@@ -167,8 +169,8 @@ public class AnalysisServlet extends HttpServlet {
   }
 
   /**
-   * Condenses array of comments into one large string, formatting it along the way
-   * and separating unpunctuated sentences with a period
+   * Condenses array of comments into one large string, formatting it along the way and separating
+   * unpunctuated sentences with a period
    *
    * @param comments The array to be condensed.
    * @return A properly formatted String
@@ -181,7 +183,7 @@ public class AnalysisServlet extends HttpServlet {
       // Make sure each comment is treated as its own sentence
       // Not sure char datatype works with regex so used String
       String lastCharacter = string.substring(string.length() - 1);
-      if (!lastCharacter.matches("\.|!|\\?")) {
+      if (!lastCharacter.matches("\\.|!|\\?")) {
         string += ". ";
       } else {
         string += " ";
