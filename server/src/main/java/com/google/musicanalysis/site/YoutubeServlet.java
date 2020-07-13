@@ -128,15 +128,4 @@ public class YoutubeServlet extends HttpServlet {
         res.setContentType("application/json"); 
         res.getWriter().println(gson.toJson(genreCount));
     }
-
-    @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException {
-      // Get form input from youtube-genres.html
-      String numVideos = req.getParameter("numVideos");
-      if (numVideos.equals("") || numVideos == null) {
-          numVideos = DEFAULT_NUM_VIDS;
-      }
-
-      res.sendRedirect("/youtube-genre.html?num_videos=" + numVideos); 
-    }
 }

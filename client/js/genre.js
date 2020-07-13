@@ -22,6 +22,10 @@ function getNumVids() {
 async function displayMusicGenre() {
   const genreBlock = document.getElementById('genres');
   const numVideos = getNumVids();
+
+  // keep track of num_videos in URL w/o reload
+  history.pushState('', '', `youtube-genre.html?num_videos=${numVideos}`);
+
   const response = await fetch(`/api/youtube?num_videos=${numVideos}`);
   if (response.status == 401) {
     // no oauth login so redirect
@@ -43,4 +47,3 @@ function updateNumVids() {
 }
 
 updateNumVids();
-displayMusicGenre();
