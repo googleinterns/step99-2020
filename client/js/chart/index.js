@@ -38,16 +38,14 @@ export function createChart(el, rankingHistory, rankingDates) {
     seriesElements.push(series);
   });
 
-  let activeSeries = null;
-  let activeX = null;
-  let activeY = null;
+  const hitState = {series: null, x: null, y: null};
 
   // do some hit-testing
-  svg.addEventListener('mousemove', (ev) => {
+  const hitTest = (clientX, clientY) => {
     // convert mouse coords to SVG coords
     const mousePos = svg.createSVGPoint();
-    mousePos.x = ev.clientX;
-    mousePos.y = ev.clientY;
+    mousePos.x = clientX;
+    mousePos.y = clientY;
     const chartPos = mousePos.matrixTransform(svg.getScreenCTM().inverse());
 
     // index in history
@@ -57,7 +55,7 @@ export function createChart(el, rankingHistory, rankingDates) {
 
     // don't recalculate the hit if we're in the same place
     // as the last hit
-    if (activeX === x && activeY === y) return;
+    if (hitState.x === x && hitState.y === y) return;
 
     let hit = null;
 
@@ -76,17 +74,17 @@ export function createChart(el, rankingHistory, rankingDates) {
       hit = index;
     });
 
-    if (activeSeries && activeSeries !== hit) {
-      const seriesElement = seriesElements[activeSeries];
+    if (hitState.series && hitState.series !== hit) {
+      const seriesElement = seriesElements[hitState.series];
       seriesElement.dispatchEvent(
           new CustomEvent('series-clear', {bubbles: true}),
       );
     }
 
     if (hit === null) {
-      activeSeries = null;
-      activeX = null;
-      activeY = null;
+      hitState.series = null;
+      hitState.x = null;
+      hitState.y = null;
     } else {
       const seriesEntry = rankingHistoryEntries[hit];
       const seriesElement = seriesElements[hit];
@@ -101,23 +99,33 @@ export function createChart(el, rankingHistory, rankingDates) {
           }),
       );
 
-      activeSeries = hit;
-      activeX = x;
-      activeY = y;
+      hitState.series = hit;
+      hitState.x = x;
+      hitState.y = y;
     }
-  });
+  };
 
-  svg.addEventListener('mouseleave', () => {
-    if (activeSeries) {
-      const seriesElement = seriesElements[activeSeries];
+  const clearHitTest = () => {
+    if (hitState.series !== null) {
+      const seriesElement = seriesElements[hitState.series];
       seriesElement.dispatchEvent(
           new CustomEvent('series-clear', {bubbles: true}),
       );
     }
 
-    activeX = null;
-    activeY = null;
-  });
+    hitState.series = null;
+    hitState.x = null;
+    hitState.y = null;
+  };
+
+  svg.addEventListener(
+      'mousemove',
+      ({clientX, clientY}) => hitTest(clientX, clientY),
+  );
+
+  svg.addEventListener('mouseleave', () => clearHitTest());
+
+  el.addEventListener('scroll', () => clearHitTest());
 
   const tooltip = createTooltip(el, svg, rankingHistory, rankingDates);
 
@@ -125,7 +133,6 @@ export function createChart(el, rankingHistory, rankingDates) {
   el.append(scrollContainer);
   el.append(tooltip);
 }
-
 
 /**
  * Creates a new series (set of lines on the chart for a specific song).
