@@ -55,19 +55,6 @@ export function createChart(el, rankingHistory, rankingDates) {
 
   const hoverState = {series: null, x: null, y: null};
 
-  const clearHover = () => {
-    if (hoverState.series !== null) {
-      const seriesElement = seriesElements[hoverState.series];
-      seriesElement.dispatchEvent(
-          new CustomEvent('series-clear', {bubbles: true}),
-      );
-    }
-
-    hoverState.series = null;
-    hoverState.x = null;
-    hoverState.y = null;
-  };
-
   svg.addEventListener('mousemove', ({clientX, clientY}) => {
     const {hit, x, y} = hitTest(svg, rows, clientX, clientY);
 
@@ -106,6 +93,19 @@ export function createChart(el, rankingHistory, rankingDates) {
     }
   });
 
+  const clearHover = () => {
+    if (hoverState.series !== null) {
+      const seriesElement = seriesElements[hoverState.series];
+      seriesElement.dispatchEvent(
+          new CustomEvent('series-clear', {bubbles: true}),
+      );
+    }
+
+    hoverState.series = null;
+    hoverState.x = null;
+    hoverState.y = null;
+  };
+
   svg.addEventListener('mouseleave', () => clearHover());
   scrollContainer.addEventListener('scroll', () => clearHover());
 
@@ -117,10 +117,14 @@ export function createChart(el, rankingHistory, rankingDates) {
 }
 
 /**
- * @param svg
- * @param rows
- * @param clientX
- * @param clientY
+ * Tests whether the mouse is currently near a point on the chart.
+ *
+ * @param {SVGSVGElement} svg The SVG element for the chart.
+ * @param {number[][]} rows The ranks of each series at each date.
+ * @param {number} clientX The position of the mouse.
+ * @param {number} clientY The position of the mouse.
+ * @returns {{hit: number | null, x: number | null, y:number | null}} A hit
+ * result.
  */
 function hitTest(svg, rows, clientX, clientY) {
   // convert mouse coords to SVG coords
@@ -272,7 +276,7 @@ function createDefs() {
  * @param {SVGSVGElement} svg The SVG element for the chart.
  * @param {Map<string, number[]>} rankingHistory The ranking history for each
  * track.
- * @param rankingDates
+ * @param {Date[]} rankingDates The date of each history entry.
  * @returns {HTMLDivElement} An element for the tooltip.
  */
 function createTooltip(el, svg, rankingHistory, rankingDates) {
