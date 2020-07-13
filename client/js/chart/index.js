@@ -17,7 +17,10 @@ export function createChart(el, rankingHistory, rankingDates) {
 
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'chart');
-  svg.setAttribute('viewBox', `0 0 ${rankingDates.length * RUN_SCALE_X} ${15 * RUN_SCALE_Y}`);
+  svg.setAttribute(
+      'viewBox',
+      `0 0 ${rankingDates.length * RUN_SCALE_X} ${15 * RUN_SCALE_Y}`,
+  );
   svg.append(createDefs());
 
   scrollContainer.append(svg);
@@ -30,49 +33,47 @@ export function createChart(el, rankingHistory, rankingDates) {
   const seriesElements = [];
   const rankingHistoryEntries = [...rankingHistory];
 
+  // to organize data into rows to speed up hit-testing
+  const rows = [];
+
+  for (let row = 0; row < rankingDates.length; row++) {
+    rows.push([]);
+  }
+
   rankingHistoryEntries.forEach(([, history], index) => {
     const hue = index * 15 % 360;
     const color = `hsl(${hue},50%,50%)`;
     const series = createSeries(color, history);
+
+    for (let row = 0; row < rankingDates.length; row++) {
+      rows[row].push(history[row] || null);
+    }
+
     seriesContainer.append(series);
     seriesElements.push(series);
   });
 
   const hitState = {series: null, x: null, y: null};
 
-  // do some hit-testing
-  const hitTest = (clientX, clientY) => {
-    // convert mouse coords to SVG coords
-    const mousePos = svg.createSVGPoint();
-    mousePos.x = clientX;
-    mousePos.y = clientY;
-    const chartPos = mousePos.matrixTransform(svg.getScreenCTM().inverse());
+  const clearHover = () => {
+    if (hitState.series !== null) {
+      const seriesElement = seriesElements[hitState.series];
+      seriesElement.dispatchEvent(
+          new CustomEvent('series-clear', {bubbles: true}),
+      );
+    }
 
-    // index in history
-    const x = Math.round(chartPos.x / RUN_SCALE_X);
-    // value in history
-    const y = Math.round(chartPos.y / RUN_SCALE_Y);
+    hitState.series = null;
+    hitState.x = null;
+    hitState.y = null;
+  };
+
+  svg.addEventListener('mousemove', ({clientX, clientY}) => {
+    const {hit, x, y} = hitTest(svg, rows, clientX, clientY);
 
     // don't recalculate the hit if we're in the same place
     // as the last hit
     if (hitState.x === x && hitState.y === y) return;
-
-    let hit = null;
-
-    rankingHistoryEntries.forEach(([, history], index) => {
-      // include only series where there is a data point for this x value
-      if (x >= history.length || history[x] === null) return;
-
-      // get distance from mouse y to series y for each series
-      const dist = history[x] - y;
-
-      // filter items where distance is too great; there should only be one
-      // remaining (impossible to be less than 0.4 away from both 1 and 2, for
-      // example)
-      if (Math.abs(dist) > 0.4) return;
-
-      hit = index;
-    });
 
     if (hitState.series && hitState.series !== hit) {
       const seriesElement = seriesElements[hitState.series];
@@ -81,7 +82,7 @@ export function createChart(el, rankingHistory, rankingDates) {
       );
     }
 
-    if (hit === null) {
+    if (hit < 0) {
       hitState.series = null;
       hitState.x = null;
       hitState.y = null;
@@ -103,35 +104,41 @@ export function createChart(el, rankingHistory, rankingDates) {
       hitState.x = x;
       hitState.y = y;
     }
-  };
+  });
 
-  const clearHitTest = () => {
-    if (hitState.series !== null) {
-      const seriesElement = seriesElements[hitState.series];
-      seriesElement.dispatchEvent(
-          new CustomEvent('series-clear', {bubbles: true}),
-      );
-    }
-
-    hitState.series = null;
-    hitState.x = null;
-    hitState.y = null;
-  };
-
-  svg.addEventListener(
-      'mousemove',
-      ({clientX, clientY}) => hitTest(clientX, clientY),
-  );
-
-  svg.addEventListener('mouseleave', () => clearHitTest());
-
-  el.addEventListener('scroll', () => clearHitTest());
+  svg.addEventListener('mouseleave', () => clearHover());
+  scrollContainer.addEventListener('scroll', () => clearHover());
 
   const tooltip = createTooltip(el, svg, rankingHistory, rankingDates);
 
   el.innerHTML = '';
   el.append(scrollContainer);
   el.append(tooltip);
+}
+
+/**
+ * @param svg
+ * @param rows
+ * @param clientX
+ * @param clientY
+ */
+function hitTest(svg, rows, clientX, clientY) {
+  // convert mouse coords to SVG coords
+  const mousePos = svg.createSVGPoint();
+  mousePos.x = clientX;
+  mousePos.y = clientY;
+  const chartPos = mousePos.matrixTransform(svg.getScreenCTM().inverse());
+
+  // index in history
+  const x = Math.round(chartPos.x / RUN_SCALE_X);
+  // value in history
+  const y = Math.round(chartPos.y / RUN_SCALE_Y);
+
+  const hit = rows[x].findIndex((rank) => rank === y);
+
+  if (hit < 0) return {hit: null, x: null, y: null};
+
+  return {hit, x, y};
 }
 
 /**
@@ -305,7 +312,7 @@ function createTooltip(el, svg, rankingHistory, rankingDates) {
     tooltip.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
 
     title.innerText = key;
-    rank.innerText = y + 1;
+    rank.innerText = y;
     date.innerText = format.format(rankingDates[x]);
   });
 
