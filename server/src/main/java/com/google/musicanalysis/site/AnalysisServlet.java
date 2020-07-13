@@ -30,11 +30,10 @@ public class AnalysisServlet extends HttpServlet {
 
     // Convert response into a large string to be passed through for analysis
     ArrayList<String> commentArray = retrieveComments(commentsJson);
-    String bigCommentString = convertToString(commentArray);
+    String cumulativeComments = convertToString(commentArray);
 
-    // Analyze with the Perspective and Natural Language APIs
-    HashMap<String, String> perspectiveMap = analyzeWithPerspective(bigCommentString);
-    MagnitudeAndScore nlpObject = analyzeWithNLP(bigCommentString);
+    HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
+    MagnitudeAndScore nlpObject = analyzeWithNLP(cumulativeComments);
   }
 
   private class MagnitudeAndScore {
@@ -147,13 +146,11 @@ public class AnalysisServlet extends HttpServlet {
   private ArrayList<String> retrieveComments(String response) {
     ArrayList<String> commentList = new ArrayList<>();
 
-    // Traversing to the items array
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
     JsonArray itemsArray = jObject.getAsJsonArray("items");
 
     for (JsonElement el : itemsArray) {
-      // Traversing each item in the array
       String topComment =
           el.getAsJsonObject()
               .getAsJsonObject("snippet")
@@ -184,7 +181,7 @@ public class AnalysisServlet extends HttpServlet {
       // Make sure each comment is treated as its own sentence
       // Not sure char datatype works with regex so used String
       String lastCharacter = string.substring(string.length() - 1);
-      if (!lastCharacter.matches(".|!|\\?")) {
+      if (!lastCharacter.matches("\.|!|\\?")) {
         string += ". ";
       } else {
         string += " ";
