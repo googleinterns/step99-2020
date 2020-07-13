@@ -68,12 +68,12 @@ public class PerspectiveRequest {
     JsonObject innerTextObject = new JsonObject();
     innerTextObject.addProperty("text", textToAnalyze);
 
-    JsonObject innerAttributeObject = new JsonObject();
+    var innerAttributeObject = new JsonObject();
     for (String el : wantedArgs) {
       innerAttributeObject.add(el, new JsonObject());
     }
 
-    JsonObject jsonObject = new JsonObject();
+    var jsonObject = new JsonObject();
     jsonObject.add("comment", innerTextObject);
     jsonObject.add("requestedAttributes", innerAttributeObject);
 
