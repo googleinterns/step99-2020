@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
+/** Handles sending requests and receving responses from Perspective API. */
 public class PerspectiveRequest {
 
   private String text;
