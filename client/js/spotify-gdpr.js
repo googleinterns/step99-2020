@@ -114,8 +114,8 @@ function populateChart(latest, changes, chart) {
   // for each changeset (set of changes that occurred on a day) apply the
   // opposite change so that we can reconstruct the ordering of the top songs
   // list on that day
-  for (const changeSet of changes.reverse()) {
-    for (const change of changeSet.reverse()) {
+  for (const changeSet of changes.slice().reverse()) {
+    for (const change of changeSet.slice().reverse()) {
       switch (change.type) {
         case 'move': {
           const {from, to} = change;
