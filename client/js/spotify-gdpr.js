@@ -7,7 +7,7 @@
 /** @typedef {import('./analysis/gdpr.js').CollatedGDPRRecords} CollatedGDPRRecords */
 
 import {collateStreamingData, getStreamingData} from './analysis/gdpr.js';
-import { createChart } from './chart/index.js';
+import {createChart} from './chart/index.js';
 
 const {google, zip} = window;
 
@@ -86,7 +86,11 @@ async function populateChart(collatedRecords) {
         });
   }
 
-  createChart(document.getElementById('chart'), rankingHistory, rankingDates);
+  createChart(
+      document.getElementById('chart-container'),
+      rankingHistory,
+      rankingDates,
+  );
 }
 
 const btnUpload =

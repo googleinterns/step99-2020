@@ -1,5 +1,8 @@
 import {SVG_NS} from '../util.js';
 
+const RUN_SCALE_X = 30;
+const RUN_SCALE_Y = 30;
+
 /**
  * Creates an SVG chart inside of `el` with the given data.
  *
@@ -9,9 +12,15 @@ import {SVG_NS} from '../util.js';
  * @param {Date[]} rankingDates The date of each history entry.
  */
 export function createChart(el, rankingHistory, rankingDates) {
+  const scrollContainer = document.createElement('div');
+  scrollContainer.classList.add('chart-scroll-container');
+
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'chart');
+  svg.setAttribute('viewBox', `0 0 ${rankingDates.length * RUN_SCALE_X} ${15 * RUN_SCALE_Y}`);
   svg.append(createDefs());
+
+  scrollContainer.append(svg);
 
   const seriesContainer = document.createElementNS(SVG_NS, 'g');
   seriesContainer.setAttribute('class', 'series-container');
@@ -24,7 +33,7 @@ export function createChart(el, rankingHistory, rankingDates) {
   rankingHistoryEntries.forEach(([, history], index) => {
     const hue = index * 15 % 360;
     const color = `hsl(${hue},50%,50%)`;
-    const series = createSeries(svg, color, history);
+    const series = createSeries(color, history);
     seriesContainer.append(series);
     seriesElements.push(series);
   });
@@ -35,14 +44,16 @@ export function createChart(el, rankingHistory, rankingDates) {
 
   // do some hit-testing
   svg.addEventListener('mousemove', (ev) => {
-    const svgBounds = svg.getBoundingClientRect();
-    const chartX = ev.clientX - svgBounds.x;
-    const chartY = ev.clientY - svgBounds.y;
+    // convert mouse coords to SVG coords
+    const mousePos = svg.createSVGPoint();
+    mousePos.x = ev.clientX;
+    mousePos.y = ev.clientY;
+    const chartPos = mousePos.matrixTransform(svg.getScreenCTM().inverse());
 
     // index in history
-    const x = Math.round(chartX / RUN_SCALE_X);
+    const x = Math.round(chartPos.x / RUN_SCALE_X);
     // value in history
-    const y = Math.round(chartY / RUN_SCALE_Y);
+    const y = Math.round(chartPos.y / RUN_SCALE_Y);
 
     // don't recalculate the hit if we're in the same place
     // as the last hit
@@ -67,7 +78,9 @@ export function createChart(el, rankingHistory, rankingDates) {
 
     if (activeSeries && activeSeries !== hit) {
       const seriesElement = seriesElements[activeSeries];
-      seriesElement.dispatchEvent(new CustomEvent('series-clear'));
+      seriesElement.dispatchEvent(
+          new CustomEvent('series-clear', {bubbles: true}),
+      );
     }
 
     if (hit === null) {
@@ -79,7 +92,12 @@ export function createChart(el, rankingHistory, rankingDates) {
       const seriesElement = seriesElements[hit];
       seriesElement.dispatchEvent(
           new CustomEvent('series-hit', {
-            detail: {x, y, key: seriesEntry[0]},
+            detail: {
+              x,
+              y,
+              key: seriesEntry[0],
+            },
+            bubbles: true,
           }),
       );
 
@@ -92,29 +110,31 @@ export function createChart(el, rankingHistory, rankingDates) {
   svg.addEventListener('mouseleave', () => {
     if (activeSeries) {
       const seriesElement = seriesElements[activeSeries];
-      seriesElement.dispatchEvent(new CustomEvent('series-clear'));
+      seriesElement.dispatchEvent(
+          new CustomEvent('series-clear', {bubbles: true}),
+      );
     }
 
     activeX = null;
     activeY = null;
   });
 
-  el.append(svg);
+  const tooltip = createTooltip(svg, rankingHistory, rankingDates);
+
+  el.append(scrollContainer);
+  el.append(tooltip);
 }
 
-const RUN_SCALE_X = 30;
-const RUN_SCALE_Y = 30;
 
 /**
  * Creates a new series (set of lines on the chart for a specific song).
  *
- * @param {SVGSVGElement} svg The root SVG element of the chart.
  * @param {string} color The color of this series.
  * @param {number[]} history The historical positions of this track on the
  * leaderboard.
  * @returns {SVGGElement} A group containing the series.
  */
-function createSeries(svg, color, history) {
+function createSeries(color, history) {
   const series = document.createElementNS(SVG_NS, 'g');
   series.setAttribute('class', 'series');
   series.style.setProperty('--run-color', color);
@@ -218,4 +238,45 @@ function createDefs() {
   defs.append(highlightFilter);
 
   return defs;
+}
+
+/**
+ * Creates a tooltip that responds to the user pointing at things on the chart.
+ *
+ * @param {SVGSVGElement} svg The SVG element for the chart.
+ * @param {Map<string, number[]>} rankingHistory The ranking history for each
+ * track.
+ * @param rankingDates
+ * @returns {HTMLDivElement} An element for the tooltip.
+ */
+function createTooltip(svg, rankingHistory, rankingDates) {
+  const tooltip = document.createElement('div');
+  tooltip.classList.add('chart-tooltip');
+  const content = document.createElement('span');
+  tooltip.append(content);
+
+  svg.addEventListener('series-hit', (ev) => {
+    const {key, x, y} = ev.detail;
+    const svgBounds = svg.getBoundingClientRect();
+
+    // convert SVG coords to HTML coords
+    let pos = svg.createSVGPoint();
+    pos.x = x * RUN_SCALE_X;
+    pos.y = y * RUN_SCALE_Y;
+    pos = pos.matrixTransform(svg.getScreenCTM());
+    pos.x -= svgBounds.x;
+    pos.y -= svgBounds.y;
+
+    tooltip.classList.add('chart-tooltip-active');
+    tooltip.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+
+    const date = rankingDates[x];
+    content.innerText = key + ' ' + date + ' ' + y;
+  });
+
+  svg.addEventListener('series-clear', (ev) => {
+    tooltip.classList.remove('chart-tooltip-active');
+  });
+
+  return tooltip;
 }
