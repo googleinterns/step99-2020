@@ -74,15 +74,15 @@ public class YoutubeServlet extends HttpServlet {
         JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
         JsonArray videos = jObject.getAsJsonArray("items");
 
-        // iterates through each liked video
         for (int i = 0; i < videos.size(); i++) {
-            // extracts array of topicCategories in video
             JsonObject video = videos.get(i).getAsJsonObject();
             JsonObject topicDetails = video.getAsJsonObject("topicDetails");
+
             if (topicDetails == null) {
-                // skip this video if it doesn't have topic details
+                // Video has no topics so it can't have a music topic
                 continue;
             }
+
             JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
 
             for (int j = 0; j < topicCategories.size(); j++) {
@@ -92,12 +92,10 @@ public class YoutubeServlet extends HttpServlet {
                 topic = topic.replaceAll("\"", "");
                 topic = topic.replaceAll("_", " ");
 
-                // skip if topic is not music
                 if (!isMusic(topic)) {
                     break;
                 }
 
-                // update genreCount hashmap
                 int count = genreCount.containsKey(topic) ? genreCount.get(topic) : 0;
                 genreCount.put(topic, count + 1);
             }
@@ -108,14 +106,15 @@ public class YoutubeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException {
-        // retrieve Youtube API key and access token 
         String API_KEY = Secrets.getSecretString("YOUTUBE_API_KEY");
         HttpSession session = req.getSession();
+
         var accessToken = session.getAttribute("oauth-access-token-youtube");
         if (accessToken == null) {
             res.setStatus(401);
             return;
         }
+
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString());
         var genreCount = new HashMap<String, Integer>();
         updateMusicCount(youtubeResBody, genreCount);
