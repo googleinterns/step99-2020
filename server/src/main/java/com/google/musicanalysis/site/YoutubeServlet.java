@@ -73,12 +73,14 @@ public class YoutubeServlet extends HttpServlet {
         JsonArray videos = jObject.getAsJsonArray("items");
 
         for (int i = 0; i < videos.size(); i++) {
-            // extracts array of topicCategories in video
             JsonObject video = videos.get(i).getAsJsonObject();
             JsonObject topicDetails = video.getAsJsonObject("topicDetails");
+
             if (topicDetails == null) {
+                // Video has no topics so it can't have a music topic
                 continue;
             }
+
             JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
 
             for (int j = 0; j < topicCategories.size(); j++) {
@@ -102,14 +104,15 @@ public class YoutubeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException {
-        // retrieve Youtube API key and access token 
         String API_KEY = Secrets.getSecretString("YOUTUBE_API_KEY");
         HttpSession session = req.getSession();
+
         var accessToken = session.getAttribute("oauth-access-token-youtube");
         if (accessToken == null) {
             res.setStatus(401);
             return;
         }
+
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString());
         var genreCount = new HashMap<String, Integer>();
         updateMusicCount(youtubeResBody, genreCount);
