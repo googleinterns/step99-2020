@@ -53,19 +53,19 @@ export function createChart(el, rankingHistory, rankingDates) {
     seriesElements.push(series);
   });
 
-  const hitState = {series: null, x: null, y: null};
+  const hoverState = {series: null, x: null, y: null};
 
   const clearHover = () => {
-    if (hitState.series !== null) {
-      const seriesElement = seriesElements[hitState.series];
+    if (hoverState.series !== null) {
+      const seriesElement = seriesElements[hoverState.series];
       seriesElement.dispatchEvent(
           new CustomEvent('series-clear', {bubbles: true}),
       );
     }
 
-    hitState.series = null;
-    hitState.x = null;
-    hitState.y = null;
+    hoverState.series = null;
+    hoverState.x = null;
+    hoverState.y = null;
   };
 
   svg.addEventListener('mousemove', ({clientX, clientY}) => {
@@ -73,19 +73,19 @@ export function createChart(el, rankingHistory, rankingDates) {
 
     // don't recalculate the hit if we're in the same place
     // as the last hit
-    if (hitState.x === x && hitState.y === y) return;
+    if (hoverState.x === x && hoverState.y === y) return;
 
-    if (hitState.series && hitState.series !== hit) {
-      const seriesElement = seriesElements[hitState.series];
+    if (hoverState.series && hoverState.series !== hit) {
+      const seriesElement = seriesElements[hoverState.series];
       seriesElement.dispatchEvent(
           new CustomEvent('series-clear', {bubbles: true}),
       );
     }
 
     if (hit < 0) {
-      hitState.series = null;
-      hitState.x = null;
-      hitState.y = null;
+      hoverState.series = null;
+      hoverState.x = null;
+      hoverState.y = null;
     } else {
       const seriesEntry = rankingHistoryEntries[hit];
       const seriesElement = seriesElements[hit];
@@ -100,9 +100,9 @@ export function createChart(el, rankingHistory, rankingDates) {
           }),
       );
 
-      hitState.series = hit;
-      hitState.x = x;
-      hitState.y = y;
+      hoverState.series = hit;
+      hoverState.x = x;
+      hoverState.y = y;
     }
   });
 
