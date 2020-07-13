@@ -5,6 +5,7 @@ import com.google.musicanalysis.util.URLEncodedBuilder;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.URI;
@@ -110,6 +111,17 @@ public class YoutubeServlet extends HttpServlet {
         return;
     }
 
+    /**
+     * @param youtubeResBody
+     * @return {int} number of total results from json response
+     */
+    protected int getTotalResults(String youtubeResBody) {
+        JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
+        JsonObject pageInfo = jObject.getAsJsonObject("pageInfo");
+        JsonPrimitive totalResults = pageInfo.getAsJsonPrimitive("totalResults");
+        return totalResults.getAsInt();
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException {
@@ -132,9 +144,12 @@ public class YoutubeServlet extends HttpServlet {
 
         var genreCount = new HashMap<String, Integer>();
         updateMusicCount(youtubeResBody, genreCount);
+        int totalLiked = getTotalResults(youtubeResBody);
+        genreCount.put("totalLiked", totalLiked);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
         res.getWriter().println(gson.toJson(genreCount));
+
     }
 }
