@@ -1,13 +1,16 @@
 .chart {
   width: 100%;
   height: 40rem;
+  overflow-x: auto;
+
+  background: transparent;
 }
 
 .chart .series {
   filter: url('#filter-highlight');
 }
 
-.chart .series:hover {
+.chart .series.series-active {
   filter: none;
 }
 
@@ -23,6 +26,10 @@
   stroke-width: 16px;
 
   stroke: transparent;
+}
+
+.chart .series-marker {
+  fill: var(--run-color);
 }
 
 .chart .series-run-cap {
