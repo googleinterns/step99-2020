@@ -8,13 +8,13 @@
   <body>
     <div id="content">
       <h1>What music do you listen to on youtube?</h1>
-      <form action="/api/youtube" method="POST" id="numVideoForm">
+      <div id="numVideoForm">
         <p>
           Choose number of liked videos to retrieve:
           <input type="number" name="numVideos" id="numVideos" value="10" placeholder="Number of Liked Videos"/>
-          <input type="submit" />
+          <input type="submit" onclick="displayMusicGenre()"/>
         </p>
-      </form>
+      </div>
     </div>
     <ul id="genres"></ul>
   </body>
