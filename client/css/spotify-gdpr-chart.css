@@ -6,24 +6,23 @@
 
 .chart-scroll-container {
   width: 100%;
-  height: 100%;
   overflow-x: auto;
   overflow-y: visible;
 }
 
 .chart {
-  height: 100%;
+  height: 30rem;
   overflow: visible;
 
   background: transparent;
 }
 
 .chart .series {
-  filter: url('#filter-highlight');
+  filter: url('#filter-dim');
 }
 
 .chart .series.series-active {
-  filter: none;
+  filter: url('#filter-highlight');
 }
 
 .chart .series-run {
@@ -53,13 +52,16 @@
   top: 1rem;
   left: 1rem;
 
-  max-width: 15rem;
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-template-columns: auto auto;
+  max-width: 20rem;
 
   padding: 1rem;
 
-  background: black;
+  background-color: rgba(0 0 0 / 0.75);
   border-radius: 0.5rem;
-  box-shadow: 0 0 1rem rgba(0 0 0 0.25);
+  box-shadow: 0 0 1rem rgba(0 0 0 / 0.25);
   visibility: hidden;
   opacity: 0;
 
@@ -71,4 +73,32 @@
 .chart-tooltip.chart-tooltip-active {
   visibility: visible;
   opacity: 1;
+}
+
+.chart-tooltip .chart-tooltip-date {
+  grid-row: 2;
+  grid-column: 2;
+  margin-top: 0.25rem;
+
+  opacity: 0.8;
+}
+
+.chart-tooltip .chart-tooltip-title {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.chart-tooltip .chart-tooltip-rank {
+  grid-row: 1 / 3;
+  grid-column: 1;
+  align-self: center;
+  justify-self: center;
+  margin: 0 1rem 0 0;
+
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.chart-tooltip .chart-tooltip-rank:before {
+  content: '#';
 }
