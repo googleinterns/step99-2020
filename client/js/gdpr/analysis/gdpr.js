@@ -194,7 +194,8 @@ export function collateStreamingData(data) {
 
       totalArtistTracks.set(trackName, totalTrackTime);
 
-      currentRecord = data[++index];
+      index++;
+      currentRecord = data[index];
     }
 
     intervals.push({start: new Date(intervalStart), totals: interval});
