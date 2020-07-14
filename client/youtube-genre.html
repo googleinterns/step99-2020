@@ -7,34 +7,38 @@
     <link rel="stylesheet" href="css/scroll.css">
   </head>
   <body>
-    <div id='graphic'>
-      <div id='sections'>
-        <section class="step">
-          <div class="title"> <h1>What music do you listen to on youtube? </h1></div>
-          <p>
-            Choose number of liked videos to retrieve:
-            <input type="number" name="numVideos" id="numVideos" value="10" placeholder="Number of Liked Videos"/>
-            <input type="submit" onclick="displayMusicGenre()" class="btn"/>
-          </p>
-          <div id="genres"></div>        
-        </section>
-        <section class="step">
-          Section 2
-        </section>
-        <section class="step">
-          Section 3
-        </section>
-        <section class="step">
-          Section 4
-        </section>
-        <section class="step">
-          Section 5
-        </section>
-      </div>
-      <div id='vis'>
-        add visualizations here
-      </div>
+    <div class="title hero" id="banner"> 
+      <h1>What music do you listen to on youtube? </h1>
+      <p>
+        Choose number of liked videos to retrieve:
+        <input type="number" name="numVideos" id="numVideos" value="10" placeholder="Number of Liked Videos"/>
+        <input type="submit" onclick="displayMusicGenre()" class="btn"/>
+      </p>
+      <div id="genres"></div>  
     </div>
+    <main>
+      <div id='graphic'>
+        <div id='sections'>
+          <section class="step">      
+          </section>
+          <section class="step">
+            Section 2
+          </section>
+          <section class="step">
+            Section 3
+          </section>
+          <section class="step">
+            Section 4
+          </section>
+          <section class="step">
+            Section 5
+          </section>
+        </div>
+        <div id='vis'>
+          add visualizations here
+        </div>
+      </div>
+    </main>
   </body>
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <script src="js/genre.js"></script>
