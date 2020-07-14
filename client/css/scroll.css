@@ -4,7 +4,7 @@
   z-index: 90;
 
   display: inline-block;
-  width: 250px;
+  width: 25vw;
 }
   
 .step {
@@ -17,9 +17,9 @@
   z-index: 1;
 
   display: block;
-  width: 600px;
+  width: 50vw;
 
-  height: 600px;
+  height: 60vh;
   margin-left: 0;
 
   background-color: #dddddd;
