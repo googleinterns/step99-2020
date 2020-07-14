@@ -4,10 +4,12 @@
     "google"
   ],
   "env": {
-    "browser": true
+    "browser": true,
+    "es6": true
   },
   "parserOptions": {
-    "ecmaVersion": 2020
+    "ecmaVersion": 2020,
+    "sourceType": "module"
   },
   "plugins": [
     "jsdoc"
@@ -47,7 +49,6 @@
     "jsdoc/require-returns-description": ["warn"],
     "jsdoc/valid-types": ["warn"],
     "new-cap": ["off"],
-    "indent": ["warn", 2],
     "max-len": ["warn", { "code": 80 }]
   },
   "settings": {

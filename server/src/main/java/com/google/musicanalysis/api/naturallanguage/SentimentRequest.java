@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import com.google.gson.JsonObject;
 
 /** Handles all NLP API requests. Takes text string and returns a JSON response as string. */
 public class SentimentRequest {
@@ -32,7 +33,7 @@ public class SentimentRequest {
     con.setRequestProperty("Accept", "application/json");
     con.setDoOutput(true);
 
-    String jsonString = new SentimentJsonBuilder(this.text).buildJson();
+    String jsonString = buildJson();
 
     // Send out the json string
     try (OutputStream out = con.getOutputStream()) {
@@ -52,5 +53,17 @@ public class SentimentRequest {
     in.close();
 
     return response.toString();
+  }
+
+  private String buildJson() {
+    JsonObject innerObject = new JsonObject();
+    innerObject.addProperty("type", "PLAIN_TEXT");
+    innerObject.addProperty("content", this.text);
+
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.add("document", innerObject);
+    jsonObject.addProperty("encodingType", "UTF8");
+
+    return jsonObject.toString();
   }
 }

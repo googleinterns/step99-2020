@@ -17,7 +17,7 @@ so you have to have Node.js installed in order to run them.
 Once Node.js is installed, you can take the following steps to run the linters:
   - `cd client`: Make sure you are in the `client` folder.
   - `npm install`: You only need to do this the first time. This will install the linters.
-  - Then you can run one of six commands.
+  - Then you can run one of six linting commands.
     - `npm run lint`: This will run both ESLint and Stylelint. It will only report errors, it will
       not auto-fix anything.
     - `npm run lint:script`: This will run ESLint only.
@@ -28,6 +28,8 @@ Once Node.js is installed, you can take the following steps to run the linters:
       auto-fix any errors it encounters.
     - `npm run lint:fix:style`: This will run ESLint only. It will report errors and attempt to
       auto-fix any errors it encounters.
+  - You can also run a dev server for local testing.
+    - `npm run serve`: Runs the development server. You have to run the actual backend at the same time. It will proxy all requests that begin with `/api` to the backend server.
 
   - **Q: How do I install Node.js on the cloud shell?**
   - A: It's already installed.
