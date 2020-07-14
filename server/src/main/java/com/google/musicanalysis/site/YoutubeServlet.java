@@ -78,9 +78,8 @@ public class YoutubeServlet extends HttpServlet {
      * @param genreCount hash map of frequency count of each music genre
      * @param numVideos maximum number of videos to retrieve
      */
-    protected void updateMusicCount(String youtubeResBody, HashMap<String, Integer> genreCount) {
-        JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
-        JsonArray videos = jObject.getAsJsonArray("items");
+    protected void updateMusicCount(JsonObject youtubeJsonObj, HashMap<String, Integer> genreCount) {
+        JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
 
         for (int i = 0; i < videos.size(); i++) {
             JsonObject video = videos.get(i).getAsJsonObject();
@@ -112,12 +111,11 @@ public class YoutubeServlet extends HttpServlet {
     }
 
     /**
-     * @param youtubeResBody
+     * @param youtubeJsonObj json obj of youtube response body 
      * @return {int} number of total results from json response
      */
-    protected int getTotalResults(String youtubeResBody) {
-        JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
-        JsonObject pageInfo = jObject.getAsJsonObject("pageInfo");
+    protected int getTotalResults(JsonObject youtubeJsonObj) {
+        JsonObject pageInfo = youtubeJsonObj.getAsJsonObject("pageInfo");
         JsonPrimitive totalResults = pageInfo.getAsJsonPrimitive("totalResults");
         return totalResults.getAsInt();
     }
@@ -141,10 +139,11 @@ public class YoutubeServlet extends HttpServlet {
         }
 
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString(), numVideos);
+        JsonObject youtubeJsonObj = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
         var genreCount = new HashMap<String, Integer>();
-        updateMusicCount(youtubeResBody, genreCount);
-        int totalLiked = getTotalResults(youtubeResBody);
+        updateMusicCount(youtubeJsonObj, genreCount);
+        int totalLiked = getTotalResults(youtubeJsonObj);
         genreCount.put("totalLiked", totalLiked);
 
         Gson gson = new Gson();
