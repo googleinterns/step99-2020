@@ -10,6 +10,7 @@ const DEFAULT_NUM_VIDS = 10;
 /**
  * extracts num vids from input, otherwise returns default
  * helper fn for displayMusicGenre()
+ *
  * @returns {number} num videos user wants to retrieve
  */
 function getNumVids() {
