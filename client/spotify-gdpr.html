@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spotify GDPR Analysis</title>
+    <base target="_blank">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/spotify-gdpr.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/c3@0.7.18/c3.min.css" integrity="sha256-6keM3+sDUFwuiB+tXRq/HV8tqQYlvarrsoWkx53dSgY=" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/spotify-gdpr-chart.css">
+  </head>
+  <body>
+    <main>
+      <h1 id="title">
+        <span class="highlight-primary-1">Spotify GDPR Analysis</span>
+      </h1>
+      <span class="subtitle">See how you've changed</span>
+
+      <h2 class="header">Get started</h2>
+      <div id="get-started">
+        <button id="btn-data-upload" class="btn btn-big" type="button">
+          Upload your data
+        </button>
+
+        <input id="input-data-upload" type="file" />
+
+        <button id="btn-get-started" class="btn btn-big" type="button">
+          Sign in with Spotify
+        </button>
+      </div>
+
+      <div id="chart">
+      </div>
+
+      <h2 class="header">How it works</h2>
+      <p>
+        The GDPR is a European law that requires tech companies to let you download the data that
+        they have collected about you. It turns out that Spotify has a record of every time that you
+        stream any song, and that information can be turned into colourful graphs and charts!
+      </p>
+      <p>
+        This service will take your GDPR data and give you a detailed look at your own listening
+        history and how your listening patterns have changed over time.
+      </p>
+
+      <h2 class="header">Privacy</h2>
+      <p>
+        Unlike with our <a href="/spotify-analysis.html">music analysis</a> service, we do not store
+        any information about you when you submit your GDPR data. All of the analysis is performed
+        in your browser, and the only requests sent to the server are to match song names to
+        artists, genres, and albums.
+      </p>
+      <p>
+        You will need to log into Spotify with your account because we can't get that information
+        from them unless you log in. The login prompt will say that we are requesting access to your
+        subscription details. We <a
+        href="https://developer.spotify.com/documentation/general/guides/scopes/#user-read-private">need
+        this permission</a> in order to search for songs.
+      </p>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@5.16.0/dist/d3.min.js" integrity="sha256-Xb6SSzhH3wEPC4Vy3W70Lqh9Y3Du/3KxPqI2JHQSpTw=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/c3@0.7.18/c3.min.js" integrity="sha256-Cm4WCqNXIU+tJa5x6RWhn6MYIjZC9I9RKkZ2HfbFi7M=" crossorigin="anonymous"></script>
+    <script src="js/zip/zip.js"></script>
+    <script src="js/spotify-gdpr.js" type="module"></script>
+  </body>
+</html>
