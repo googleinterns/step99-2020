@@ -25,9 +25,10 @@ export function createChart(el, rankingHistory, rankingDates) {
 
   scrollContainer.append(svg);
 
+  const grid = createGrid(rankingDates);
+  svg.append(grid);
+
   const seriesContainer = document.createElementNS(SVG_NS, 'g');
-  seriesContainer.setAttribute('class', 'series-container');
-  svg.append(seriesContainer);
 
   /** @type {SVGGElement[]} */
   const seriesElements = [];
@@ -53,6 +54,9 @@ export function createChart(el, rankingHistory, rankingDates) {
     seriesElements.push(series);
   });
 
+  seriesContainer.setAttribute('class', 'series-container');
+  svg.append(seriesContainer);
+
   const hoverState = {series: null, x: null, y: null};
 
   svg.addEventListener('mousemove', ({clientX, clientY}) => {
@@ -65,7 +69,7 @@ export function createChart(el, rankingHistory, rankingDates) {
     // index in history
     const x = Math.round(chartPos.x / RUN_SCALE_X);
     // value in history
-    const y = Math.round(chartPos.y / RUN_SCALE_Y);
+    const y = Math.round(chartPos.y / RUN_SCALE_Y + 0.5);
 
     // don't recalculate the hit if we're in the same place
     // as the last hit
@@ -163,7 +167,7 @@ function createSeries(color, history) {
     series.append(marker);
     series.classList.add('series-active');
     marker.setAttribute('cx', x * RUN_SCALE_X + 'px');
-    marker.setAttribute('cy', y * RUN_SCALE_Y + 'px');
+    marker.setAttribute('cy', (y - 0.5) * RUN_SCALE_Y + 'px');
   });
 
   series.addEventListener('series-clear', () => {
@@ -186,7 +190,9 @@ function createSeries(color, history) {
 function createRun(history, start, end) {
   const points = history
       .slice(start, end)
-      .map((val, idx) => `${(idx + start) * RUN_SCALE_X},${val * RUN_SCALE_Y}`)
+      .map((val, idx) => 
+        (idx + start) * RUN_SCALE_X + ',' + 
+        (val - 0.5) * RUN_SCALE_Y)
       .join(' ');
 
   // line that is displayed
@@ -208,10 +214,10 @@ function createRun(history, start, end) {
 
   startCap.setAttribute('r', '5');
   startCap.setAttribute('cx', start * RUN_SCALE_X + 'px');
-  startCap.setAttribute('cy', history[start] * RUN_SCALE_Y + 'px');
+  startCap.setAttribute('cy', (history[start] - 0.5) * RUN_SCALE_Y + 'px');
   endCap.setAttribute('r', '5');
   endCap.setAttribute('cx', (end - 1) * RUN_SCALE_X + 'px');
-  endCap.setAttribute('cy', history[end - 1] * RUN_SCALE_Y + 'px');
+  endCap.setAttribute('cy', (history[end - 1] - 0.5) * RUN_SCALE_Y + 'px');
 
   return [startCap, line, touchTarget, endCap];
 }
@@ -244,6 +250,25 @@ function createDefs() {
   defs.append(highlightFilter);
 
   return defs;
+}
+
+function createGrid(dates) {
+  const grid = document.createElementNS(SVG_NS, 'g');
+  grid.classList.add('grid');
+
+  for (let i = 0; i < dates.length; i++) {
+    const verticalLine = document.createElementNS(SVG_NS, 'line');
+    verticalLine.classList.add('date-line');
+
+    verticalLine.setAttribute('x1', RUN_SCALE_X * i + 'px');
+    verticalLine.setAttribute('x2', RUN_SCALE_X * i + 'px');
+    verticalLine.setAttribute('y1', '0px');
+    verticalLine.setAttribute('y2', RUN_SCALE_Y * 15 + 'px');
+
+    grid.append(verticalLine);
+  }
+
+  return grid;
 }
 
 /**
