@@ -7,9 +7,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import com.google.gson.JsonObject;
 
+/** Handles all NLP API requests. Takes text string and returns a JSON response as string. */
 public class SentimentRequest {
 
   private String text;
