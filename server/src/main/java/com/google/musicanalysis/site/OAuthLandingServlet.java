@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /** 
- * New page after logging in via oauth. This servlet closes the page. 
+ * New page after logging in via oauth. This servlet closes the page.
  */
 @WebServlet("/api/oauth/landing")
 public class OAuthLandingServlet extends HttpServlet {
@@ -15,11 +15,10 @@ public class OAuthLandingServlet extends HttpServlet {
     res.setContentType("text/html");
 
     StringBuilder content = new StringBuilder();
-
     content.append("<html><body>Succesfully Logged in.<script type=\"text/javascript\">");
-
     content.append("window.close();");
     content.append("</script></body></html>");
+
     res.getWriter().write(content.toString());
     res.setStatus(200);
   }
