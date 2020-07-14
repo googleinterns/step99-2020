@@ -80,7 +80,7 @@ export function createChart(el, rankingHistory, rankingDates) {
       );
     }
 
-    if (hit <0) {
+    if (hit < 0) {
       hoverState.series = null;
       hoverState.x = null;
       hoverState.y = null;
