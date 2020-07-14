@@ -34,10 +34,10 @@ btnUpload.addEventListener('click', async () => {
   if (!fileUpload) return;
 
   const records = await getStreamingData(fileUpload);
-  console.log(records);
 
+  // TODO: use collated records for chart
+  // eslint-disable-next-line no-unused-vars
   const collatedRecords = collateStreamingData(records);
-  console.log(collatedRecords);
 });
 
 /**
