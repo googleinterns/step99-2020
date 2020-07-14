@@ -204,3 +204,78 @@ export function collateStreamingData(data) {
 
   return {intervals: intervals, totals};
 }
+
+/**
+ * Gets an object containing the historical ranking of each song on a given
+ * date, as well as a list of all of the dates in the range of the data.
+ *
+ * @param {CollatedGDPRRecords} data Collated GDPR records
+ * @param {number} rollingWindowSize The size of the interval for calculating
+ * rolling sums
+ * @returns {{history: Map<string, number[]>, dates: Date[]}} Historical
+ * rankings of each track.
+ */
+export function getStreamingHistory(data, rollingWindowSize = 28 * 2) {
+  // calculate song rankings based on 28-day rolling sums
+  const rankingHistory = new Map();
+  const rankingDates = [];
+  const rollingSums = new Map();
+
+  for (let i = 0; i < data.intervals.length; i++) {
+    rankingDates.push(data.intervals[i].start);
+
+    const entering = data.intervals[i].totals;
+    const exiting = i >= rollingWindowSize ?
+    data.intervals[i - rollingWindowSize].totals :
+       null;
+
+    for (const [artist, tracks] of entering) {
+      for (const [track, added] of tracks) {
+        const key = `${track} - ${artist}`;
+        const current = rollingSums.get(key) || 0;
+        rollingSums.set(key, current + added);
+      }
+    }
+
+    if (exiting) {
+      for (const [artist, tracks] of exiting) {
+        for (const [track, removed] of tracks) {
+          const key = `${track} - ${artist}`;
+          const current = rollingSums.get(key) || 0;
+          rollingSums.set(key, current - removed);
+        }
+      }
+    }
+
+    // turn into array of entries
+    [...rollingSums]
+    // sort by play time in the last 28 days
+        .sort((entryA, entryB) => {
+          if (entryA[1] > entryB[1]) return -1;
+          if (entryA[1] < entryB[1]) return 1;
+          return 0;
+        })
+        // select top 15
+        .slice(0, 15)
+        // add indexes to track history
+        .forEach((entry, index) => {
+          const [key] = entry;
+
+          let trackHistory = rankingHistory.get(key);
+
+          if (!trackHistory) {
+            trackHistory = [];
+            rankingHistory.set(key, trackHistory);
+          }
+
+          while (trackHistory.length < i) {
+            // if the track was missing from the chart, add null values
+            trackHistory.push(null);
+          }
+
+          trackHistory.push(index + 1);
+        });
+  }
+
+  return {history: rankingHistory, dates: rankingDates};
+}

@@ -1,4 +1,4 @@
-import {SVG_NS} from '../util.js';
+import {SVG_NS} from '../../util.js';
 
 const RUN_SCALE_X = 30;
 const RUN_SCALE_Y = 30;
@@ -109,7 +109,7 @@ export function createChart(el, rankingHistory, rankingDates) {
   svg.addEventListener('mouseleave', () => clearHover());
   scrollContainer.addEventListener('scroll', () => clearHover());
 
-  const tooltip = createTooltip(el, svg, rankingHistory, rankingDates);
+  const tooltip = createTooltip(el, svg, rankingDates);
 
   el.innerHTML = '';
   el.append(scrollContainer);
@@ -274,12 +274,10 @@ function createDefs() {
  *
  * @param {HTMLElement} el The element that contains the whole chart.
  * @param {SVGSVGElement} svg The SVG element for the chart.
- * @param {Map<string, number[]>} rankingHistory The ranking history for each
- * track.
  * @param {Date[]} rankingDates The date of each history entry.
  * @returns {HTMLDivElement} An element for the tooltip.
  */
-function createTooltip(el, svg, rankingHistory, rankingDates) {
+function createTooltip(el, svg, rankingDates) {
   const tooltip = document.createElement('div');
   tooltip.classList.add('chart-tooltip');
 
@@ -320,7 +318,7 @@ function createTooltip(el, svg, rankingHistory, rankingDates) {
     date.innerText = format.format(rankingDates[x]);
   });
 
-  svg.addEventListener('series-clear', (ev) => {
+  svg.addEventListener('series-clear', () => {
     tooltip.classList.remove('chart-tooltip-active');
   });
 
