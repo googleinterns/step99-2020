@@ -1,4 +1,4 @@
-package com.google.musicanalysis.site;
+package com.google.musicanalysis.api.musixmatch;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

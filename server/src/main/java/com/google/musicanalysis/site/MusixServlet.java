@@ -1,6 +1,6 @@
 package com.google.musicanalysis.site;
 
-import com.google.gson.Gson;
+import com.google.musicanalysis.api.musixmatch.*;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
