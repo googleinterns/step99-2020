@@ -2,7 +2,7 @@ package com.google.musicanalysis.types;
 
 import java.util.HashMap;
 
-public class Tuple {
+public class AnalysisPair {
   public final HashMap<String, String> map;
   public final MagnitudeAndScore magnitudeAndScore;
 

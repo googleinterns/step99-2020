@@ -21,30 +21,27 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    // Video name from the front-end
     String videoName = "sharks 101";
 
-    // Get response from Youtube API
     String videoIdJson = new YoutubeRequest("search", videoName).getResult();
     String videoId = getVideoId(videoIdJson);
     String commentsJson = new YoutubeRequest("commentThreads", "snippet", videoId).getResult();
 
-    // Convert response into a large string to be passed through for analysis
     ArrayList<String> commentArray = retrieveComments(commentsJson);
     String cumulativeComments = convertToString(commentArray);
 
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
-    MagnitudeAndScore nlpObject = analyzeWithNLP(cumulativeComments);
+    MagnitudeAndScore commentsSentiment = analyzeWithNLP(cumulativeComments);
 
-    String json = convertToJsonUsingGson(new Tuple(perspectiveMap, nlpObject));
+    String json = convertToJsonUsingGson(new AnalysisPair(perspectiveMap, commentsSentiment));
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
 
   /** @param arr the array that will be converted to json */
-  private String convertToJsonUsingGson(Tuple tuple) {
+  private String convertToJsonUsingGson(AnalysisPair pair) {
     Gson gson = new Gson();
-    String json = gson.toJson(tuple);
+    String json = gson.toJson(pair);
     return json;
   }
 
@@ -178,17 +175,17 @@ public class AnalysisServlet extends HttpServlet {
   private String convertToString(ArrayList<String> comments) {
     StringBuilder res = new StringBuilder();
 
-    for (String string : comments) {
-      string = string.replace("\"", "");
+    for (String comment : comments) {
+      comment = comment.replace("\"", "");
       // Make sure each comment is treated as its own sentence
       // Not sure char datatype works with regex so used String
-      String lastCharacter = string.substring(string.length() - 1);
+      String lastCharacter = comment.substring(comment.length() - 1);
       if (!lastCharacter.matches("\\.|!|\\?")) {
-        string += ". ";
+        comment += ". ";
       } else {
-        string += " ";
+        comment += " ";
       }
-      res.append(string);
+      res.append(comment);
     }
 
     return res.toString();
