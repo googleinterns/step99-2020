@@ -16,8 +16,8 @@ public class MusixServlet extends HttpServlet {
     res.getWriter().write("<h1>See below api data:\n\n</h1>");
 
     // Setup variables, these will be given by the front end
-    String trackName = "Baby";
-    String artistName = "Justin Bieber";
+    String trackName = req.getParameter("song");
+    String artistName = req.getParameter("artist");
     String trackId = "32184842";
     String callType = "track.search";
     MusixParamBuilder params;
