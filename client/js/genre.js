@@ -1,5 +1,6 @@
-/** fetches youtube api calls from YoutubeServlet.java
-    and displays on youtube-genre.html
+/**
+ * fetches youtube api calls from YoutubeServlet.java
+ * and displays on youtube-genre.html
  */
 
 const genreBlock = document.getElementById('genres');
