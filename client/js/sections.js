@@ -37,16 +37,9 @@ const activationFunctions = [
   draw5,
 ];
 // set the dimensions and margins of the graph
-var margin = {top: 20, right: 30, bottom: 40, left: 90};
-var width = 460 var svg = d3.select("#my_dataviz")
-      .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform",
-              "translate(" + margin.left + "," + margin.top + ")");
-      - margin.left - margin.right,
-          height = 400 - margin.top - margin.bottom;
+const margin = {top: 20, right: 30, bottom: 40, left: 90};
+const width = 460 - margin.left - margin.right;
+const height = 400 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
 const svg = d3.select('#vis')
@@ -58,7 +51,7 @@ const svg = d3.select('#vis')
     'translate(' + margin.left + ',' + margin.top + ')');
 
 /**
- *
+ * displays sample bar chart
  */
 function draw1() {
   d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv', function(data) {
