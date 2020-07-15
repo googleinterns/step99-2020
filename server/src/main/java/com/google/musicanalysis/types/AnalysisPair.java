@@ -11,5 +11,3 @@ public class AnalysisPair {
     this.magnitudeAndScore = magnitudeAndScore;
   }
 }
-
-test
