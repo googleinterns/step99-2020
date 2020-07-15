@@ -43,6 +43,6 @@ public class YouTubeLoginServlet extends OAuthLoginServlet {
 
   @Override
   protected String getSessionServiceKey() {
-    return Constants.SPOTIFY_SESSION_KEY;
+    return Constants.YOUTUBE_SESSION_KEY;
   }
 }
