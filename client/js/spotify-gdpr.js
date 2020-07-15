@@ -1,9 +1,44 @@
-// @ts-check
-/* global c3 */
 /**
  * @file This file currently works on mock data, just to make sure that the
  * chart works.
  */
+// @ts-check
+import {getStreamingData, collateStreamingData} from './analysis/gdpr.js';
+
+const {c3, zip} = window;
+
+zip.workerScriptsPath = '/js/zip/';
+
+const btnUpload =
+  /** @type {HTMLButtonElement} */
+  (document.getElementById('btn-data-upload'));
+
+btnUpload.addEventListener('click', async () => {
+  const inputUpload =
+      /** @type {HTMLInputElement} */
+      (document.getElementById('input-data-upload'));
+
+  inputUpload.click();
+
+  await new Promise(
+      (resolve) => inputUpload.addEventListener(
+          'change',
+          resolve,
+          {once: true},
+      ),
+  );
+
+  if (!inputUpload.files) return;
+
+  const fileUpload = inputUpload.files.item(0);
+  if (!fileUpload) return;
+
+  const records = await getStreamingData(fileUpload);
+
+  // TODO: use collated records for chart
+  // eslint-disable-next-line no-unused-vars
+  const collatedRecords = collateStreamingData(records);
+});
 
 /**
  * @typedef {object} MoveChange
@@ -87,7 +122,7 @@ function getChangeHistory() {
   ];
 }
 
-const MS_PER_DAY = 24 * 60 * 60 * 100;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /**
  * Populates `chart` with historical track data derived from `latest` and
@@ -99,7 +134,7 @@ const MS_PER_DAY = 24 * 60 * 60 * 100;
  * @param {c3.ChartAPI} chart The chart to populate.
  */
 function populateChart(latest, changes, chart) {
-// number of days we have backtracked
+  // number of days we have backtracked
   let generation = 1;
   const xAxis = [new Date()];
 
@@ -150,7 +185,7 @@ function populateChart(latest, changes, chart) {
         indexHistory = indicesHistory.get(id);
         indexHistory.push(index);
       } else {
-      // this song wasn't in the record, backfill all of the indices
+        // this song wasn't in the record, backfill all of the indices
         indexHistory = [];
 
         for (let i = 0; i < generation; i++) {
