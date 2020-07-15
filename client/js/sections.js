@@ -18,6 +18,7 @@ scroll.on('active', function(index) {
   const sign = (activeIndex - lastIndex) < 0 ? -1 : 1;
   const scrolledSections = d3.range(lastIndex + sign, activeIndex + sign, sign);
   scrolledSections.forEach((i) => {
+    console.log(i);
     activationFunctions[i]();
   });
   lastIndex = activeIndex;
@@ -32,12 +33,27 @@ scroll.on('active', function(index) {
 const activationFunctions = [
   draw1,
   draw2,
+  draw3,
+  draw4,
+  draw5,
 ];
 
 function draw1() {
-  console.log('1');
+  console.log('draw1');
 }
 
 function draw2() {
-  console.log('2');
+  console.log('draw2');
+}
+
+function draw3() {
+  console.log('draw3');
+}
+
+function draw4() {
+  console.log('draw4');
+}
+
+function draw5() {
+  console.log('draw5');
 }
