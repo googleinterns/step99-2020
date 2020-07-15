@@ -20,7 +20,8 @@ export function createChart(el, rankingHistory, rankingDates) {
   let index = 0;
   const colors = ['blue', 'red', 'green', 'purple', 'orange'];
 
-  for (const [, history] of [...rankingHistory].slice(0, 7)) {
+  // get only the first 7 tracks for now
+  for (const history of [...rankingHistory.values()].slice(0, 7)) {
     const color = colors[index % colors.length];
     const series = createSeries(color, history);
     seriesContainer.append(series);
