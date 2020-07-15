@@ -33,7 +33,7 @@ public class AnalysisServlet extends HttpServlet {
 
     commentArgs.put("part", "snippet");
     commentArgs.put("videoId", videoId);
-    String commentsJson = new YoutubeRequest("commentThreads", args).getResult();
+    String commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
 
     ArrayList<String> commentArray = retrieveComments(commentsJson);
     String cumulativeComments = convertToString(commentArray);
