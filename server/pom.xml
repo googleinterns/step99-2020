@@ -38,25 +38,12 @@
         <artifactId>gson</artifactId>
         <version>2.8.6</version>
     </dependency>
-    <!-- Music Match -->
-    <dependency>
-      <groupId>com.sachinhandiekar</groupId>
-      <artifactId>jMusixMatch</artifactId>
-      <version>1.1.4</version>
-    </dependency>
 
     <!-- Google API Client -->
     <dependency>
       <groupId>com.google.api-client</groupId>
       <artifactId>google-api-client</artifactId>
       <version>1.30.9</version>
-    </dependency>
- 
-   <!-- Youtube API -->
-    <dependency>
-      <groupId>com.google.apis</groupId>
-      <artifactId>google-api-services-youtube</artifactId>
-      <version>v3-rev20200618-1.30.9</version>
     </dependency>
     
     <!-- Gcloud logging -->
@@ -66,12 +53,14 @@
       <version>1.101.2</version>
     </dependency>
 
+    <!-- Google Cloud Secret Manager -->
     <dependency>
       <groupId>com.google.cloud</groupId>
       <artifactId>google-cloud-secretmanager</artifactId>
       <version>1.1.0</version>
     </dependency>
     
+    <!-- Google OAuth -->
     <dependency>
       <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-oauth2</artifactId>
