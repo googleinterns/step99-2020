@@ -1,38 +1,39 @@
-:root {
-    /* the higher the number, the less filled */
+/* DONUT CHARTS */
+#a-chart {
   --percent: 8;
 }
 
 .item {
-    display: block;
+  display: block;
 }
 
 .item h2 {
-    text-align:center;
-    width: 100%;
+  text-align: center;
+  width: 100%;
 }
 
 svg {
-   -webkit-transform: rotate(-90deg);
-    transform: rotate(-90deg);
-    display: block; /* svg is auto display-inline*/
-    margin: auto;
-    overflow: visible;
+  -webkit-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+  display: block; /* svg is auto display-inline*/
+  margin: auto;
+  overflow: visible;
 }
 
 .circle_animation {
-  stroke-dasharray: 440; /* circumference of the circle */
-  stroke-dashoffset: 440;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
 }
 
 .donut .circle_animation {
-    -webkit-animation: donut 1s ease-out forwards;
-    animation: donut 1s ease-out forwards;
+  -webkit-animation: donut 1.3s ease-in-out forwards;
+  animation: donut 1.3s ease-in-out forwards;
 }
 
 @-webkit-keyframes donut {
   to {
-    stroke-dashoffset: var(--percent); /* half filled is 220*/
+    stroke-dashoffset: var(--percent);
+    /* 50% would be 220 (half the initial value specified above) */
   }
 }
 

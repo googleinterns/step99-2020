@@ -7,6 +7,8 @@ window.onload = function() {
 
 /**
  * Will be overwritten in merge
+ *
+ * @returns {string} value
  */
 async function fetchAndShowResponse() {
   const response = await fetch('/api/musix');
@@ -17,8 +19,9 @@ async function fetchAndShowResponse() {
 
 /**
  * Will be overwritten in merge
- * @param elId
- * @param value
+ *
+ * @param {string} elId description
+ * @param {string} value description
  */
 function changeInnerText(elId, value) {
   const el = document.getElementById(elId);
@@ -27,6 +30,8 @@ function changeInnerText(elId, value) {
 
 /**
  * Adds a new chart to the page
+ *
+ * @returns {HTMLElement} a new chart to the page
  */
 function addElement() {
   const div = document.createElement('div');
@@ -70,6 +75,7 @@ function buildCircle() {
   outsideCircle.setAttribute('stroke-width', '20');
   outsideCircle.setAttribute('stroke', '#ffb6c1'); // light pink
   outsideCircle.setAttribute('fill', 'none');
+  outsideCircle.setAttribute('pathLength', '100');
 
   g.appendChild(insideCircle);
   g.appendChild(outsideCircle);
@@ -79,7 +85,8 @@ function buildCircle() {
 
 /**
  * Creates an SVG Element
- * @param el
+ *
+ * @param {string} el type of element
  */
 function createSVGElement(el) {
   return document.createElementNS('http://www.w3.org/2000/svg', el);
