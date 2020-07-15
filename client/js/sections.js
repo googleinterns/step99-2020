@@ -18,7 +18,7 @@ scroll.on('active', function(index) {
   const sign = (activeIndex - lastIndex) < 0 ? -1 : 1;
   const scrolledSections = d3.range(lastIndex + sign, activeIndex + sign, sign);
   scrolledSections.forEach((i) => {
-    activationFunctions[i];
+    activationFunctions[i]();
   });
   lastIndex = activeIndex;
 });
@@ -30,11 +30,26 @@ scroll.on('active', function(index) {
  *
  */
 const activationFunctions = [
-  draw1(),
-  draw2(),
+  draw1,
+  draw2,
+  draw3,
+  draw4,
+  draw5,
 ];
+// set the dimensions and margins of the graph
+var margin = {top: 20, right: 30, bottom: 40, left: 90};
+var width = 460 var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+      - margin.left - margin.right,
+          height = 400 - margin.top - margin.bottom;
 
-var svg = d3.select('#vis')
+// append the svg object to the body of the page
+const svg = d3.select('#vis')
   .append('svg')
   .attr('width', width + margin.left + margin.right)
   .attr('height', height + margin.top + margin.bottom)
@@ -90,5 +105,17 @@ function draw1() {
  *
  */
 function draw2() {
-  console.log('2');
+  console.log('draw2');
+}
+
+function draw3() {
+  console.log('draw3');
+}
+
+function draw4() {
+  console.log('draw4');
+}
+
+function draw5() {
+  console.log('draw5');
 }
