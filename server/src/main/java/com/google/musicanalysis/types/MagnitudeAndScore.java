@@ -1,10 +1,10 @@
 package com.google.musicanalysis.types;
 
 public class MagnitudeAndScore {
-  Double magnitude;
-  Double score;
+  double magnitude;
+  double score;
 
-  public MagnitudeAndScore(Double magnitude, Double score) {
+  public MagnitudeAndScore(double magnitude, double score) {
     this.magnitude = magnitude;
     this.score = score;
   }
