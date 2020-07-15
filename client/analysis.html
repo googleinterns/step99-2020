@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -12,15 +10,25 @@
     </head>
 
     <body>
-        <h1>Enter a song name and artist name</h1>
+        <div class="flex-row center">
+        <div>
+            <input type="text" id="searchbar" placeholder="Enter video name here!" />
+            <button id="sendbutton">Send</button>
+        </div>
+        </div>
 
-        <p>Insert Song name</p>
-        <input type="text" placeholder="Song" name="song"/>
-        <p>Insert Artist name</p>
-        <input type="text" placeholder="Artist" name="artist"/>
-        <input type="submit" value="Submit" id="formSubmit" />
+        <div class="flex-row center">
+        <p>*link to video here*</p>
+        </div>
 
-        <h1>Response</h1>
-        <div id="response"></div>
+        <div class="flex-row" id="middle-content">
+        <div class="flex-column">
+            <h2>Featured comments:</h2>
+            <ol id="list"></ol>
+        </div>
+        <div class="flex-column">
+            <div class="grid-container" id="charts"></div>
+        </div>
+        </div>
     </body>
 </html>

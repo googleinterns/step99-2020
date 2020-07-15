@@ -1,3 +1,107 @@
+ol {
+  list-style: none;
+  counter-reset: item;
+}
+
+li {
+  counter-increment: item;
+  margin-bottom: 5%;
+  animation: fadeIn 1s;
+  font-size: 20px;
+  font-family: Helvetica;
+}
+
+li:before {
+  text-align: center;
+  display: inline-block;
+  content: counter(item);
+  margin-right: 10px;
+  background-color: #9f86c0;
+  border-radius: 100%;
+  padding: 5px;
+  color: white;
+  width: 1.2em;
+  animation: pulse .7s ease-in;
+}
+
+input:focus,
+button:focus {
+  outline: none;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+  }
+
+  100% {
+    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 100;
+  }
+}
+
+.fade {
+  animation: fadeIn .5s;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 100%;
+  flex: 1;
+}
+
+.center {
+  justify-content: center;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  padding: 10px;
+}
+
+#searchbar {
+  border-radius: 5px;
+  border: none;
+  background-color: #d3d3d3;
+  /*light-gray*/
+  font-size: 18px;
+  padding: 5px;
+  width: 70%;
+  color: black;
+}
+
+#sendbutton {
+  width: 80px;
+  background-color: #9f86c0;
+  border: none;
+  font-size: 18px;
+  color: white;
+  border-radius: 5px;
+  text-align: center;
+  padding: 2px;
+}
+
+#overall {
+  margin-top: 10%;
+}
+
 /* DONUT CHARTS */
 #a-chart {
   --percent: 8;
@@ -15,7 +119,8 @@
 svg {
   -webkit-transform: rotate(-90deg);
   transform: rotate(-90deg);
-  display: block; /* svg is auto display-inline*/
+  display: block;
+  /* svg is auto display-inline*/
   margin: auto;
   overflow: visible;
 }
