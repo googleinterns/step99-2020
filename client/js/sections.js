@@ -18,7 +18,7 @@ scroll.on('active', function(index) {
   const sign = (activeIndex - lastIndex) < 0 ? -1 : 1;
   const scrolledSections = d3.range(lastIndex + sign, activeIndex + sign, sign);
   scrolledSections.forEach((i) => {
-    activationFunctions[i]();
+    activationFunctions[i];
   });
   lastIndex = activeIndex;
 });
@@ -30,14 +30,65 @@ scroll.on('active', function(index) {
  *
  */
 const activationFunctions = [
-  draw1,
-  draw2,
+  draw1(),
+  draw2(),
 ];
 
+var svg = d3.select('#vis')
+  .append('svg')
+  .attr('width', width + margin.left + margin.right)
+  .attr('height', height + margin.top + margin.bottom)
+  .append('g')
+  .attr('transform',
+    'translate(' + margin.left + ',' + margin.top + ')');
+
+/**
+ *
+ */
 function draw1() {
-  console.log('1');
+  d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv', function(data) {
+    console.log(data);
+    // Add X axis
+    const x = d3.scaleLinear()
+      .domain([0, 13000])
+      .range([0, width]);
+    svg.append('g')
+      .attr('transform', 'translate(0,' + height + ')')
+      .call(d3.axisBottom(x))
+      .selectAll('text')
+      .attr('transform', 'translate(-10,0)rotate(-45)')
+      .style('text-anchor', 'end');
+
+    // Y axis
+    const y = d3.scaleBand()
+      .range([0, height])
+      .domain(data.map(function(d) {
+        return d.Country;
+      }))
+      .padding(.1);
+    svg.append('g')
+      .call(d3.axisLeft(y));
+
+    // Bars
+    svg.selectAll('myRect')
+      .data(data)
+      .enter()
+      .append('rect')
+      .attr('x', x(0) )
+      .attr('y', function(d) {
+        return y(d.Country);
+      })
+      .attr('width', function(d) {
+        return x(d.Value);
+      })
+      .attr('height', y.bandwidth() )
+      .attr('fill', '#69b3a2');
+  });
 }
 
+/**
+ *
+ */
 function draw2() {
   console.log('2');
 }
