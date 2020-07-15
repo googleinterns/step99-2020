@@ -112,7 +112,7 @@ public class YoutubeServlet extends HttpServlet {
 
     /**
      * @param youtubeJsonObj json obj of youtube response body 
-     * @return {int} number of total results from json response
+     * @return number of total results from json response
      */
     protected int getTotalResults(JsonObject youtubeJsonObj) {
         JsonObject pageInfo = youtubeJsonObj.getAsJsonObject("pageInfo");

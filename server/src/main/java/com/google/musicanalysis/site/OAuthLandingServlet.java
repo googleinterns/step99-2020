@@ -14,12 +14,12 @@ public class OAuthLandingServlet extends HttpServlet {
   public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
     res.setContentType("text/html");
 
-    StringBuilder content = new StringBuilder();
-    content.append("<html><body>Succesfully Logged in.<script type=\"text/javascript\">");
-    content.append("window.close();");
-    content.append("</script></body></html>");
+    String content = "<html>"
+                   + "<body>Successfully logged in.</body>"
+                   + "<script type=\"text/javascript\">window.close();</script>"
+                   + "</html>";
 
-    res.getWriter().write(content.toString());
+    res.getWriter().write(content);
     res.setStatus(200);
   }
 }
