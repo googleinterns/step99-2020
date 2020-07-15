@@ -19,7 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.annotation.WebServlet;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Servlet handles youtube api call to get genres of liked videos */
 @WebServlet("/api/youtube")
@@ -59,6 +60,24 @@ public class YoutubeServlet extends HttpServlet {
         return youtubeRes.body();
     }
 
+    /**
+     * updates genreCountList with new genre or count
+     * by checking if .genre attribute of VideoGenreCount obj exists
+     * @param topic identifies youtube video music category e.g. Pop music
+     */
+    protected void updateGenre(String topic, List<VideoGenreCount> genreCountList) {
+        Boolean containsGenre = false;
+        for (VideoGenreCount videoGenre : genreCountList) {
+            if (videoGenre.genre.equals(topic)) {
+                containsGenre = true;
+                videoGenre.count = videoGenre.count + 1;
+            }
+        }
+
+        if (!containsGenre) {
+            genreCountList.add(new VideoGenreCount(topic, 1));
+        }
+    }
 
     /**
      * checks whether topic is categorized as music
@@ -75,10 +94,10 @@ public class YoutubeServlet extends HttpServlet {
      * parses through youtube liked videos json string,
      * updates hash map to contain frequency count of each music genre
      * @param youtubeResBody json response of youtube liked videos
-     * @param genreCount hash map of frequency count of each music genre
+     * @param genreCountList list of that contains VideoMusicGenre obj (freq count of each music genre)
      * @param numVideos maximum number of videos to retrieve
      */
-    protected void updateMusicCount(JsonObject youtubeJsonObj, HashMap<String, Integer> genreCount) {
+    protected void updateMusicCount(JsonObject youtubeJsonObj, List<VideoGenreCount> genreCountList) {
         JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
 
         for (int i = 0; i < videos.size(); i++) {
@@ -103,8 +122,7 @@ public class YoutubeServlet extends HttpServlet {
                     break;
                 }
 
-                int count = genreCount.containsKey(topic) ? genreCount.get(topic) : 0;
-                genreCount.put(topic, count + 1);
+                updateGenre(topic, genreCountList);
             }
         }
         return;
@@ -112,7 +130,7 @@ public class YoutubeServlet extends HttpServlet {
 
     /**
      * @param youtubeJsonObj json obj of youtube response body 
-     * @return {int} number of total results from json response
+     * @return number of total results from json response
      */
     protected int getTotalResults(JsonObject youtubeJsonObj) {
         JsonObject pageInfo = youtubeJsonObj.getAsJsonObject("pageInfo");
@@ -141,14 +159,13 @@ public class YoutubeServlet extends HttpServlet {
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString(), numVideos);
         JsonObject youtubeJsonObj = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
-        var genreCount = new HashMap<String, Integer>();
-        updateMusicCount(youtubeJsonObj, genreCount);
+        List<VideoGenreCount> genreCountList = new ArrayList<>();
+        updateMusicCount(youtubeJsonObj, genreCountList);
         int totalLiked = getTotalResults(youtubeJsonObj);
-        genreCount.put("totalLiked", totalLiked);
+        YoutubeGenres jsonRes = new YoutubeGenres(genreCountList, totalLiked);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
-        res.getWriter().println(gson.toJson(genreCount));
-
+        res.getWriter().println(gson.toJson(jsonRes));
     }
 }
