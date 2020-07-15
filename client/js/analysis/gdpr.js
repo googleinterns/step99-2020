@@ -36,71 +36,75 @@ const {zip} = window;
 export async function getStreamingData(data) {
   const streamingDataPattern = /StreamingHistory(\d+)\.json$/i;
 
+  const readFile = (file) => {
+    return new Promise((resolve) => {
+      file.getData(
+          new zip.TextWriter('utf-8'),
+          (text) => resolve(JSON.parse(text)),
+      );
+    });
+  };
+
+  const parseEntryDate = (entry) => {
+    const MS_PER_MINUTE = 60 * 1000;
+
+    // dates are strings in JSON, convert to JS date
+    const endTime = new Date(entry.endTime);
+
+    // move according to UTC offset
+    const endTimeMs = +endTime;
+    const endTimeOffsetMs =
+      endTime.getTimezoneOffset() * MS_PER_MINUTE;
+
+    entry.endTime = new Date(endTimeMs - endTimeOffsetMs);
+    return entry;
+  };
+
+  const readEntries = (reader, cb) => {
+    reader.getEntries((files) => {
+      /** @typedef {{ index: number; file: zip.Entry; }} EntryWithIndex */
+
+      // get only entries named StreamingHistoryX.json and pair them with
+      // their index so they can be sorted
+      const entriesWithIndices = files.reduce(
+          (
+              /** @type {EntryWithIndex[]} */ arr,
+              /** @type {zip.Entry} */ file,
+          ) => {
+            const match = streamingDataPattern.exec(file.filename);
+
+            if (match) {
+              const index = parseInt(match[1]);
+              arr.push({index, file});
+            }
+
+            return arr;
+          }, [])
+          .sort((a, b) => a.index < b.index ? -1 : 1)
+          .map(({file}) => file);
+
+      // create a Promise for each StreamingHistoryX.json to read & parse
+      // its content
+      const contentPromises = entriesWithIndices.map(readFile);
+
+      // content of each file should be an array of GDPR records, once all
+      // of the reading is done, concatenate the arrays and return
+      Promise
+          .all(contentPromises)
+          .then((contentWithIndices) => {
+            const collatedEntries = contentWithIndices
+                .reduce((acc, data) => acc.concat(data), [])
+                .map(parseEntryDate);
+
+            cb(collatedEntries);
+          });
+    });
+  };
+
   return new Promise((resolve, reject) => {
     zip.createReader(
         new zip.BlobReader(data),
-        (reader) => {
-          reader.getEntries((files) => {
-            /** @typedef {{ index: number; file: zip.Entry; }} EntryWithIndex */
-
-            // get only entries named StreamingHistoryX.json and pair them with
-            // their index so they can be sorted
-            const entriesWithIndices =
-            files
-                .reduce((
-                    /** @type {EntryWithIndex[]} */ arr,
-                    /** @type {zip.Entry} */ file,
-                ) => {
-                  const match = streamingDataPattern.exec(file.filename);
-
-                  if (match) {
-                    const index = parseInt(match[1]);
-                    arr.push({index, file});
-                  }
-
-                  return arr;
-                }, [])
-                .sort((a, b) => a.index < b.index ? -1 : 1);
-
-            // create a Promise for each StreamingHistoryX.json to read & parse
-            // its content
-            const contentPromises =
-            entriesWithIndices.map(({index, file}) => {
-              return new Promise((resolve) => {
-                file.getData(
-                    new zip.TextWriter('utf-8'),
-                    (text) => resolve({index, data: JSON.parse(text)}),
-                );
-              });
-            });
-
-            // content of each file should be an array of GDPR records, once all
-            // of the reading is done, concatenate the arrays and return
-            Promise
-                .all(contentPromises)
-                .then((contentWithIndices) => {
-                  const collatedEntries = contentWithIndices
-                      .map((entry) => entry.data)
-                      .reduce((acc, data) => acc.concat(data), [])
-                      .map((entry) => {
-                        const MS_PER_MINUTE = 60 * 1000;
-
-                        // dates are strings in JSON, convert to JS date
-                        const endTime = new Date(entry.endTime);
-
-                        // move according to UTC offset
-                        const endTimeMs = +endTime;
-                        const endTimeOffsetMs =
-                          endTime.getTimezoneOffset() * MS_PER_MINUTE;
-
-                        entry.endTime = new Date(endTimeMs - endTimeOffsetMs);
-                        return entry;
-                      });
-
-                  resolve(collatedEntries);
-                });
-          });
-        },
+        (reader) => readEntries(reader, resolve),
         (error) => reject(error),
     );
   });
@@ -149,6 +153,7 @@ export function collateStreamingData(data) {
   let currentRecord = data[index];
 
   const INTERVAL_SIZE = 24 * 60 * 60 * 1000;
+
   // round down to the start of the day of the first record
   let intervalStart =
     +currentRecord.endTime - (+currentRecord.endTime % INTERVAL_SIZE);
