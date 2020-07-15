@@ -9,8 +9,4 @@ public class VideoGenreCount {
     this.genre = genre;
     this.count = count;
   }
-
-  public void incCount() {
-    this.count++;
-  }
 }
