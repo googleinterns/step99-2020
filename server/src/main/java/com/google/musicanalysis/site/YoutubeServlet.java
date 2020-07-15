@@ -70,7 +70,7 @@ public class YoutubeServlet extends HttpServlet {
         for (VideoGenreCount videoGenre : genreCountList) {
             if (videoGenre.genre.equals(topic)) {
                 containsGenre = true;
-                videoGenre.count++;
+                videoGenre.count = videoGenre.count + 1;
             }
         }
 
@@ -161,12 +161,11 @@ public class YoutubeServlet extends HttpServlet {
 
         List<VideoGenreCount> genreCountList = new ArrayList<>();
         updateMusicCount(youtubeJsonObj, genreCountList);
-        // int totalLiked = getTotalResults(youtubeJsonObj);
-        // genreCountList.put("totalLiked", totalLiked);
+        int totalLiked = getTotalResults(youtubeJsonObj);
+        YoutubeGenres jsonRes = new YoutubeGenres(genreCountList, totalLiked);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
-        res.getWriter().println(gson.toJson(genreCountList));
-
+        res.getWriter().println(gson.toJson(jsonRes));
     }
 }
