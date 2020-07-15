@@ -8,22 +8,30 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * Handles all Youtube API requests. Takes operation string and map of parameters and returns a JSON
+ * response as string.
+ */
 public class YoutubeRequest {
   private static final String BASE_URL = "https://www.googleapis.com/youtube/v3/";
-  private static final String apiKey = "&key=";
+  private static final String API_KEY = "&key=";
 
   private String operation;
-  private ArrayList<String> parameters = new ArrayList<String>();
+  private HashMap<String, String> parameters;
 
-  public YoutubeRequest(String operation, String... parameters) {
+  public YoutubeRequest(String operation, HashMap<String, String> parameters) {
     this.operation = operation;
-    for (String parameter : parameters) {
-      this.parameters.add(parameter);
-    }
+    this.parameters = parameters;
   }
 
+  /**
+   * Returns the result from the Youtube API call.
+   *
+   * @return JSON response string.
+   */
   public String getResult() throws MalformedURLException, IOException {
 
     StringBuffer buffer = new StringBuffer();
@@ -44,31 +52,15 @@ public class YoutubeRequest {
   }
 
   private URL buildUrl() throws MalformedURLException {
-    ArrayList<String> searchOps = new ArrayList<String>(Arrays.asList("?q=", "&videoCaption="));
-    ArrayList<String> commentOps = new ArrayList<String>(Arrays.asList("?part=", "&videoId="));
-    String parameterString;
+    ArrayList<String> ops = new ArrayList<>();
 
-    if (this.operation == "search") {
-      parameterString = buildParams(searchOps);
-    } else {
-      parameterString = buildParams(commentOps);
+    for (Map.Entry<String, String> entry : this.parameters.entrySet()) {
+      ops.add(String.format("%s=%s", entry.getKey(), encode(entry.getValue())));
     }
 
-    String urlString = BASE_URL + this.operation + parameterString + apiKey;
+    String urlString = BASE_URL + this.operation + "?" + String.join("&", ops) + API_KEY;
     URL url = new URL(urlString);
     return url;
-  }
-
-  private String buildParams(ArrayList<String> ops) {
-    // More cases can be added in the future to this
-    switch (this.parameters.size()) {
-      case 1:
-        return ops.get(0) + encode(this.parameters.get(0));
-      case 2:
-        return ops.get(0) + encode(this.parameters.get(0)) + ops.get(1) + encode(parameters.get(1));
-      default:
-        return null;
-    }
   }
 
   private String encode(String param) {

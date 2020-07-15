@@ -1,5 +1,6 @@
 package com.google.musicanalysis.api.perspective;
 
+import com.google.gson.JsonObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,6 +10,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
+/**
+ * Handles all Perspective API requests. Takes text string and list of attributes and returns a JSON
+ * response as string.
+ */
 public class PerspectiveRequest {
 
   private String text;
@@ -60,18 +65,21 @@ public class PerspectiveRequest {
    * Builds the JSON Object to be sent out.
    *
    * @param textToAnalyze The text that will be analyzed by the Perspective API.
-   * @param requestedAttributes the attributes requested.
+   * @param wantedArgs the attributes requested.
    */
-  private String buildJson(String textToAnalyze, ArrayList<String> requestedAttributes) {
+  private String buildJson(String textToAnalyze, ArrayList<String> wantedArgs) {
+    JsonObject innerTextObject = new JsonObject();
+    innerTextObject.addProperty("text", textToAnalyze);
 
-    ArrayList<String> wantedArgs = new ArrayList<String>();
-    for (String el : requestedAttributes) {
-      wantedArgs.add(el);
+    var innerAttributeObject = new JsonObject();
+    for (String el : wantedArgs) {
+      innerAttributeObject.add(el, new JsonObject());
     }
 
-    PerspectiveJsonBuilder json = new PerspectiveJsonBuilder(textToAnalyze, wantedArgs);
-    String jsonString = json.buildJson();
+    var jsonObject = new JsonObject();
+    jsonObject.add("comment", innerTextObject);
+    jsonObject.add("requestedAttributes", innerAttributeObject);
 
-    return jsonString;
+    return jsonObject.toString();
   }
 }
