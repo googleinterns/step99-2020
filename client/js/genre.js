@@ -6,7 +6,7 @@
 const genreBlock = document.getElementById('genres');
 const numVideosInput = document.getElementById('numVideos');
 const DEFAULT_NUM_VIDS = 10;
-
+window.data;
 /**
  * extracts num vids from input, otherwise returns default
  * helper fn for displayMusicGenre()
@@ -35,6 +35,8 @@ async function displayMusicGenre() {
 
   const genreCount = await response.text();
   genreBlock.innerHTML = genreCount;
+  window.data = JSON.parse(genreCount);
+  console.log(window.data);
 }
 
 /**

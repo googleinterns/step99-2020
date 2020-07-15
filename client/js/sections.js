@@ -24,7 +24,7 @@ scroll.on('active', function(index) {
 });
 
 /**
- * I placed all the functions in an array. Each function corresponds
+ * contains functions to activate per section. Each function corresponds
  * to a different change in the visualisation. One may change the
  * graph into a scatter plot, and another may initiate a force simulation.
  *
@@ -54,44 +54,43 @@ const svg = d3.select('#vis')
  * displays sample bar chart
  */
 function draw1() {
-  d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/7_OneCatOneNum_header.csv', function(data) {
-    console.log(data);
-    // Add X axis
-    const x = d3.scaleLinear()
-      .domain([0, 13000])
-      .range([0, width]);
-    svg.append('g')
-      .attr('transform', 'translate(0,' + height + ')')
-      .call(d3.axisBottom(x))
-      .selectAll('text')
-      .attr('transform', 'translate(-10,0)rotate(-45)')
-      .style('text-anchor', 'end');
+  const data = window.data.data;
+  console.log(data);
+  // Add X axis
+  const x = d3.scaleLinear()
+    .domain([0, 13000])
+    .range([0, width]);
+  svg.append('g')
+    .attr('transform', 'translate(0,' + height + ')')
+    .call(d3.axisBottom(x))
+    .selectAll('text')
+    .attr('transform', 'translate(-10,0)rotate(-45)')
+    .style('text-anchor', 'end');
 
-    // Y axis
-    const y = d3.scaleBand()
-      .range([0, height])
-      .domain(data.map(function(d) {
-        return d.Country;
-      }))
-      .padding(.1);
-    svg.append('g')
-      .call(d3.axisLeft(y));
+  // Y axis
+  const y = d3.scaleBand()
+    .range([0, height])
+    .domain(data.map(function(d) {
+      return d.Country;
+    }))
+    .padding(.1);
+  svg.append('g')
+    .call(d3.axisLeft(y));
 
-    // Bars
-    svg.selectAll('myRect')
-      .data(data)
-      .enter()
-      .append('rect')
-      .attr('x', x(0) )
-      .attr('y', function(d) {
-        return y(d.Country);
-      })
-      .attr('width', function(d) {
-        return x(d.Value);
-      })
-      .attr('height', y.bandwidth() )
-      .attr('fill', '#69b3a2');
-  });
+  // Bars
+  svg.selectAll('myRect')
+    .data(data)
+    .enter()
+    .append('rect')
+    .attr('x', x(0) )
+    .attr('y', function(d) {
+      return y(d.Country);
+    })
+    .attr('width', function(d) {
+      return x(d.Value);
+    })
+    .attr('height', y.bandwidth() )
+    .attr('fill', '#69b3a2');
 }
 
 /**
