@@ -3,12 +3,12 @@ import {SVG_NS} from '../util.js';
 /**
  * Creates an SVG chart inside of `el` with the given data.
  *
- * @param {HTMLElement} el The container element for this chart.
- * @param {Map<string, number[]>} rankingHistory The ranking history for each
+ * @param {HTMLElement} container The container element for this chart.
+ * @param {Map<string, number[]>} histories The ranking history for each
  * track.
- * @param {Date[]} rankingDates The date of each history entry.
+ * @param {Date[]} dates The date of each history entry.
  */
-export function createChart(el, rankingHistory, rankingDates) {
+export function createChart(container, histories, dates) {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'chart');
   svg.append(createDefs());
@@ -21,14 +21,14 @@ export function createChart(el, rankingHistory, rankingDates) {
   const colors = ['blue', 'red', 'green', 'purple', 'orange'];
 
   // get only the first 7 tracks for now
-  for (const history of [...rankingHistory.values()].slice(0, 7)) {
+  for (const history of [...histories.values()].slice(0, 7)) {
     const color = colors[index % colors.length];
-    const series = createSeries(color, history);
+    const series = createSeries(history, color);
     seriesContainer.append(series);
     index++;
   }
 
-  el.append(svg);
+  container.append(svg);
 }
 
 const RUN_SCALE_X = 30;
@@ -37,26 +37,33 @@ const RUN_SCALE_Y = 30;
 /**
  * Creates a new series (set of lines on the chart for a specific song).
  *
- * @param {string} color The color of this series.
  * @param {number[]} history The historical positions of this track on the
  * leaderboard.
+ * @param {string} color The color of this series.
  * @returns {SVGGElement} A group containing the series.
  */
-function createSeries(color, history) {
+function createSeries(history, color) {
   const series = document.createElementNS(SVG_NS, 'g');
   series.setAttribute('class', 'series');
   series.style.setProperty('--run-color', color);
+
   let start = 0;
   let end = 0;
+
   while (end < history.length) {
+    // go until we find a non-null point
     while (start < history.length && history[start] === null) {
       start++;
     }
     end = start + 1;
+
+    // go until we find a null point
     while (end < history.length && history[end] !== null) {
       end++;
     }
-    series.append(...createRun(history, start, end));
+
+    // all of the points between start and end are non-null, create run
+    series.append(createRun(history, start, end));
     start = end;
   }
 
@@ -70,10 +77,12 @@ function createSeries(color, history) {
  * leaderboard.
  * @param {number} start The index of the first entry in this run.
  * @param {number} end The index of the last entry in this run.
- * @returns {SVGElement[]} The elements that compose this run.
+ * @returns {SVGGElement} The elements that compose this run.
  */
 function createRun(history, start, end) {
-  const points = history
+  const runContainer = document.createElementNS(SVG_NS, 'g');
+
+  const pointsStr = history
       .slice(start, end)
       .map((val, idx) => `${(idx + start) * RUN_SCALE_X},${val * RUN_SCALE_Y}`)
       .join(' ');
@@ -81,13 +90,13 @@ function createRun(history, start, end) {
   // line that is displayed
   const line = document.createElementNS(SVG_NS, 'polyline');
   line.setAttribute('class', 'series-run');
-  line.setAttribute('points', points);
+  line.setAttribute('points', pointsStr);
 
-  // secondary invisible line to make it easier to hit the line
-  // with the mouse
+  // secondary (wider) invisible line to make it easier to hit the line with the
+  // mouse
   const touchTarget = document.createElementNS(SVG_NS, 'polyline');
   touchTarget.setAttribute('class', 'series-run-touch-target');
-  touchTarget.setAttribute('points', points);
+  touchTarget.setAttribute('points', pointsStr);
 
   const startCap = document.createElementNS(SVG_NS, 'circle');
   const endCap = document.createElementNS(SVG_NS, 'circle');
@@ -102,7 +111,8 @@ function createRun(history, start, end) {
   endCap.setAttribute('cx', (end - 1) * RUN_SCALE_X + 'px');
   endCap.setAttribute('cy', history[end - 1] * RUN_SCALE_Y + 'px');
 
-  return [startCap, line, touchTarget, endCap];
+  runContainer.append(startCap, line, touchTarget, endCap);
+  return runContainer;
 }
 
 /**
