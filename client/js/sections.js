@@ -51,14 +51,14 @@ const svg = d3.select('#vis')
     'translate(' + margin.left + ',' + margin.top + ')');
 
 /**
- * displays sample bar chart
+ * displays bar chart
  */
 function draw1() {
-  const data = window.data.data;
-  console.log(data);
+  const genre = window.data.data;
+  console.log(genre);
   // Add X axis
   const x = d3.scaleLinear()
-    .domain([0, 13000])
+    .domain([0, 6]) // x range (changed)
     .range([0, width]);
   svg.append('g')
     .attr('transform', 'translate(0,' + height + ')')
@@ -70,8 +70,8 @@ function draw1() {
   // Y axis
   const y = d3.scaleBand()
     .range([0, height])
-    .domain(data.map(function(d) {
-      return d.Country;
+    .domain(genre.map(function(d) {
+      return d.genre;
     }))
     .padding(.1);
   svg.append('g')
@@ -79,35 +79,44 @@ function draw1() {
 
   // Bars
   svg.selectAll('myRect')
-    .data(data)
+    .data(genre)
     .enter()
     .append('rect')
     .attr('x', x(0) )
     .attr('y', function(d) {
-      return y(d.Country);
+      return y(d.genre);
     })
     .attr('width', function(d) {
-      return x(d.Value);
+      return x(d.count);
     })
     .attr('height', y.bandwidth() )
     .attr('fill', '#69b3a2');
 }
 
 /**
- *
+ * 
  */
 function draw2() {
   console.log('draw2');
 }
 
+/**
+ *
+ */
 function draw3() {
   console.log('draw3');
 }
 
+/**
+ *
+ */
 function draw4() {
   console.log('draw4');
 }
 
+/**
+ *
+ */
 function draw5() {
   console.log('draw5');
 }
