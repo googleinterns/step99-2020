@@ -7,7 +7,7 @@
 /** @typedef {import('./analysis/gdpr.js').CollatedGDPRRecords} CollatedGDPRRecords */
 
 import {collateStreamingData, getStreamingData} from './analysis/gdpr.js';
-import { createChart } from './chart/index.js';
+import {createChart} from './chart/index.js';
 
 const {google, zip} = window;
 
@@ -16,8 +16,7 @@ zip.workerScriptsPath = '/js/zip/';
 google.charts.load('current', {'packages': ['line']});
 
 /**
- * Populates `chart` with historical track data derived from `latest` and
- * `changes`.
+ * Populates `chart` with historical track data derived from `collatedRecords`.
  *
  * @param {CollatedGDPRRecords} collatedRecords Information about the amount of
  * time each track has been listened to on each day.
@@ -56,6 +55,9 @@ async function populateChart(collatedRecords) {
       }
     }
 
+    // number of songs that can be on the chart at a time
+    const CHART_SIZE = 15;
+
     // turn into array of entries
     [...rollingSums]
         // sort by play time in the last 28 days
@@ -64,8 +66,8 @@ async function populateChart(collatedRecords) {
           if (entryA[1] < entryB[1]) return 1;
           return 0;
         })
-        // select top 50
-        .slice(0, 15)
+        // select top 15
+        .slice(0, CHART_SIZE)
         // add indexes to track history
         .forEach((entry, index) => {
           const [key] = entry;
