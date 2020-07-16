@@ -87,12 +87,6 @@
         <artifactId>maven-war-plugin</artifactId>
         <version>3.3.0</version>
         <configuration>
-          <packagingIncludes>
-            index.html,
-            js/,
-            css/,
-            **/*.html,
-          </packagingIncludes>
           <packagingExcludes>
             node_modules/
           </packagingExcludes>
