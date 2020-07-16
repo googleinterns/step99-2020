@@ -1,5 +1,5 @@
 /**
- * runs functions as user scrolls past different sections on youtube-genre.html
+ * runs functions as user scrolls past diff sections on youtube-genre.html
  */
 
 const scroll = scroller().container(d3.select('#graphic'));
