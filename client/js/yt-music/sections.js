@@ -53,11 +53,7 @@ const svg = d3.select('#vis')
     'translate(' + margin.left + ',' + margin.top + ')');
 
 /**
-<<<<<<< HEAD
  * displays bar chart in section 1
-=======
- * displays bar chart
->>>>>>> 10723cc703d2d93adad92a6b90df948d17c60292
  */
 function draw1() {
   const genre = window.data.data;
