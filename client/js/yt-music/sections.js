@@ -1,3 +1,7 @@
+/**
+ * runs functions as user scrolls past different sections on youtube-genre.html
+ */
+
 const scroll = scroller().container(d3.select('#graphic'));
 scroll();
 
@@ -24,9 +28,7 @@ scroll.on('active', function(index) {
 });
 
 /**
- * contains functions to activate per section. Each function corresponds
- * to a different change in the visualisation. One may change the
- * graph into a scatter plot, and another may initiate a force simulation.
+ * ith function in this array is run when section i is reached
  *
  */
 const activationFunctions = [
@@ -51,7 +53,7 @@ const svg = d3.select('#vis')
     'translate(' + margin.left + ',' + margin.top + ')');
 
 /**
- * displays bar chart
+ * displays bar chart in section 1
  */
 function draw1() {
   const genre = window.data.data;
@@ -94,7 +96,7 @@ function draw1() {
 }
 
 /**
- * 
+ * function triggered on 2nd section
  */
 function draw2() {
   console.log('draw2');
@@ -102,20 +104,21 @@ function draw2() {
 
 /**
  *
+ * function triggered on 3rd section
  */
 function draw3() {
   console.log('draw3');
 }
 
 /**
- *
+ * function triggered on 4th section
  */
 function draw4() {
   console.log('draw4');
 }
 
 /**
- *
+ * function triggered on 5th section
  */
 function draw5() {
   console.log('draw5');

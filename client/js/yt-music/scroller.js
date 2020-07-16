@@ -1,5 +1,6 @@
 /**
  * figures out which section the user is currently scrolled to
+ * in youtube-genre.html
  *
  * @returns {scroll}
  */
@@ -14,7 +15,7 @@ function scroller() {
 
   /**
    * binds the position function to the scroll event,
-   * and the resize funciton to the resize event.
+   * and the resize fn to the resize event.
    */
   function scroll() {
     d3.select(window)
@@ -30,9 +31,9 @@ function scroller() {
   }
 
   /**
-   * determines where each of teh .step elements are on the page,
-   * relate to the top of the first element. It saves all of the
-   * coordinates of the elements in an array called sectionPositions.
+   * determines where each of the .step elements are on the page,
+   * relate to the top of the first element. Saves all of the
+   * coordinates of the elements in the sectionPositions array.
    */
   function resize() {
     sectionPositions = [];
@@ -50,10 +51,10 @@ function scroller() {
 
   /**
    * determines where the user is on the page (using window.pageYOffset),
-   * and uses that to determine which section of text should currently be in view.
-   * It then uses D3's dispatching tools to signal the 'progress' event, which
-   * will be used in the main script, passing along the current section index so
-   * that the script knows which stage of the animation/visualization should be showing
+   * then determins which section of text should currently be in view.
+   * signals the 'progress' event via D3's dispatching tools.
+   * Progress event passes along the current section index to determine
+   * which animation/visualization should be displayed
    */
   function position() {
     const pos = window.pageYOffset - 300 - containerStart;
@@ -75,10 +76,10 @@ function scroller() {
    * event listener to dispatcher
    *
    * @param value
-   * @returns {scroll} // TODO
+   * @returns {fn} scroll function to scroll.container
    */
   scroll.container = function(value) {
-    if (arguments.legth === 0) {
+    if (arguments.length === 0) {
       return container;
     }
     container = value;

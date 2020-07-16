@@ -35,6 +35,7 @@ async function displayMusicGenre() {
 
   const genreCount = await response.text();
   genreBlock.innerHTML = genreCount;
+
   window.data = JSON.parse(genreCount);
   console.log(window.data);
 }
