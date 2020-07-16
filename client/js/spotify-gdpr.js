@@ -7,7 +7,7 @@
 /** @typedef {import('./analysis/gdpr.js').CollatedGDPRRecords} CollatedGDPRRecords */
 
 import {collateStreamingData, getStreamingData} from './analysis/gdpr.js';
-import { createChart } from './chart/index.js';
+import {createChart} from './chart/index.js';
 
 const {google, zip} = window;
 
