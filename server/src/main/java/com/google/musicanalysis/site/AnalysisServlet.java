@@ -21,7 +21,9 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    String videoName = "sharks 101";
+    String videoName = req.getParameter("name");
+
+    assert videoName == null : "Something went wrong with sending to backend.";
 
     // Use like this: {url_parameter, value}
     HashMap<String, String> videoArgs = new HashMap<>();
@@ -41,15 +43,16 @@ public class AnalysisServlet extends HttpServlet {
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
 
-    String json = convertToJsonUsingGson(new AnalysisPair(perspectiveMap, commentsSentiment));
+    String json =
+        convertToJsonUsingGson(new AnalysisTrio(perspectiveMap, commentsSentiment, commentArray));
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
 
   /** @param arr the array that will be converted to json */
-  private String convertToJsonUsingGson(AnalysisPair pair) {
+  private String convertToJsonUsingGson(AnalysisTrio trio) {
     Gson gson = new Gson();
-    String json = gson.toJson(pair);
+    String json = gson.toJson(trio);
     return json;
   }
 
