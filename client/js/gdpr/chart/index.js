@@ -2,6 +2,7 @@ import {SVG_NS} from '../../util.js';
 
 const RUN_SCALE_X = 30;
 const RUN_SCALE_Y = 30;
+const NUM_POSITIONS = 15;
 
 /**
  * Creates an SVG chart inside of `el` with the given data.
@@ -19,14 +20,12 @@ export function createChart(container, histories, dates) {
   svg.setAttribute('class', 'chart');
   svg.setAttribute(
       'viewBox',
-      `0 0 ${dates.length * RUN_SCALE_X} ${15 * RUN_SCALE_Y}`,
+      `0 0 ${dates.length * RUN_SCALE_X} ${NUM_POSITIONS * RUN_SCALE_Y}`,
   );
   svg.append(createDefs());
+  svg.append(createGrid(dates, NUM_POSITIONS));
 
   scrollContainer.append(svg);
-
-  const grid = createGrid(rankingDates);
-  svg.append(grid);
 
   const seriesContainer = document.createElementNS(SVG_NS, 'g');
 
@@ -198,8 +197,8 @@ function createRun(history, start, end) {
 
   const pointsStr = history
       .slice(start, end)
-      .map((val, idx) => 
-        (idx + start) * RUN_SCALE_X + ',' + 
+      .map((val, idx) =>
+        (idx + start) * RUN_SCALE_X + ',' +
         (val - 0.5) * RUN_SCALE_Y)
       .join(' ');
 
@@ -261,7 +260,15 @@ function createDefs() {
   return defs;
 }
 
-function createGrid(dates) {
+/**
+ * Creates gridlines that appear in the back of the chart.
+ *
+ * @param {Date[]} dates The dates that are covered by this chart
+ * @param {number} positions The number of song positions showed by this chart
+ * (i.e., 15 for top 15)
+ * @returns {SVGGElement} An SVG group containing the grid.
+ */
+function createGrid(dates, positions) {
   const grid = document.createElementNS(SVG_NS, 'g');
   grid.classList.add('grid');
 
@@ -272,7 +279,7 @@ function createGrid(dates) {
     verticalLine.setAttribute('x1', RUN_SCALE_X * i + 'px');
     verticalLine.setAttribute('x2', RUN_SCALE_X * i + 'px');
     verticalLine.setAttribute('y1', '0px');
-    verticalLine.setAttribute('y2', RUN_SCALE_Y * 15 + 'px');
+    verticalLine.setAttribute('y2', RUN_SCALE_Y * positions + 'px');
 
     grid.append(verticalLine);
   }
