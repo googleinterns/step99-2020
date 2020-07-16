@@ -22,7 +22,7 @@ window.onload = function() {
 };
 
 /**
- * Adds an bullet point to the comment list
+ * Adds a bullet point to the comment list
  *
  * @param {string} str the txt of the bullet point
  */
@@ -64,11 +64,9 @@ function addDonutChart(str, percent) {
 
   const header = document.createElement('h2');
   header.innerText = str;
-
   div.appendChild(header);
 
   const svg = createSVGElement('svg');
-
   svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 
   const g = buildCircle();
