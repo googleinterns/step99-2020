@@ -15,8 +15,7 @@ zip.workerScriptsPath = '/js/zip/';
 
 
 /**
- * Populates `chart` with historical track data derived from `latest` and
- * `changes`.
+ * Populates `chart` with historical track data derived from `collatedRecords`.
  *
  * @param {CollatedGDPRRecords} collatedRecords Information about the amount of
  * time each track has been listened to on each day.
@@ -56,6 +55,9 @@ async function populateChart(collatedRecords, chart) {
       }
     }
 
+    // number of songs that can be on the chart at a time
+    const CHART_SIZE = 15;
+
     // turn into array of entries
     [...rollingSums]
         // sort by play time in the last 28 days
@@ -64,8 +66,8 @@ async function populateChart(collatedRecords, chart) {
           if (entryA[1] < entryB[1]) return 1;
           return 0;
         })
-        // select top 50
-        .slice(0, 15)
+        // select top 15
+        .slice(0, CHART_SIZE)
         // add indexes to track history
         .forEach((entry, index) => {
           const [key] = entry;
@@ -101,6 +103,8 @@ async function populateChart(collatedRecords, chart) {
       ],
       done: resolve,
     }));
+
+    // yield control to browser so it doesn't hang
     await sleep(400);
   }
 }
