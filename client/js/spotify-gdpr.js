@@ -6,7 +6,6 @@
 // eslint-disable-next-line max-len
 /** @typedef {import('./analysis/gdpr.js').CollatedGDPRRecords} CollatedGDPRRecords */
 
-import {sleep} from './util.js';
 import {getStreamingData, collateStreamingData} from './analysis/gdpr.js';
 
 const {google, zip} = window;
