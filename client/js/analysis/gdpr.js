@@ -111,16 +111,24 @@ export async function getStreamingData(data) {
 }
 
 /** @typedef {Map<string, Map<string, number>>} ArtistTrackTimeMap */
-/** @typedef {{
- * start: Date,
- * totals: ArtistTrackTimeMap
- * }} ArtistTrackTimeInterval */
+
+/**
+ * @typedef {object} ArtistTrackTimeInterval
+ * @property {Date} start
+ * @property {ArtistTrackTimeMap} totals
+ * */
+
+/**
+ * @typedef {object} CollatedGDPRRecords
+ * @property {ArtistTrackTimeMap} totals
+ * @property {ArtistTrackTimeInterval[]} intervals
+ */
 
 /**
  * Calculates aggregate per-track listening times from a list of GDPR records.
  *
  * @param {GDPRRecord[]} data The list of GDPR records to aggregate.
- * @returns {{totals: ArtistTrackTimeMap, intervals: ArtistTrackTimeInterval[]}}
+ * @returns {CollatedGDPRRecords}
  * An object with two properties: `totals` and `intervals`. `totals` is a map
  * whose keys are artists and whose values are maps from track names to duration
  * listened. `intervals` is an array of interval objects. Each interval object
