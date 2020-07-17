@@ -6,21 +6,21 @@
 // eslint-disable-next-line max-len
 /** @typedef {import('./analysis/gdpr.js').CollatedGDPRRecords} CollatedGDPRRecords */
 
-import {sleep} from './util.js';
 import {getStreamingData, collateStreamingData} from './analysis/gdpr.js';
 
-const {c3, zip} = window;
+const {google, zip} = window;
 
 zip.workerScriptsPath = '/js/zip/';
+
+google.charts.load('current', {'packages': ['line']});
 
 /**
  * Populates `chart` with historical track data derived from `collatedRecords`.
  *
  * @param {CollatedGDPRRecords} collatedRecords Information about the amount of
  * time each track has been listened to on each day.
- * @param {c3.ChartAPI} chart The chart to populate.
  */
-async function populateChart(collatedRecords, chart) {
+async function populateChart(collatedRecords) {
   const ROLLING_WINDOW_SIZE = 28;
 
   // calculate song rankings based on 28-day rolling sums
@@ -83,86 +83,71 @@ async function populateChart(collatedRecords, chart) {
             trackHistory.push(null);
           }
 
-          trackHistory.push(index);
+          trackHistory.push(index + 1);
         });
   }
 
-  // format of a chart series in c3 is ['name of series', point1, point2, ...]
-  const chartData = Array
-      .from(rankingHistory.entries())
-      .map(([id, history]) => [id, ...history]);
+  const chartSeries = Array.from(rankingHistory.entries());
+  const chartData = new google.visualization.DataTable();
+  chartData.addColumn('date', 'Date');
+
+  for (const [key] of chartSeries) {
+    chartData.addColumn('number', key);
+  }
+
+  for (let i = 0; i < rankingDates.length; i++) {
+    const row = [rankingDates[i]];
+
+    for (const [, positions] of chartSeries) {
+      row.push(positions[i]);
+    }
+
+    chartData.addRow(row);
+  }
+
+  const chart =
+    new google.charts.Line(document.getElementById('chart'));
 
   // load data in segments to avoid hanging the browser
-  for (let i = 0; i < chartData.length; i++) {
-    const chartDataSegment = chartData.slice(i, i + 15);
-    await new Promise((resolve) => chart.load({
-      columns: [
-        ['date', ...rankingDates],
-        ...chartDataSegment,
-      ],
-      done: resolve,
-    }));
-
-    // yield control to browser so it doesn't hang
-    // browser will perform any pending updates (clicks, animations, etc)
-    // then return to this loop ASAP
-    await sleep(0);
-  }
-}
-
-
-const dateFormat = new Intl.DateTimeFormat('en', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-
-const chart = c3.generate({
-  bindto: '#chart',
-  size: {
-    height: 700,
-  },
-  data: {
-    x: 'date',
-    columns: [],
-    onmouseover: (d) => chart.focus(d.id),
-    onmouseout: () => chart.focus(),
-  },
-  axis: {
-    x: {
-      type: 'timeseries',
-      tick: {
-        format: '%d/%m/%Y',
-        outer: false,
-        culling: {
-          max: 4,
+  chart.draw(
+      chartData,
+      google.charts.Line.convertOptions({
+        aggregationTarget: 'series',
+        backgroundColor: {
+          fill: '#1c1c1c',
         },
-      },
-    },
-    y: {
-      show: false,
-      inverted: true,
-    },
-  },
-  tooltip: {
-    grouped: false,
-    contents: (d) =>
-      `<span class='c3-tooltip'>
-        <span class='c3-tooltip-rank'>#${d[0].value + 1}</span>
-        <span class='c3-tooltip-thumbnail'>TODO</span>
-        <span class='c3-tooltip-track-name'>${d[0].id}</span>
-        <span class='c3-tooltip-artist-name'>unknown artist</span>
-        <span class='c3-tooltip-date'>${dateFormat.format(d[0].x)}</span>
-      </span>`,
-  },
-  legend: {
-    show: false,
-  },
-  zoom: {
-    enabled: true,
-  },
-});
-
+        chartArea: {
+          backgroundColor: '#1c1c1c',
+        },
+        vAxis: {
+          textStyle: {
+            color: '#ffffff',
+          },
+          direction: -1,
+          gridlines: {
+            color: '#1f1f1f',
+          },
+          minorGridlines: {
+            color: '#1d1d1d',
+          },
+        },
+        hAxis: {
+          textStyle: {
+            color: '#ffffff',
+          },
+        },
+        pointsVisible: false,
+        height: 700,
+        legend: {position: 'none'},
+        explorer: {
+          axis: 'horizontal',
+          keepInBounds: true,
+          maxZoomIn: 0.05,
+          maxZoomOut: 0.5,
+        },
+      }),
+  );
+}
 
 const btnUpload =
   /** @type {HTMLButtonElement} */
@@ -192,5 +177,5 @@ btnUpload.addEventListener('click', async () => {
 
   const collatedRecords = collateStreamingData(records);
 
-  populateChart(collatedRecords, chart);
+  populateChart(collatedRecords);
 });
