@@ -27,6 +27,7 @@ import java.util.List;
 public class YoutubeServlet extends HttpServlet {
 
     static final String DEFAULT_NUM_VIDS = "10";
+    static int totalMusic = 0;
 
     /**
      * makes http request of youtube api to retrieve topics of liked videos, 
@@ -75,21 +76,34 @@ public class YoutubeServlet extends HttpServlet {
         }
 
         if (!containsGenre) {
+            // check if equal to "Music"
             genreCountList.add(new VideoGenreCount(topic, 1));
         }
     }
 
     /**
      * checks whether topic is categorized as music
-     * by checking if the last word is "music" or "Music"
+     * and whether it has other 
      * @param topic identifies youtube video category e.g. Knowledge or Pop music
-     * @return whether topic is categorized as music
+     * @return 0 is topic is "Music", 1 if topic is a music category (Pop Music), 
+     *        -1 if topic is not music
      */
-    protected Boolean isMusic(String topic) {
-        String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);
-        return lastWord.equalsIgnoreCase("music");
-    }
+    protected int getMusicCategory(String topic) {
+        if (topic.equals("Music")) {
+            System.out.println(topic + " = " + "0");
+            return 0;
+        }
 
+        String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);
+        if (lastWord.equalsIgnoreCase("music")) {
+            System.out.println(topic + " = " + "1");
+            return 1;
+        }
+
+        System.out.println(topic + " = " + "-1");
+        return -1;
+    }
+     
     /**
      * parses through youtube liked videos json string,
      * updates hash map to contain frequency count of each music genre
@@ -99,7 +113,6 @@ public class YoutubeServlet extends HttpServlet {
      */
     protected void updateMusicCount(JsonObject youtubeJsonObj, List<VideoGenreCount> genreCountList) {
         JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
-
         for (int i = 0; i < videos.size(); i++) {
             JsonObject video = videos.get(i).getAsJsonObject();
             JsonObject topicDetails = video.getAsJsonObject("topicDetails");
@@ -110,7 +123,9 @@ public class YoutubeServlet extends HttpServlet {
             }
 
             JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
-
+            
+            boolean isMusic = false;
+            int classifiedMusicCount = 0;
             for (int j = 0; j < topicCategories.size(); j++) {
                 // extract music genre out of wikipedia links of topic categories
                 String link = topicCategories.get(j).toString();
@@ -118,11 +133,25 @@ public class YoutubeServlet extends HttpServlet {
                 topic = topic.replaceAll("\"", "");
                 topic = topic.replaceAll("_", " ");
 
-                if (!isMusic(topic)) {
-                    break;
-                }
+                int musicCat = getMusicCategory(topic);
+                if (musicCat == 0) {
+                    // topic is Music so we don't update genreCount
+                    isMusic = true;
+                    totalMusic++;
+                } else if (musicCat == 1) {
 
-                updateGenre(topic, genreCountList);
+                    isMusic = true;                    
+                    classifiedMusicCount++;
+                    updateGenre(topic, genreCountList);                   
+                } else {
+                    continue;
+                }
+            }  
+
+            System.out.println(classifiedMusicCount);
+            if (isMusic && classifiedMusicCount == 0) {
+                // video only classified as Music so we update as "Other music"
+                updateGenre("Other music", genreCountList);
             }
         }
         return;
@@ -157,12 +186,13 @@ public class YoutubeServlet extends HttpServlet {
         }
 
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString(), numVideos);
+        System.out.println(youtubeResBody);
         JsonObject youtubeJsonObj = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
         List<VideoGenreCount> genreCountList = new ArrayList<>();
         updateMusicCount(youtubeJsonObj, genreCountList);
         int totalLiked = getTotalResults(youtubeJsonObj);
-        YoutubeGenres jsonRes = new YoutubeGenres(genreCountList, totalLiked);
+        YoutubeGenres jsonRes = new YoutubeGenres(genreCountList, totalLiked, totalMusic);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
