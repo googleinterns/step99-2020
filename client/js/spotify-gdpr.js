@@ -13,7 +13,6 @@ const {c3, zip} = window;
 
 zip.workerScriptsPath = '/js/zip/';
 
-
 /**
  * Populates `chart` with historical track data derived from `collatedRecords`.
  *
@@ -105,7 +104,9 @@ async function populateChart(collatedRecords, chart) {
     }));
 
     // yield control to browser so it doesn't hang
-    await sleep(400);
+    // browser will perform any pending updates (clicks, animations, etc)
+    // then return to this loop ASAP
+    await sleep(0);
   }
 }
 
