@@ -26,7 +26,7 @@ import java.util.List;
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
 
-    static final int DEFAULT_NUM_VIDS = "10";
+    static final int DEFAULT_NUM_VIDS = 10;
     static int totalMusic = 0;
 
     /**
@@ -85,7 +85,7 @@ public class YoutubeServlet extends HttpServlet {
      * checks whether topic is categorized as music
      * and whether it has other 
      * @param topic identifies youtube video category e.g. Knowledge or Pop music
-     * @return 0 is topic is "Music", 1 if topic is a music category (Pop Music), 
+     * @return 0 is topic is "Music", 1 if topic is a specific music category (Pop Music), 
      *        -1 if topic is not music
      */
     protected int getMusicCategory(String topic) {
@@ -105,14 +105,13 @@ public class YoutubeServlet extends HttpServlet {
     }
      
     /**
-     * parses through youtube liked videos json string,
+     * parses through youtube liked videos json array,
      * updates hash map to contain frequency count of each music genre
-     * @param youtubeResBody json response of youtube liked videos
+     * @param videos json array of youtube liked videos
      * @param genreCountList list of that contains VideoMusicGenre obj (freq count of each music genre)
      * @param numVideos maximum number of videos to retrieve
      */
-    protected void updateMusicCount(JsonObject youtubeJsonObj, List<VideoGenreCount> genreCountList) {
-        JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
+    protected void updateMusicCount(JsonArray videos, List<VideoGenreCount> genreCountList) {
         for (int i = 0; i < videos.size(); i++) {
             JsonObject video = videos.get(i).getAsJsonObject();
             JsonObject topicDetails = video.getAsJsonObject("topicDetails");
@@ -190,7 +189,8 @@ public class YoutubeServlet extends HttpServlet {
         JsonObject youtubeJsonObj = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
         List<VideoGenreCount> genreCountList = new ArrayList<>();
-        updateMusicCount(youtubeJsonObj, genreCountList);
+        JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
+        updateMusicCount(videos, genreCountList);
         int totalLiked = getTotalResults(youtubeJsonObj);
         YoutubeGenres jsonRes = new YoutubeGenres(genreCountList, totalLiked, totalMusic);
 
