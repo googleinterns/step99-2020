@@ -95,7 +95,7 @@ function buildCircle() {
 
   const outsideCircle = createSVGElement('circle');
 
-  outsideCircle.setAttribute('class', 'circle_animation');
+  outsideCircle.setAttribute('class', 'circle-animation');
   outsideCircle.setAttribute('r', '70');
   outsideCircle.setAttribute('cx', '50%');
   outsideCircle.setAttribute('cy', '50%');
