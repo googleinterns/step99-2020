@@ -19,15 +19,18 @@ async function fetchResponse() {
 /**
  * Handles populating all elements on the screen
  *
- * @param {object} json the json object
+ * @param {object} json the json object from backend
  */
 function populationHandler(json) {
   const charts = document.getElementById('charts');
   const list = document.getElementById('list');
+  const card = document.getElementById('videocard-wrapper');
 
   removeAllChildNodes(charts);
   removeAllChildNodes(list);
+  removeAllChildNodes(card);
   populateDonutCharts(json);
+  showCommentHeader();
   const time = populateComments(json);
   determineOverall(json, time*1500);
 }
@@ -35,22 +38,64 @@ function populationHandler(json) {
 /**
  * Puts the charts on the screen
  *
- * @param {object} json the json object
+ * @param {object} json the json object from backend
  */
 function populateDonutCharts(json) {
   const map = json.perspectiveMap;
   for (const key in map) {
-    if (key) { // this is here bc of the linter
+    if (Object.prototype.hasOwnProperty.call(map, key)) {
       // Convert to string for type compatibility
-      addDonutChart(key, String(100 - map[key]*100));
+      addDonutChart(key, (100 - map[key]*100).toString());
     }
   }
 }
 
 /**
+ * Creates the card that displays on a result match
+ *
+ * @param {object} json the json object from backend
+ */
+function createCard(json) {
+  const id = json.videoId;
+  const name = json.videoInfo.name;
+  const channel = json.videoInfo.channel;
+
+  const el = document.getElementById('videocard-wrapper');
+
+  const card = document.createElement('div');
+  card.setAttribute('id', 'videocard');
+
+  const img = document.createElement('img');
+  img.classList = 'card-image';
+  img.setAttribute('src', `https://img.youtube.com/vi/${id}/sddefault.jpg`);
+  card.appendChild(img);
+
+  const videoInfo = document.createElement('div');
+
+  const link = document.createElement('a');
+  link.setAttribute('href', `https://www.youtube.com/watch?v=${id}`);
+  link.setAttribute('target', '_blank');
+
+  const title = document.createElement('h3');
+  title.setAttribute('id', 'card-title');
+  title.innerText = name;
+
+  link.appendChild(title);
+  videoInfo.appendChild(link);
+
+  const author = document.createElement('p');
+  author.setAttribute('id', 'card-author');
+  author.innerText = channel;
+  videoInfo.appendChild(author);
+
+  card.appendChild(videoInfo);
+  el.appendChild(card);
+}
+
+/**
  * Puts the comments on the screen
  *
- * @param {object} json the json object
+ * @param {object} json the json object from backend
  * @returns {number} the stop index so that overall knows when to come in
  */
 function populateComments(json) {
@@ -69,7 +114,7 @@ function populateComments(json) {
 /**
  * Determines the overall sentiment and adds it to the screen
  *
- * @param {object} json the json object
+ * @param {object} json the json object from backend
  * @param {number} time the time for the text to come in
  */
 function determineOverall(json, time) {
@@ -92,6 +137,7 @@ function determineOverall(json, time) {
 
   setTimeout(() => {
     addFeedbackResult(isClear + tone);
+    createCard(json);
   }, time);
 }
 
@@ -104,6 +150,16 @@ function removeAllChildNodes(parent) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild);
   }
+}
+
+/**
+ * Toggles the comment header
+ *
+ */
+function showCommentHeader() {
+  const el = document.getElementById('commentHeader');
+  el.classList.toggle('hidden');
+  el.classList.toggle('fade');
 }
 
 /**
@@ -127,7 +183,7 @@ function addFeedbackResult(result) {
   el.classList = 'center fade';
   const text = document.createElement('h1');
   text.setAttribute('id', 'overall');
-  text.innerHTML = 'Overall Response:\n ' + result;
+  text.innerHTML = 'Overall Response: ' + result;
   el.appendChild(text);
 
   const list = document.getElementById('list');
@@ -147,9 +203,7 @@ function addDonutChart(str, percent) {
   div.className = 'item donut';
   div.style.setProperty('--percent', percent);
 
-  // Convert back to actual percentage
-  const percentString = String(100 - Number.parseInt(percent));
-
+  const percentString = (100 - parseInt(percent)).toString();
   const header = document.createElement('h2');
   header.innerText = str + ': ' + percentString.substring(0, 2) + '%';
   div.appendChild(header);

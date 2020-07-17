@@ -28,8 +28,10 @@ public class AnalysisServlet extends HttpServlet {
     // Use like this: {url_parameter, value}
     HashMap<String, String> videoArgs = new HashMap<>();
     HashMap<String, String> commentArgs = new HashMap<>();
+    HashMap<String, String> nameArgs = new HashMap<>();
 
     videoArgs.put("q", videoName);
+    videoArgs.put("type", "video");
     String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
     String videoId = getVideoId(videoIdJson);
 
@@ -40,19 +42,25 @@ public class AnalysisServlet extends HttpServlet {
     ArrayList<String> commentArray = retrieveComments(commentsJson);
     String cumulativeComments = convertToString(commentArray);
 
+    nameArgs.put("part", "snippet");
+    nameArgs.put("id", videoId);
+    String nameJson = new YoutubeRequest("videos", nameArgs).getResult();
+    NameAndChannel videoInfo = getNameAndChannel(nameJson);
+
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
 
     String json =
-        convertToJsonUsingGson(new AnalysisTrio(perspectiveMap, commentsSentiment, commentArray));
+        convertToJsonUsingGson(
+            new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
 
   /** @param arr the array that will be converted to json */
-  private String convertToJsonUsingGson(AnalysisTrio trio) {
+  private String convertToJsonUsingGson(AnalysisGroup group) {
     Gson gson = new Gson();
-    String json = gson.toJson(trio);
+    String json = gson.toJson(group);
     return json;
   }
 
@@ -118,6 +126,24 @@ public class AnalysisServlet extends HttpServlet {
     }
 
     return perspectiveResults;
+  }
+
+  private NameAndChannel getNameAndChannel(String response) {
+
+    // Accessing the items JSON Array
+    JsonElement jElement = JsonParser.parseString(response);
+    JsonObject jObject = jElement.getAsJsonObject();
+    JsonArray itemsArray = jObject.getAsJsonArray("items");
+    JsonElement el = itemsArray.get(0);
+
+    // Grabbing the name and channel
+    JsonObject object = el.getAsJsonObject();
+    JsonObject data = object.getAsJsonObject("snippet");
+    JsonElement videoName = data.get("title");
+    JsonElement channelName = data.get("channelTitle");
+
+    return new NameAndChannel(
+        videoName.toString().replace("\"", ""), channelName.toString().replace("\"", ""));
   }
 
   private String getVideoId(String response) {
