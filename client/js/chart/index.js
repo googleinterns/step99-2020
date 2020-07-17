@@ -1,7 +1,7 @@
 import {SVG_NS} from '../util.js';
 
 /**
- * Creates an SVG chart inside of `el` with the given data.
+ * Creates an SVG chart inside of `container` with the given data.
  *
  * @param {HTMLElement} container The container element for this chart.
  * @param {Map<string, number[]>} histories The ranking history for each
@@ -50,6 +50,8 @@ function createSeries(history, color) {
   let start = 0;
   let end = 0;
 
+  // find segments of history that don't contain null and create a 'run' for
+  // each one
   while (end < history.length) {
     // go until we find a non-null point
     while (start < history.length && history[start] === null) {
