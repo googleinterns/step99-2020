@@ -13,8 +13,7 @@ const DEFAULT_NUM_VIDS = 10;
  * @returns {number} num videos user wants to retrieve
  */
 function getNumVids() {
-  const numVideos = numVideosInput.value;
-  return numVideos || DEFAULT_NUM_VIDS;
+  return numVideosInput.value || DEFAULT_NUM_VIDS;
 }
 
 /**

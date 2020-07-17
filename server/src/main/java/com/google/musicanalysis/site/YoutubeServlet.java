@@ -24,7 +24,6 @@ import java.util.HashMap;
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
 
-    static final String DEFAULT_NUM_VIDS = "10";
     /**
      * makes http request of youtube api to retrieve topics of liked videos, 
      *  gets json string of youtube response
