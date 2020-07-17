@@ -26,7 +26,7 @@ import java.util.List;
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
 
-    static final String DEFAULT_NUM_VIDS = "10";
+    static final int DEFAULT_NUM_VIDS = "10";
     static int totalMusic = 0;
 
     /**
@@ -180,7 +180,7 @@ public class YoutubeServlet extends HttpServlet {
         }
 
         String numVideosParam = req.getParameter("num_videos");
-        int numVideos = Integer.parseInt(DEFAULT_NUM_VIDS);
+        int numVideos = DEFAULT_NUM_VIDS;
         if (numVideosParam != null) {
             numVideos = Integer.parseInt(numVideosParam);
         }
