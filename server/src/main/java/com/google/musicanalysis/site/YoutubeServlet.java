@@ -23,6 +23,7 @@ import java.util.HashMap;
 /** Servlet handles youtube api call to get genres of liked videos */
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
+
     /**
      * makes http request of youtube api to retrieve topics of liked videos, 
      *  gets json string of youtube response
@@ -69,8 +70,9 @@ public class YoutubeServlet extends HttpServlet {
      * updates hash map to contain frequency count of each music genre
      * @param youtubeResBody json response of youtube liked videos
      * @param genreCount hash map of frequency count of each music genre
+     * @param numVideos maximum number of videos to retrieve
      */
-    protected void updateMusicCount(String youtubeResBody, HashMap<String, Integer> genreCount) {
+    protected void updateMusicCount(String youtubeResBody, HashMap<String, Integer> genreCount, int numVideos) {
         JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
         JsonArray videos = jObject.getAsJsonArray("items");
 
@@ -116,8 +118,10 @@ public class YoutubeServlet extends HttpServlet {
         }
 
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString());
+        int numVideos = Integer.parseInt(req.getParameter("num_videos"));
+
         var genreCount = new HashMap<String, Integer>();
-        updateMusicCount(youtubeResBody, genreCount);
+        updateMusicCount(youtubeResBody, genreCount, numVideos);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
