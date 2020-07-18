@@ -89,7 +89,6 @@ public class YoutubeServlet extends HttpServlet {
         }
 
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString(), numVideos);
-        System.out.println(youtubeResBody);
         JsonObject youtubeJsonObj = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
         List<VideoGenreCount> genreCountList = new ArrayList<>();

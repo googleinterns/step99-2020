@@ -32,17 +32,19 @@ public class YoutubeGenres {
    */
   protected int getMusicCategory(String topic) {
       if (topic.equals("Music")) {
-          System.out.println(topic + " = " + "0");
           return 0;
       }
 
-      String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);
-      if (lastWord.equalsIgnoreCase("music")) {
-          System.out.println(topic + " = " + "1");
+      String firstWord = topic;
+      if (topic.indexOf(" ") != -1) {
+        firstWord = topic.substring(0, topic.indexOf(" "));
+      }
+
+      String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);   
+      if (lastWord.equalsIgnoreCase("music") || firstWord.equalsIgnoreCase("music")) {
           return 1;
       }
 
-      System.out.println(topic + " = " + "-1");
       return -1;
   }
 
@@ -110,7 +112,6 @@ public class YoutubeGenres {
             }
         } 
 
-        System.out.println(specificMusicCount);
         if (isMusic && specificMusicCount == 0) {
             // video only classified as Music so we update as "Other music"
             this.updateGenre("Other music");
