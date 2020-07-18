@@ -17,9 +17,18 @@
 
       <h2 class="header">Get started</h2>
       <div id="get-started">
+        <button id="btn-data-upload" class="btn btn-big" type="button">
+          Upload your data
+        </button>
+
+        <input id="input-data-upload" type="file" accept=".zip,application/zip" />
+
         <button id="btn-get-started" class="btn btn-big" type="button">
           Sign in with Spotify
         </button>
+      </div>
+
+      <div id="chart">
       </div>
 
       <h2 class="header">How it works</h2>
@@ -48,5 +57,10 @@
         this permission</a> in order to search for songs.
       </p>
     </main>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script src="js/zip/zip.js"></script>
+    <script src="js/spotify-gdpr.js" type="module"></script>
   </body>
 </html>

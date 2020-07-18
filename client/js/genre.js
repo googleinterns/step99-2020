@@ -28,7 +28,7 @@ async function displayMusicGenre() {
   const response = await fetch(`/api/youtube?num_videos=${numVideos}`);
   if (response.status == 401) {
     // no oauth login so redirect
-    window.location.href = "/api/oauth/login/youtube";
+    window.location.href = '/api/oauth/login/youtube';
   }
 
   const genreCount = await response.text();
