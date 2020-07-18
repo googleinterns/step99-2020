@@ -1,42 +1,28 @@
 package com.google.musicanalysis.site;
+
 import java.util.ArrayList;
 import java.util.List;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.util.List;
+import java.lang.Math;
 
 /** contains final object that YoutubeServlet.java sends to frontend */
 public class YoutubeGenres {
   private List<VideoGenreCount> data;
   private final int totalLiked;
-  private final int totalMusic;
+  private int totalMusic = 0;
   private boolean isMusic;
+  private int maxGenreCount = 0;
 
-  public YoutubeGenres(List<VideoGenreCount> genreCountList, int totalLiked, int totalMusic) {
+  public YoutubeGenres(List<VideoGenreCount> genreCountList, int totalLiked) {
     this.data = genreCountList;
     this.totalLiked = totalLiked;
-    this.totalMusic = totalMusic;
   }
 
-  /**
- * checks whether topic is categorized as music
- * and whether it has other 
- * @param topic identifies youtube video category e.g. Knowledge or Pop music
- * @return 0 is topic is "Music", 1 if topic is a specific music category (Pop Music), 
- *        -1 if topic is not music
- */
-  protected int getMusicCategory(String topic) {
-      if (topic.equals("Music")) {
-          System.out.println(topic + " = " + "0");
-          return 0;
-      }
-
-      String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);
-      if (lastWord.equalsIgnoreCase("music")) {
-          System.out.println(topic + " = " + "1");
-          return 1;
-      }
-
-      System.out.println(topic + " = " + "-1");
-      return -1;
-  }
   /**
    * checks whether topic is categorized as music
    * and whether it has other 
@@ -71,21 +57,22 @@ public class YoutubeGenres {
           if (videoGenre.genre.equals(topic)) {
               containsGenre = true;
               videoGenre.count = videoGenre.count + 1;
+              this.maxGenreCount = Math.max(videoGenre.count, this.maxGenreCount);
           }
       }
 
       if (!containsGenre) {
           // check if equal to "Music"
           this.data.add(new VideoGenreCount(topic, 1));
+          this.maxGenreCount = Math.max(1, this.maxGenreCount);
       }
+
   }
 
     /**
    * parses through youtube liked videos json array,
    * updates hash map to contain frequency count of each music genre
    * @param videos json array of youtube liked videos
-   * @param genreCountList list of that contains VideoMusicGenre obj (freq count of each music genre)
-   * @param numVideos maximum number of videos to retrieve
    */
   protected void updateMusicCount(JsonArray videos) {
     for (int i = 0; i < videos.size(); i++) {
@@ -100,7 +87,7 @@ public class YoutubeGenres {
         JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
         
         boolean isMusic = false;
-        int classifiedMusicCount = 0;
+        int specificMusicCount = 0;
         for (int j = 0; j < topicCategories.size(); j++) {
             // extract music genre out of wikipedia links of topic categories
             String link = topicCategories.get(j).toString();
@@ -108,24 +95,25 @@ public class YoutubeGenres {
             topic = topic.replaceAll("\"", "");
             topic = topic.replaceAll("_", " ");
 
-            int musicCat = this.getMusicCategory(topic); // change to a switch statement
-            if (musicCat == 0) {
-                // topic is Music so we don't update genreCount
+            switch (this.getMusicCategory(topic)) {
+              case 0:
                 isMusic = true;
                 totalMusic++;
-            } else if (musicCat == 1) {
-                isMusic = true;                    
-                classifiedMusicCount++;
-                this.updateGenre(topic);                   
-            } else {
+                break;
+              case 1:
+                // topic is a specific music category so we update genre 
+                specificMusicCount++;
+                this.updateGenre(topic);
+                break;
+              case -1:
                 continue;
             }
         } 
 
-        System.out.println(classifiedMusicCount);
-        if (isMusic && classifiedMusicCount == 0) {
+        System.out.println(specificMusicCount);
+        if (isMusic && specificMusicCount == 0) {
             // video only classified as Music so we update as "Other music"
-            updateGenre("Other music", genreCountList);
+            this.updateGenre("Other music");
         }
     }
     return;

@@ -27,7 +27,6 @@ import java.util.List;
 public class YoutubeServlet extends HttpServlet {
 
     static final int DEFAULT_NUM_VIDS = 10;
-    static int totalMusic = 0;
 
     /**
      * makes http request of youtube api to retrieve topics of liked videos, 
@@ -94,10 +93,11 @@ public class YoutubeServlet extends HttpServlet {
         JsonObject youtubeJsonObj = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
         List<VideoGenreCount> genreCountList = new ArrayList<>();
-        JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
-        updateMusicCount(videos, genreCountList);
         int totalLiked = getTotalResults(youtubeJsonObj);
-        YoutubeGenres jsonRes = new YoutubeGenres(genreCountList, totalLiked, totalMusic);
+        YoutubeGenres jsonRes = new YoutubeGenres(genreCountList, totalLiked);
+
+        JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
+        jsonRes.updateMusicCount(videos);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
