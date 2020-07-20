@@ -84,21 +84,33 @@ function draw1() {
     .data(genre)
     .enter()
     .append('rect')
+    .attr('class', 'bar')
     .attr('x', x(0) )
     .attr('y', function(d) {
       return y(d.genre);
-    })
+    }); // TODO separate construction with display
+
+    svg.selectAll('.bar')
+    .transition()
+    .delay(function (d, i) { return 300 * (i + 1);}) // delays in succession
+    .duration(600)
     .attr('width', function(d) {
       return x(d.count);
     })
     .attr('height', y.bandwidth() )
     .attr('fill', '#69b3a2');
+
 }
 
 /**
  * function triggered on 2nd section
  */
 function draw2() {
+
+  svg.selectAll('.bar')
+    .transition()
+    .duration(0)
+    .attr('opacity', 0);
   console.log('draw2');
 }
 
