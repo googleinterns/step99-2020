@@ -34,9 +34,10 @@ public class AnalysisServlet extends HttpServlet {
 
     commentArgs.put("part", "snippet");
     commentArgs.put("videoId", input);
-    String commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
-
-    if (commentsJson.equals("unreadable")) {
+    String commentsJson;
+    try {
+      commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+    } catch (IOException err) {
       // We need to search for the id and get the comments again
       videoArgs.put("q", input);
       videoArgs.put("type", "video");
@@ -218,6 +219,10 @@ public class AnalysisServlet extends HttpServlet {
 
     for (String comment : comments) {
       comment = comment.replace("\"", "");
+      
+      if (comment.length() - 1 <= 0){
+          continue;
+      }
       // Make sure each comment is treated as its own sentence
       // Not sure char datatype works with regex so used String
       String lastCharacter = comment.substring(comment.length() - 1);
