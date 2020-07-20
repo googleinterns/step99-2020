@@ -41,6 +41,8 @@ export function createChart(container, histories, dates) {
   }
 
   historyEntries.forEach(([, history], index) => {
+    // each track is given one of 24 colours, which are spaced 15 degrees apart
+    // in hue
     const hue = index * 15 % 360;
     const color = `hsl(${hue},50%,50%)`;
     const series = createSeries(history, color);
