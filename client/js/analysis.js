@@ -10,10 +10,13 @@ window.onload = function() {
  */
 async function fetchResponse() {
   const param = document.getElementById('searchbar').value;
-  const response = await fetch(`/api/analysis?name=${param}`);
-  const value = await response.json();
-  console.log(value);
-  populationHandler(value);
+  try {
+    // see caching.js for this function
+    const response = await getData(`/api/analysis?name=${param}`);
+    populationHandler(response);
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 /**
