@@ -4,9 +4,9 @@ import java.util.HashMap;
 
 public class AnalysisPair {
   public final HashMap<String, String> perspectiveMap;
-  public final MagnitudeAndScore magnitudeAndScore;
+  public final NLPResult magnitudeAndScore;
 
-  public AnalysisPair(HashMap<String, String> perspectiveMap, MagnitudeAndScore magnitudeAndScore) {
+  public AnalysisPair(HashMap<String, String> perspectiveMap, NLPResult magnitudeAndScore) {
     this.perspectiveMap = perspectiveMap;
     this.magnitudeAndScore = magnitudeAndScore;
   }
