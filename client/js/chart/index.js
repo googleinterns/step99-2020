@@ -53,13 +53,13 @@ function createSeries(history, color) {
   // find segments of history that don't contain null and create a 'run' for
   // each one
   while (end < history.length) {
-    // go until we find a non-null point
+    // go until we find a non-null point, which is the beginning of a run
     while (start < history.length && history[start] === null) {
       start++;
     }
     end = start + 1;
 
-    // go until we find a null point
+    // go until we find a null point, which is the end of a run
     while (end < history.length && history[end] !== null) {
       end++;
     }
@@ -87,12 +87,12 @@ function createRun(history, start, end) {
   const points = history
       .slice(start, end)
       .map((val, idx) => ({
-        x: (idx + start) * RUN_SCALE_X, 
-        y: val * RUN_SCALE_Y
+        x: (idx + start) * RUN_SCALE_X,
+        y: val * RUN_SCALE_Y,
       }));
 
   const pointsStr = points
-      .map(({x, y}) => `${x},${y}`)
+      .map(({x, y}) => `${x}, ${y}`)
       .join(' ');
 
   // line that is displayed
