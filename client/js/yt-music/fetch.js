@@ -38,6 +38,10 @@ async function displayMusicGenre() {
 
   window.data = JSON.parse(genreCount);
   console.log(window.data);
+
+  // call function in section.js here
+  // - render charts -- hidden
+  // page doesn't load until everything is loading
 }
 
 /**

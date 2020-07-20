@@ -21,41 +21,6 @@ const svg = d3.select('#vis')
   .attr('transform',
     'translate(' + margin.left + ',' + margin.top + ')');
 
-console.log(window.data);
-const genre = window.data.data;
-
-// Add X axis
-const x = d3.scaleLinear()
-  .domain([0, 6]) // x range (changed)
-  .range([0, width]);
-svg.append('g')
-  .attr('transform', 'translate(0,' + height + ')')
-  .call(d3.axisBottom(x))
-  .selectAll('text')
-  .attr('transform', 'translate(-10,0)rotate(-45)')
-  .style('text-anchor', 'end');
-
-// Y axis
-const y = d3.scaleBand()
-  .range([0, height])
-  .domain(genre.map(function(d) {
-    return d.genre;
-  }))
-  .padding(.1);
-svg.append('g')
-  .call(d3.axisLeft(y));
-
-// Bars
-svg.selectAll('myRect')
-  .data(genre)
-  .enter()
-  .append('rect')
-  .attr('class', 'bar')
-  .attr('x', x(0) )
-  .attr('y', function(d) {
-    return y(d.genre);
-  }); // TODO separate construction with display
-
 /**
  * every time the user scrolls, we receive a new index everytime the user
  * scrolls. First find all the irrelevant sections, and reduce their opacity.
@@ -93,6 +58,42 @@ const activationFunctions = [
  * displays bar chart in section 1
  */
 function draw1() {
+
+
+  console.log(window.data);
+  const genre = window.data.data;
+
+  // Add X axis
+  const x = d3.scaleLinear()
+    .domain([0, 6]) // x range (changed)
+    .range([0, width]);
+  svg.append('g')
+    .attr('transform', 'translate(0,' + height + ')')
+    .call(d3.axisBottom(x))
+    .selectAll('text')
+    .attr('transform', 'translate(-10,0)rotate(-45)')
+    .style('text-anchor', 'end');
+
+  // Y axis
+  const y = d3.scaleBand()
+    .range([0, height])
+    .domain(genre.map(function(d) {
+      return d.genre;
+    }))
+    .padding(.1);
+  svg.append('g')
+    .call(d3.axisLeft(y));
+
+  // Bars
+  svg.selectAll('myRect')
+    .data(genre)
+    .enter()
+    .append('rect')
+    .attr('class', 'bar')
+    .attr('x', x(0) )
+    .attr('y', function(d) {
+      return y(d.genre);
+    }); // TODO separate construction with display
   svg.selectAll('.bar')
     .transition()
     .delay(function (d, i) { return 300 * (i + 1);}) // delays in succession
