@@ -3,12 +3,12 @@ package com.google.musicanalysis.types;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class AnalysisTrio {
+public class CommentAnalysis {
   public final HashMap<String, String> perspectiveMap;
   public final NLPResult magnitudeAndScore;
   public final ArrayList<String> commentArray;
 
-  public AnalysisTrio(
+  public CommentAnalysis(
       HashMap<String, String> perspectiveMap,
       NLPResult magnitudeAndScore,
       ArrayList<String> commentArray) {
