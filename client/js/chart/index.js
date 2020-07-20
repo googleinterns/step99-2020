@@ -84,9 +84,15 @@ function createSeries(history, color) {
 function createRun(history, start, end) {
   const runContainer = document.createElementNS(SVG_NS, 'g');
 
-  const pointsStr = history
+  const points = history
       .slice(start, end)
-      .map((val, idx) => `${(idx + start) * RUN_SCALE_X},${val * RUN_SCALE_Y}`)
+      .map((val, idx) => ({
+        x: (idx + start) * RUN_SCALE_X, 
+        y: val * RUN_SCALE_Y
+      }));
+
+  const pointsStr = points
+      .map(({x, y}) => `${x},${y}`)
       .join(' ');
 
   // line that is displayed
@@ -107,11 +113,11 @@ function createRun(history, start, end) {
   endCap.setAttribute('class', 'series-run-cap');
 
   startCap.setAttribute('r', '5');
-  startCap.setAttribute('cx', start * RUN_SCALE_X + 'px');
-  startCap.setAttribute('cy', history[start] * RUN_SCALE_Y + 'px');
+  startCap.setAttribute('cx', points[0].x + 'px');
+  startCap.setAttribute('cy', points[0].y + 'px');
   endCap.setAttribute('r', '5');
-  endCap.setAttribute('cx', (end - 1) * RUN_SCALE_X + 'px');
-  endCap.setAttribute('cy', history[end - 1] * RUN_SCALE_Y + 'px');
+  endCap.setAttribute('cx', points[points.length - 1].x + 'px');
+  endCap.setAttribute('cy', points[points.length - 1].y + 'px');
 
   runContainer.append(startCap, line, touchTarget, endCap);
   return runContainer;
