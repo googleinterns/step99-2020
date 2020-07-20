@@ -7,6 +7,19 @@ export class GdprTable {
    */
   constructor(chart, histories, dates) {
     this.table = document.createElement('table');
+    this.table.classList.add('gdpr-table');
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = 
+      '<th class="gdpr-table-header gdpr-table-header-rank">Rank</th>' +
+      '<th class="gdpr-table-header gdpr-table-header-track">Track</th>';
+
+    const tbody = document.createElement('tbody');
+    tbody.classList.add('gdpr-table-body');
+
+    this.table.append(thead, tbody);
+
+    this.tbody = tbody;
     this.chart = chart;
     this.histories = histories;
     this.dates = dates;
@@ -49,22 +62,26 @@ export class GdprTable {
     ranking.sort((a, b) => a.rank < b.rank ? -1 : 1);
 
     // update the table
-    this.table.innerHTML = '';
+    this.tbody.innerHTML = '';
 
     for (const {key, rank, selected} of ranking) {
       const row = document.createElement('tr');
+
+      row.classList.add('gdpr-table-track');
+      row.classList.toggle('gdpr-table-track-selected', selected);
+
       const rankCell = document.createElement('td');
       const keyCell = document.createElement('td');
 
-      row.classList.add('gdpr-track');
-      row.classList.toggle('gdpr-track-selected', selected);
+      rankCell.classList.add('gdpr-table-track-rank');
+      keyCell.classList.add('gdpr-table-track-track');
 
       rankCell.innerText = `#${rank}`;
       keyCell.innerText = key;
 
       row.append(rankCell, keyCell);
 
-      this.table.append(row);
+      this.tbody.append(row);
     }
   }
 
