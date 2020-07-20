@@ -1,3 +1,6 @@
+const COMMENT_APPEARANCE_TIME = 1500;
+const COMMENT_TO_STOP_AT = 5;
+
 window.onload = function() {
   // Listen for submission click
   const formSubmit = document.getElementById('sendbutton');
@@ -9,40 +12,44 @@ window.onload = function() {
  *
  */
 async function fetchResponse() {
-  const param = document.getElementById('searchbar').value;
-  const response = await fetch(`/api/analysis?name=${param}`);
-  const value = await response.json();
-  console.log(value);
-  populationHandler(value);
+  const videoQuery = document.getElementById('searchbar').value;
+  const response = await fetch(`/api/analysis?name=${videoQuery}`);
+  const responseJson = await response.json();
+  populationHandler(responseJson);
 }
 
 /**
  * Handles populating all elements on the screen
  *
- * @param {object} json the json object
+ * @param {object} videoAnalysis the object returned from the HTTP request
+ * which contains all of the data.
  */
-function populationHandler(json) {
+function populationHandler(videoAnalysis) {
   const charts = document.getElementById('charts');
   const list = document.getElementById('list');
 
   removeAllChildNodes(charts);
   removeAllChildNodes(list);
-  populateDonutCharts(json);
-  const time = populateComments(json);
-  determineOverall(json, time*1500);
+  populateDonutCharts(videoAnalysis.perspectiveMap);
+  // The +1 allows for determineOverall() to run correctly.
+  const time = renderComments(videoAnalysis.commentArray) + 1;
+  const overall = determineOverall(videoAnalysis.magnitudeAndScore.magnitude,
+      videoAnalysis.magnitudeAndScore.score);
+  setTimeout(() => {
+    addFeedbackResult(overall);
+  }, time*COMMENT_APPEARANCE_TIME);
 }
 
 /**
  * Puts the charts on the screen
  *
- * @param {object} json the json object
+ * @param {Map<string, number>} map the map from the videoAnalysis object
  */
-function populateDonutCharts(json) {
-  const map = json.perspectiveMap;
+function populateDonutCharts(map) {
   for (const key in map) {
-    if (key) { // this is here bc of the linter
+    if (Object.prototype.hasOwnProperty.call(map, key)) {
       // Convert to string for type compatibility
-      addDonutChart(key, String(100 - map[key]*100));
+      addDonutChart(key, map[key]);
     }
   }
 }
@@ -50,31 +57,29 @@ function populateDonutCharts(json) {
 /**
  * Puts the comments on the screen
  *
- * @param {object} json the json object
+ * @param {Array} array the comment array from the json response
  * @returns {number} the stop index so that overall knows when to come in
  */
-function populateComments(json) {
-  const array = json.commentArray;
-  const stopIndex = array.length < 5 ? array.length : 5;
-  for (let i = 0; i < stopIndex; i++) {
+function renderComments(array) {
+  const totalComments = Math.min(COMMENT_TO_STOP_AT, array.length);
+  for (let i = 0; i < totalComments; i++) {
+    const filteredValue = array[i].replace('\n', '');
     setTimeout(() => {
-      // removes all linebreaks
-      addListElement(array[i].replace('\n', ''));
-    }, (i+1) * 1500);
+      addListElement(filteredValue);
+    }, (i+1) * COMMENT_APPEARANCE_TIME);
   }
   // so that the overall knows when to come in
-  return stopIndex+1;
+  return totalComments;
 }
 
 /**
  * Determines the overall sentiment and adds it to the screen
  *
- * @param {object} json the json object
- * @param {number} time the time for the text to come in
+ * @param {number} magnitude the magnitude returned by Perspective API
+ * @param {number} score the score returned by Perspective API
+ * @returns {string} a string describing the magnitude and score in words
  */
-function determineOverall(json, time) {
-  const magnitude = json.magnitudeAndScore.magnitude;
-  const score = json.magnitudeAndScore.score;
+function determineOverall(magnitude, score) {
   let isClear = '';
   let tone = '';
 
@@ -90,9 +95,7 @@ function determineOverall(json, time) {
     tone = 'MIXED';
   }
 
-  setTimeout(() => {
-    addFeedbackResult(isClear + tone);
-  }, time);
+  return isClear + tone;
 }
 
 /**
@@ -143,12 +146,15 @@ function addFeedbackResult(result) {
 function addDonutChart(str, percent) {
   const div = document.createElement('div');
 
+  // Conversion math for CSS
+  percent = 100 - percent*100;
+
   div.setAttribute('id', 'a-chart');
   div.className = 'item donut';
-  div.style.setProperty('--percent', percent);
+  div.style.setProperty('--percent', percent.toString());
 
   // Convert back to actual percentage
-  const percentString = String(100 - Number.parseInt(percent));
+  const percentString = (100 - percent).toString();
 
   const header = document.createElement('h2');
   header.innerText = str + ': ' + percentString.substring(0, 2) + '%';
@@ -168,6 +174,8 @@ function addDonutChart(str, percent) {
 
 /**
  * builds the circle parts of the donut charts
+ *
+ * @returns {SVGElement} the circle element
  */
 function buildCircle() {
   const g = createSVGElement('g');
@@ -202,6 +210,7 @@ function buildCircle() {
  * Helper function that creates an SVG element
  *
  * @param {string} el the string for the svg element
+ * @returns {SVGElement} the svg element
  */
 function createSVGElement(el) {
   return document.createElementNS('http://www.w3.org/2000/svg', el);
