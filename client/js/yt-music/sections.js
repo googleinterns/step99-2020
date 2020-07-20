@@ -7,6 +7,55 @@ scroll();
 
 let lastIndex; let activeIndex = 0;
 
+// set the dimensions and margins of the graph
+const margin = {top: 20, right: 30, bottom: 40, left: 90};
+const width = 460 - margin.left - margin.right;
+const height = 400 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+const svg = d3.select('#vis')
+  .append('svg')
+  .attr('width', width + margin.left + margin.right)
+  .attr('height', height + margin.top + margin.bottom)
+  .append('g')
+  .attr('transform',
+    'translate(' + margin.left + ',' + margin.top + ')');
+
+console.log(window.data);
+const genre = window.data.data;
+
+// Add X axis
+const x = d3.scaleLinear()
+  .domain([0, 6]) // x range (changed)
+  .range([0, width]);
+svg.append('g')
+  .attr('transform', 'translate(0,' + height + ')')
+  .call(d3.axisBottom(x))
+  .selectAll('text')
+  .attr('transform', 'translate(-10,0)rotate(-45)')
+  .style('text-anchor', 'end');
+
+// Y axis
+const y = d3.scaleBand()
+  .range([0, height])
+  .domain(genre.map(function(d) {
+    return d.genre;
+  }))
+  .padding(.1);
+svg.append('g')
+  .call(d3.axisLeft(y));
+
+// Bars
+svg.selectAll('myRect')
+  .data(genre)
+  .enter()
+  .append('rect')
+  .attr('class', 'bar')
+  .attr('x', x(0) )
+  .attr('y', function(d) {
+    return y(d.genre);
+  }); // TODO separate construction with display
+
 /**
  * every time the user scrolls, we receive a new index everytime the user
  * scrolls. First find all the irrelevant sections, and reduce their opacity.
@@ -38,59 +87,13 @@ const activationFunctions = [
   draw4,
   draw5,
 ];
-// set the dimensions and margins of the graph
-const margin = {top: 20, right: 30, bottom: 40, left: 90};
-const width = 460 - margin.left - margin.right;
-const height = 400 - margin.top - margin.bottom;
 
-// append the svg object to the body of the page
-const svg = d3.select('#vis')
-  .append('svg')
-  .attr('width', width + margin.left + margin.right)
-  .attr('height', height + margin.top + margin.bottom)
-  .append('g')
-  .attr('transform',
-    'translate(' + margin.left + ',' + margin.top + ')');
 
 /**
  * displays bar chart in section 1
  */
 function draw1() {
-  const genre = window.data.data;
-  console.log(genre);
-  // Add X axis
-  const x = d3.scaleLinear()
-    .domain([0, 6]) // x range (changed)
-    .range([0, width]);
-  svg.append('g')
-    .attr('transform', 'translate(0,' + height + ')')
-    .call(d3.axisBottom(x))
-    .selectAll('text')
-    .attr('transform', 'translate(-10,0)rotate(-45)')
-    .style('text-anchor', 'end');
-
-  // Y axis
-  const y = d3.scaleBand()
-    .range([0, height])
-    .domain(genre.map(function(d) {
-      return d.genre;
-    }))
-    .padding(.1);
-  svg.append('g')
-    .call(d3.axisLeft(y));
-
-  // Bars
-  svg.selectAll('myRect')
-    .data(genre)
-    .enter()
-    .append('rect')
-    .attr('class', 'bar')
-    .attr('x', x(0) )
-    .attr('y', function(d) {
-      return y(d.genre);
-    }); // TODO separate construction with display
-
-    svg.selectAll('.bar')
+  svg.selectAll('.bar')
     .transition()
     .delay(function (d, i) { return 300 * (i + 1);}) // delays in succession
     .duration(600)
@@ -107,10 +110,10 @@ function draw1() {
  */
 function draw2() {
 
-  svg.selectAll('.bar')
-    .transition()
-    .duration(0)
-    .attr('opacity', 0);
+  // svg.selectAll('.bar')
+  //   .transition()
+  //   .duration(0)
+  //   .attr('opacity', 0);
   console.log('draw2');
 }
 
