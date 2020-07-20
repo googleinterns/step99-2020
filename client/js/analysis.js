@@ -1,12 +1,16 @@
+const COMMENT_APPEARANCE_TIME = 1500;
+const TOTAL_COMMENTS_TO_DISPLAY = 6;
+const TOTAL_COMMENTS_TIME = COMMENT_APPEARANCE_TIME * TOTAL_COMMENTS_TO_DISPLAY;
+
 window.onload = function() {
   for (let i = 1; i < 6; i++) {
     setTimeout(() => {
       addListElement(i);
-    }, i * 1500);
+    }, i * COMMENT_APPEARANCE_TIME);
   }
   setTimeout(() => {
     addFeedbackResult('POSITIVE');
-  }, 9000);
+  }, TOTAL_COMMENTS_TO_DISPLAY);
 
   for (let i = 0; i < 6; i++) {
     const values = [
@@ -17,7 +21,9 @@ window.onload = function() {
       'THREAT',
       'FLIRTATION',
     ];
-    addDonutChart(values[i], Math.floor(Math.random() * 61) + 30);
+    // Mock the data with a number between 30% and 60% for now.
+    const chartFullness = Math.floor(Math.random() * 61 + 30);
+    addDonutChart(values[i], chartFullness);
   }
 };
 
@@ -100,7 +106,7 @@ function buildCircle() {
   outsideCircle.setAttribute('cx', '50%');
   outsideCircle.setAttribute('cy', '50%');
   outsideCircle.setAttribute('stroke-width', '25');
-  outsideCircle.setAttribute('stroke', '#ff1493'); // ff073a is good too
+  outsideCircle.setAttribute('stroke', '#ff1493');
   outsideCircle.setAttribute('fill', 'none');
   outsideCircle.setAttribute('pathLength', '100');
 
