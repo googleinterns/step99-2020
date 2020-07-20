@@ -19,13 +19,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.annotation.WebServlet;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Servlet handles youtube api call to get genres of liked videos */
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
 
-    static final String DEFAULT_NUM_VIDS = "10";
+    static final int DEFAULT_NUM_VIDS = 10;
 
     /**
      * makes http request of youtube api to retrieve topics of liked videos, 
@@ -59,57 +60,6 @@ public class YoutubeServlet extends HttpServlet {
         return youtubeRes.body();
     }
 
-
-    /**
-     * checks whether topic is categorized as music
-     * by checking if the last word is "music" or "Music"
-     * @param topic identifies youtube video category e.g. Knowledge or Pop music
-     * @return whether topic is categorized as music
-     */
-    protected Boolean isMusic(String topic) {
-        String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);
-        return lastWord.equalsIgnoreCase("music");
-    }
-
-    /**
-     * parses through youtube liked videos json string,
-     * updates hash map to contain frequency count of each music genre
-     * @param youtubeResBody json response of youtube liked videos
-     * @param genreCount hash map of frequency count of each music genre
-     * @param numVideos maximum number of videos to retrieve
-     */
-    protected void updateMusicCount(JsonObject youtubeJsonObj, HashMap<String, Integer> genreCount) {
-        JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
-
-        for (int i = 0; i < videos.size(); i++) {
-            JsonObject video = videos.get(i).getAsJsonObject();
-            JsonObject topicDetails = video.getAsJsonObject("topicDetails");
-
-            if (topicDetails == null) {
-                // Video has no topics so it can't have a music topic
-                continue;
-            }
-
-            JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
-
-            for (int j = 0; j < topicCategories.size(); j++) {
-                // extract music genre out of wikipedia links of topic categories
-                String link = topicCategories.get(j).toString();
-                String topic = link.substring(link.lastIndexOf('/') + 1);
-                topic = topic.replaceAll("\"", "");
-                topic = topic.replaceAll("_", " ");
-
-                if (!isMusic(topic)) {
-                    break;
-                }
-
-                int count = genreCount.containsKey(topic) ? genreCount.get(topic) : 0;
-                genreCount.put(topic, count + 1);
-            }
-        }
-        return;
-    }
-
     /**
      * @param youtubeJsonObj json obj of youtube response body 
      * @return number of total results from json response
@@ -133,7 +83,7 @@ public class YoutubeServlet extends HttpServlet {
         }
 
         String numVideosParam = req.getParameter("num_videos");
-        int numVideos = Integer.parseInt(DEFAULT_NUM_VIDS);
+        int numVideos = DEFAULT_NUM_VIDS;
         if (numVideosParam != null) {
             numVideos = Integer.parseInt(numVideosParam);
         }
@@ -141,14 +91,15 @@ public class YoutubeServlet extends HttpServlet {
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString(), numVideos);
         JsonObject youtubeJsonObj = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
-        var genreCount = new HashMap<String, Integer>();
-        updateMusicCount(youtubeJsonObj, genreCount);
+        List<VideoGenreCount> genreCountList = new ArrayList<>();
         int totalLiked = getTotalResults(youtubeJsonObj);
-        genreCount.put("totalLiked", totalLiked);
+        YoutubeGenres jsonRes = new YoutubeGenres(genreCountList, totalLiked);
+
+        JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
+        jsonRes.updateMusicCount(videos);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
-        res.getWriter().println(gson.toJson(genreCount));
-
+        res.getWriter().println(gson.toJson(jsonRes));
     }
 }
