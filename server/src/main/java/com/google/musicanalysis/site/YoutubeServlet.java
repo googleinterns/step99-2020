@@ -96,7 +96,7 @@ public class YoutubeServlet extends HttpServlet {
         YoutubeGenres jsonRes = new YoutubeGenres(genreCountList, totalLiked);
 
         JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
-        jsonRes.updateMusicCount(videos);
+        jsonRes.calculateMusicCount(videos);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 

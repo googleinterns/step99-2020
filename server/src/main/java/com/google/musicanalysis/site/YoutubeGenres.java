@@ -68,7 +68,6 @@ public class YoutubeGenres {
           this.data.add(new VideoGenreCount(topic, 1));
           this.maxGenreCount = Math.max(1, this.maxGenreCount);
       }
-
   }
 
     /**
@@ -76,7 +75,7 @@ public class YoutubeGenres {
    * updates hash map to contain frequency count of each music genre
    * @param videos json array of youtube liked videos
    */
-  protected void updateMusicCount(JsonArray videos) {
+  protected void calculateMusicCount(JsonArray videos) {
     for (int i = 0; i < videos.size(); i++) {
         JsonObject video = videos.get(i).getAsJsonObject();
         JsonObject topicDetails = video.getAsJsonObject("topicDetails");
