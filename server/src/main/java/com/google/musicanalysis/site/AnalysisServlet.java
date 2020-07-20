@@ -21,23 +21,31 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    String videoName = req.getParameter("name");
+    String input = req.getParameter("name");
 
-    assert videoName == null : "Something went wrong with sending to backend.";
+    assert input == null : "Something went wrong with sending to backend.";
 
     // Use like this: {url_parameter, value}
     HashMap<String, String> videoArgs = new HashMap<>();
     HashMap<String, String> commentArgs = new HashMap<>();
     HashMap<String, String> nameArgs = new HashMap<>();
 
-    videoArgs.put("q", videoName);
-    videoArgs.put("type", "video");
-    String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
-    String videoId = getVideoId(videoIdJson);
+    String videoId = input; // assume user enters id
 
     commentArgs.put("part", "snippet");
-    commentArgs.put("videoId", videoId);
+    commentArgs.put("videoId", input);
     String commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+
+    if (commentsJson.equals("unreadable")) {
+      // We need to search for the id and get the comments again
+      videoArgs.put("q", input);
+      videoArgs.put("type", "video");
+      String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
+      videoId = getVideoId(videoIdJson);
+
+      commentArgs.replace("videoId", videoId);
+      commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+    }
 
     ArrayList<String> commentArray = retrieveComments(commentsJson);
     String cumulativeComments = convertToString(commentArray);
