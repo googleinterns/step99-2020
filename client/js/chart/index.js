@@ -54,19 +54,27 @@ function createSeries(history, color) {
   // each one
   while (end < history.length) {
     // go until we find a non-null point, which is the beginning of a run
-    while (start < history.length && history[start] === null) {
+    if (history[start] === null) {
       start++;
+      end = start;
+      continue;
     }
-    end = start + 1;
 
     // go until we find a null point, which is the end of a run
-    while (end < history.length && history[end] !== null) {
+    if (history[end] !== null) {
       end++;
+      continue;
     }
 
-    // all of the points between start and end are non-null, create run
+    if (end > start) {
+      // all of the points between start and end are non-null, create run
+      series.append(createRun(history, start, end));
+      start = end;
+    }
+  }
+
+  if (end > start) {
     series.append(createRun(history, start, end));
-    start = end;
   }
 
   return series;
