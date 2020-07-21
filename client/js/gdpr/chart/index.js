@@ -145,21 +145,34 @@ function createSeries(history, color) {
   let start = 0;
   let end = 0;
 
+  let start = 0;
+  let end = 0;
+
+  // find segments of history that don't contain null and create a 'run' for
+  // each one
   while (end < history.length) {
-    // go until we find a non-null point
-    while (start < history.length && history[start] === null) {
+    // go until we find a non-null point, which is the beginning of a run
+    if (history[start] === null) {
       start++;
+      end = start;
+      continue;
     }
-    end = start + 1;
 
-    // go until we find a null point
-    while (end < history.length && history[end] !== null) {
+    // go until we find a null point, which is the end of a run
+    if (history[end] !== null) {
       end++;
+      continue;
     }
 
-    // all of the points between start and end are non-null, create run
+    if (end > start) {
+      // all of the points between start and end are non-null, create run
+      series.append(createRun(history, start, end));
+      start = end;
+    }
+  }
+
+  if (end > start) {
     series.append(createRun(history, start, end));
-    start = end;
   }
 
   // create marker for when the user mouses near a point
