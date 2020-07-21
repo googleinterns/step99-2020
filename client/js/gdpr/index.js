@@ -9,7 +9,7 @@
 import {
   collateStreamingData, getStreamingData, getStreamingHistory,
 } from './analysis/gdpr.js';
-import {createChart} from './chart/index.js';
+import './chart/index.js';
 import {GdprTable} from './table/index.js';
 
 const {zip} = window;
@@ -45,11 +45,8 @@ btnUpload.addEventListener('click', async () => {
 
   const rankings = getStreamingHistory(collatedRecords);
 
-  createChart(
-      document.getElementById('chart-container'),
-      rankings.history,
-      rankings.dates,
-  );
+  const chart = document.getElementById('gdpr-chart');
+  chart.load(rankings.history, rankings.dates);
 
   const table = new GdprTable(
       document.getElementById('chart-container'),
