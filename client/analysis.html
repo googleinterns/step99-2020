@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/analysis.css">
     <title>Comment Analysis</title>
+    <base target="_blank">
   </head>
 
   <body>
@@ -17,10 +18,10 @@
                 <h1>Youtube Comment Analysis.</h1>
                 <ul>
                    <li>Enter a video name to see what people think!</li>
-                    <li>Click <a href="#info">here</a> to learn more.</li>
+                    <li>Click <a href="#info" target="_self">here</a> to learn more.</li>
                 </ul>
-                <div onclick="window.location='#_'" class="lightbox" id="info">
-                    <div id="infoBox">
+                <div class="lightbox" id="info">
+                    <div id="info-box">
                         <h1>Welcome to my project!</h1>
                         <h3>Introduction</h3>
                         <p>
@@ -32,10 +33,10 @@
 
                         <p>
                            In order to achieve this, I took advantage of the 
-                            <a href="https://cloud.google.com/natural-language" target="_blank">Google Natural Language (NLP)</a> 
-                            and <a href="https://www.perspectiveapi.com/#/home" target="_blank">Google Perspective</a> APIs 
+                            <a href="https://cloud.google.com/natural-language">Google Natural Language (NLP)</a> 
+                            and <a href="https://www.perspectiveapi.com/#/home">Google Perspective</a> APIs 
                             to analyze comments returned to me from the
-                            <a href="https://developers.google.com/youtube/v3" target="_blank">Youtube Data API</a>.
+                            <a href="https://developers.google.com/youtube/v3">Youtube Data API</a>.
                         </p>
                         <h3>Method</h3>
                         <p>
@@ -47,31 +48,31 @@
                         <!--Potentially, we will take the most popular comments.-->
                         <p>
                             NLP
-                            <ul>    
+                            <p class="indent">    
                                 NLP returns a magnitude and score value which give us the Overall Response. 
                                 The score value contributes to the corresponding adjective:
                                 Positive, Negative, or Mixed. If a video is "Clearly" one
                                 of these values, NLP returned a high magnitude rating and thus is confident 
-                                that the given data supports its score. Click <a href="https://cloud.google.com/natural-language/docs/basics#interpreting_sentiment_analysis_values" target="_blank">
+                                that the given data supports its score. Click <a href="https://cloud.google.com/natural-language/docs/basics#interpreting_sentiment_analysis_values">
                                 here</a> for the official documentation.
-                            </ul>
+                            </p>
                         </p>
                         <p>
                             Perspective
-                            <ul>    
+                            <p class="indent">   
                                 Perspective returns a series of probabilities which correspond to attributes such
                                 as Toxicity, Insult, Identity Attack, etc. These probabilities indicate how likely
                                 the text is to have these effects on the readers. It is important to note that all
-                                attributes except for Toxicity are in the experimental phase right now. Click <a href="https://github.com/conversationai/perspectiveapi/blob/master/2-api/models.md#all-attribute-types" target="_blank">
+                                attributes except for Toxicity are in the experimental phase right now. Click <a href="https://github.com/conversationai/perspectiveapi/blob/master/2-api/models.md#all-attribute-types">
                                 here</a> for further explanation. 
-                            </ul>
+                            </p>
                         </p>
                         <h3>Programming techniques</h3>
                         <p>
                             I've implemented techniques like caching, pattern-matching, 
                             search, and string manipulation to provide the best possible experience
                             and just to have some fun with this. 
-                            The code is all open source and can be found <a href="https://github.com/googleinterns/step99-2020" target="_blank">
+                            The code is all open source and can be found <a href="https://github.com/googleinterns/step99-2020">
                             here</a>.
                         </p>
                         <h3>Limitations</h3>
@@ -92,8 +93,8 @@
                                 </li>
                             </ul>
                         </p>
-                        <h3 id="rightHeader"> - Seun Omonije </h3>
-                        <h4>Click anywhere to close.</h4>
+                        <h3 id="right-header"> - Seun Omonije </h3>
+                        <h4><a href="#_" target="_self">Click here to close.</a></h4>
                     </div>
                 </a>
             </div>

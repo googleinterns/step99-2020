@@ -288,7 +288,7 @@ svg {
   outline: none;
 }
 
-#infoBox {
+#info-box {
   width: 50%;
   min-width: 400px;
   margin: 10% auto;
@@ -299,18 +299,31 @@ svg {
   background-color: white;
 }
 
-#infoBox > p {
+#info-box > p {
   font-size: 15px;
 }
 
-#infoBox > ul {
+#info-box > ul {
   font-size: 13px;
 }
 
-#infoBox > h4 {
+#info-box > h4 {
   text-align: center;
 }
  
-#rightHeader {
+#right-header {
   text-align: right;
+}
+
+.indent {
+  margin-left: 30px;
+}
+
+h4 > a {
+  color: #ff1493;
+}
+
+h4 > a:hover {
+  text-decoration: underline;
+  color: #9f86c0;
 }
