@@ -4,7 +4,7 @@ const RUN_SCALE_X = 30;
 const RUN_SCALE_Y = 30;
 
 /**
- * Creates an SVG chart inside of `el` with the given data.
+ * Creates an SVG chart inside of `container` with the given data.
  *
  * @param {HTMLElement} container The container element for this chart.
  * @param {Map<string, number[]>} histories The ranking history for each
@@ -162,21 +162,31 @@ function createSeries(history, color) {
   let start = 0;
   let end = 0;
 
+  // find segments of history that don't contain null and create a 'run' for
+  // each one
   while (end < history.length) {
-    // go until we find a non-null point
-    while (start < history.length && history[start] === null) {
+    // go until we find a non-null point, which is the beginning of a run
+    if (history[start] === null) {
       start++;
+      end = start;
+      continue;
     }
-    end = start + 1;
 
-    // go until we find a null point
-    while (end < history.length && history[end] !== null) {
+    // go until we find a null point, which is the end of a run
+    if (history[end] !== null) {
       end++;
+      continue;
     }
 
-    // all of the points between start and end are non-null, create run
+    if (end > start) {
+      // all of the points between start and end are non-null, create run
+      series.append(createRun(history, start, end));
+      start = end;
+    }
+  }
+
+  if (end > start) {
     series.append(createRun(history, start, end));
-    start = end;
   }
 
   // create marker for when the user mouses near a point
@@ -212,9 +222,15 @@ function createSeries(history, color) {
 function createRun(history, start, end) {
   const runContainer = document.createElementNS(SVG_NS, 'g');
 
-  const pointsStr = history
+  const points = history
       .slice(start, end)
-      .map((val, idx) => `${(idx + start) * RUN_SCALE_X},${val * RUN_SCALE_Y}`)
+      .map((val, idx) => ({
+        x: (idx + start) * RUN_SCALE_X,
+        y: val * RUN_SCALE_Y,
+      }));
+
+  const pointsStr = points
+      .map(({x, y}) => `${x}, ${y}`)
       .join(' ');
 
   // line that is displayed
@@ -235,11 +251,11 @@ function createRun(history, start, end) {
   endCap.setAttribute('class', 'series-run-cap');
 
   startCap.setAttribute('r', '5');
-  startCap.setAttribute('cx', start * RUN_SCALE_X + 'px');
-  startCap.setAttribute('cy', history[start] * RUN_SCALE_Y + 'px');
+  startCap.setAttribute('cx', points[0].x + 'px');
+  startCap.setAttribute('cy', points[0].y + 'px');
   endCap.setAttribute('r', '5');
-  endCap.setAttribute('cx', (end - 1) * RUN_SCALE_X + 'px');
-  endCap.setAttribute('cy', history[end - 1] * RUN_SCALE_Y + 'px');
+  endCap.setAttribute('cx', points[points.length - 1].x + 'px');
+  endCap.setAttribute('cy', points[points.length - 1].y + 'px');
 
   runContainer.append(startCap, line, touchTarget, endCap);
   return runContainer;
