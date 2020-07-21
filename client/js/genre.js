@@ -35,6 +35,7 @@ async function displayMusicGenre() {
 
   const genreCount = await response.text();
   genreBlock.innerHTML = genreCount;
+  displayChart();
 }
 
 /**
@@ -49,3 +50,33 @@ function updateNumVids() {
 }
 
 updateNumVids();
+
+function displayChart() {
+  const options = {
+    series: [{
+    data: [400, 430, 448, 470, 540, 580, 690, 1100, 1200, 1380]
+  }],
+    chart: {
+    type: 'bar',
+    height: 350
+  },
+  plotOptions: {
+    bar: {
+      horizontal: true,
+    }
+  },
+  dataLabels: {
+    enabled: false
+  },
+  xaxis: {
+    categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy', 'France', 'Japan',
+      'United States', 'China', 'Germany'
+    ],
+  }
+  };
+
+  var chart = new ApexCharts(document.querySelector("#vis"), options);
+  chart.render();
+}
+
+// issues don't know how to delete / hide chart. hideSeries() doesn't work
