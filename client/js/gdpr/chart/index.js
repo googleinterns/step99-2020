@@ -125,6 +125,7 @@ export class GdprChart extends HTMLElement {
             key,
           },
           bubbles: true,
+          composed: true,
         }),
     );
 
@@ -139,7 +140,7 @@ export class GdprChart extends HTMLElement {
     if (seriesIndex !== null) {
       const seriesEl = this.svg.querySelectorAll('.series')[seriesIndex];
       seriesEl.dispatchEvent(
-          new CustomEvent('series-clear', {bubbles: true}),
+          new CustomEvent('series-clear', {bubbles: true, composed: true}),
       );
     }
 
