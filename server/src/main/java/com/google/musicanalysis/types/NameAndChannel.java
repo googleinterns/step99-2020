@@ -1,6 +1,7 @@
 package com.google.musicanalysis.types;
+import java.io.Serializable;
 
-public class NameAndChannel {
+public class NameAndChannel implements Serializable {
   String name;
   String channel;
 
