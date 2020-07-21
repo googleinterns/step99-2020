@@ -160,9 +160,6 @@ function createSeries(history, color) {
   let start = 0;
   let end = 0;
 
-  let start = 0;
-  let end = 0;
-
   // find segments of history that don't contain null and create a 'run' for
   // each one
   while (end < history.length) {
