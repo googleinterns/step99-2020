@@ -31,7 +31,7 @@ public class AnalysisCache {
 
         try {
             // .ser for serialized 
-            FileInputStream inFile = new FileInputStream(DIRECTORY + "cached-data.txt");
+            FileInputStream inFile = new FileInputStream("cachedData.txt");
             ObjectInputStream inData = new ObjectInputStream(inFile);
             responseMap = (HashMap<String, AnalysisGroup>)inData.readObject();
             inData.close();
@@ -48,7 +48,7 @@ public class AnalysisCache {
 
     public void close() {
         try {
-            FileOutputStream outFile = new FileOutputStream(DIRECTORY + "cached-data.txt");
+            FileOutputStream outFile = new FileOutputStream("cachedData.txt");
             ObjectOutputStream outData = new ObjectOutputStream(outFile);
             outData.writeObject(this.responseMap);
             outData.close();
@@ -73,7 +73,7 @@ public class AnalysisCache {
 
     private int createFile() {
         try {   //logic here is going to improve which is why it's int
-            File file = new File(DIRECTORY + "cached-data.txt");
+            File file = new File("cachedData.txt");
             if (file.createNewFile()){
                 return 0;
             } else {
