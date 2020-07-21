@@ -8,6 +8,8 @@ export class GdprChart extends HTMLElement {
   constructor() {
     super();
 
+    this.attachShadow({mode: 'open'});
+
     /** @type {Map<string, number[]>} */
     this.histories = new Map();
 
@@ -19,7 +21,11 @@ export class GdprChart extends HTMLElement {
 
     this.hoverState = {seriesIndex: null, x: null, y: null};
 
+    this.mainContainer = document.createElement('div');
+    this.mainContainer.id = 'main-container';
+
     this.scrollContainer = document.createElement('div');
+    this.scrollContainer.id = 'scroll-container';
     this.scrollContainer.addEventListener('scroll', this.onScroll.bind(this));
 
     this.tooltip = this.createTooltip();
@@ -28,10 +34,10 @@ export class GdprChart extends HTMLElement {
     stylesheet.rel = 'stylesheet';
     stylesheet.href = '/css/spotify-gdpr-chart.css';
 
-    this.attachShadow({mode: 'open'});
-    this.shadowRoot.append(stylesheet);
-    this.shadowRoot.append(this.scrollContainer);
-    this.shadowRoot.append(this.tooltip);
+    this.mainContainer.append(this.scrollContainer);
+    this.mainContainer.append(this.tooltip);
+
+    this.shadowRoot.append(stylesheet, this.mainContainer);
   }
 
   /**
@@ -86,32 +92,16 @@ export class GdprChart extends HTMLElement {
     // as the last hit
     if (this.hoverState.x === x && this.hoverState.y === y) return;
 
-    // subtract 1 b/c first row is key
-    const hitIndex = this.rows[x].findIndex((rank) => rank === y) - 1;
+    // offset by 1 b/c first row is key
+    const hitIndex = this.rows[x + 1].findIndex((rank) => rank === y);
 
-    if (this.hoverState.seriesIndex && this.hoverState.seriesIndex !== hitIndex) {
+    if (this.hoverState.seriesIndex !== null &&
+        this.hoverState.seriesIndex !== hitIndex) {
       this.clearHover();
     }
 
     if (hitIndex >= 0) {
-      const key = this.rows[x][0];
-
-      const seriesEntry = historyEntries[hitIndex];
-      const seriesElement = seriesElements[hitIndex];
-      seriesElement.dispatchEvent(
-          new CustomEvent('series-hit', {
-            detail: {
-              x,
-              y,
-              key,
-            },
-            bubbles: true,
-          }),
-      );
-
-      this.hoverState.seriesIndex = hitIndex;
-      this.hoverState.x = x;
-      this.hoverState.y = y;
+      this.setHover(x, y, hitIndex);
     }
   }
 
@@ -380,7 +370,7 @@ export class GdprChart extends HTMLElement {
         {year: 'numeric', month: 'long', day: '2-digit'},
     );
 
-    this.addEventListener('series-hit', (ev) => {
+    this.shadowRoot.addEventListener('series-hit', (ev) => {
       const {key, x, y} = ev.detail;
       const chartBounds = this.getBoundingClientRect();
 
@@ -400,7 +390,7 @@ export class GdprChart extends HTMLElement {
       date.innerText = format.format(this.dates[x]);
     });
 
-    this.addEventListener('series-clear', () => {
+    this.shadowRoot.addEventListener('series-clear', () => {
       tooltip.classList.remove('chart-tooltip-active');
     });
 
