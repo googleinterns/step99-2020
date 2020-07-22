@@ -27,8 +27,8 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    // String input = req.getParameter("name");
-    String input = "wKcUx7OSlB4";
+    String input = req.getParameter("name");
+    
     assert input == null : "Something went wrong with sending to backend.";
 
     // Use like this: {url_parameter, value}
