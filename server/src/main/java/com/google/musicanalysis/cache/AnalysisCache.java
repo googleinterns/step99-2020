@@ -1,87 +1,112 @@
 package com.google.musicanalysis.cache;
 
 import com.google.musicanalysis.types.*;
-import java.lang.Object;
-import java.lang.ClassNotFoundException;
-import java.time.Instant;
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.EOFException;
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
 import java.io.IOException;
-
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SealedObject;
+import javax.crypto.spec.SecretKeySpec;
 
 public class AnalysisCache {
-    private HashMap<String, AnalysisGroup> responseMap;
-    
-    public AnalysisCache(){
-        this.responseMap = new HashMap<String, AnalysisGroup>();
+
+  private HashMap<String, AnalysisGroup> responseMap;
+  Cipher cipher;
+
+  public AnalysisCache() throws NoSuchAlgorithmException, NoSuchPaddingException {
+    this.responseMap = new HashMap<String, AnalysisGroup>();
+    this.cipher = Cipher.getInstance("Blowfish");
+  }
+
+  public void open() throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+    HashMap<String, AnalysisGroup> responseData = null;
+
+    int file = createFile(); // this will have use later.
+
+    try {
+      cipher.init(Cipher.DECRYPT_MODE, generateKey());
+      CipherInputStream inFile =
+          new CipherInputStream(
+              new BufferedInputStream(new FileInputStream("cachedData.txt")), cipher);
+      ObjectInputStream inData = new ObjectInputStream(inFile);
+      SealedObject encodedResponse = (SealedObject) inData.readObject();
+      responseMap = (HashMap<String, AnalysisGroup>) encodedResponse.getObject(cipher);
+      inData.close();
+      inFile.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+      return;
+    } catch (ClassNotFoundException c) {
+      System.out.println("Analysis Group class not found");
+      c.printStackTrace();
+      return;
+    } catch (EOFException e) {
+      // This will hit when the cache first opens
+      return;
     }
+  }
 
-    public void open() {
-        HashMap<String, AnalysisGroup> responseData = null;
-
-        int file = createFile(); // this will have use later.
-
-        try {
-            // .ser for serialized 
-            FileInputStream inFile = new FileInputStream("cachedData.txt");
-            ObjectInputStream inData = new ObjectInputStream(inFile);
-            responseMap = (HashMap<String, AnalysisGroup>)inData.readObject();
-            inData.close();
-            inFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        } catch (ClassNotFoundException c) {
-            System.out.println("Analysis Group class not found");
-            c.printStackTrace();
-            return;
-        }
+  public void close() throws InvalidKeyException, IllegalBlockSizeException {
+    try {
+      cipher.init(Cipher.ENCRYPT_MODE, generateKey());
+      SealedObject sealedObject = new SealedObject(this.responseMap, cipher);
+      CipherOutputStream outFile =
+          new CipherOutputStream(
+              new BufferedOutputStream(new FileOutputStream("cachedData.txt")), cipher);
+      ObjectOutputStream outData = new ObjectOutputStream(outFile);
+      outData.writeObject(sealedObject);
+      outData.close();
+      outFile.close();
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+  }
 
-    public void close() {
-        try {
-            FileOutputStream outFile = new FileOutputStream("cachedData.txt");
-            ObjectOutputStream outData = new ObjectOutputStream(outFile);
-            outData.writeObject(this.responseMap);
-            outData.close();
-            outFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+  public void add(String requestUrl, AnalysisGroup responseData) {
+    this.responseMap.put(requestUrl, responseData);
+  }
 
-    public void add(String requestUrl, AnalysisGroup responseData) {
-        this.responseMap.put(requestUrl, responseData);
-    }
+  public AnalysisGroup search(String requestUrl) {
+    // map.get() returns null if not match
+    return this.responseMap.get(requestUrl);
+  }
 
-    public AnalysisGroup search(String requestUrl) {
-        // map.get() returns null if not match
-        return this.responseMap.get(requestUrl);
-    }
+  public void delete(String requestUrl) {
+    this.responseMap.remove(requestUrl);
+  }
 
-    public void delete(String requestUrl) {
-        this.responseMap.remove(requestUrl);
-    }
-
-    private int createFile() {
-        try {   //logic here is going to improve which is why it's int
-            File file = new File("cachedData.txt");
-            if (file.createNewFile()){
-                return 0;
-            } else {
-                return 1;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+  private int createFile() {
+    try { // logic here is going to improve which is why it's int
+      File file = new File("cachedData.txt");
+      if (file.createNewFile()) {
         return 0;
+      } else {
+        return 1;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+    return 0;
+  }
+
+  private SecretKeySpec generateKey() {
+    String key = "placeholder for github :)";
+    byte[] keyData = key.getBytes();
+    SecretKeySpec keySpec = new SecretKeySpec(keyData, "Blowfish");
+    return keySpec;
+  }
 }

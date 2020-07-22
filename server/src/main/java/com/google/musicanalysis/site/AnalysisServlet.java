@@ -4,11 +4,17 @@ import com.google.gson.*;
 import com.google.musicanalysis.api.naturallanguage.*;
 import com.google.musicanalysis.api.perspective.*;
 import com.google.musicanalysis.api.youtube.*;
+import com.google.musicanalysis.cache.*;
 import com.google.musicanalysis.types.*;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -21,8 +27,8 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    String input = req.getParameter("name");
-
+    // String input = req.getParameter("name");
+    String input = "wKcUx7OSlB4";
     assert input == null : "Something went wrong with sending to backend.";
 
     // Use like this: {url_parameter, value}
@@ -30,7 +36,7 @@ public class AnalysisServlet extends HttpServlet {
     HashMap<String, String> commentArgs = new HashMap<>();
     HashMap<String, String> nameArgs = new HashMap<>();
 
-    String videoId = input; // assume user enters id
+    String videoId = input;
 
     commentArgs.put("part", "snippet");
     commentArgs.put("videoId", input);
@@ -57,6 +63,21 @@ public class AnalysisServlet extends HttpServlet {
 
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
+
+    try {
+      AnalysisCache cache = new AnalysisCache();
+      cache.open();
+      cache.add(
+          "example key",
+          new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
+      cache.close();
+    } catch (InvalidKeyException
+        | IllegalBlockSizeException
+        | BadPaddingException
+        | NoSuchAlgorithmException
+        | NoSuchPaddingException e) {
+      e.printStackTrace();
+    }
 
     String json =
         convertToJsonUsingGson(
