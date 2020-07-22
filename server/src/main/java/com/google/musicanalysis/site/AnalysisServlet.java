@@ -23,8 +23,6 @@ public class AnalysisServlet extends HttpServlet {
 
     String input = req.getParameter("name");
 
-    assert input == null : "Something went wrong with sending to backend.";
-
     // Use like this: {url_parameter, value}
     HashMap<String, String> videoArgs = new HashMap<>();
     HashMap<String, String> commentArgs = new HashMap<>();
@@ -33,7 +31,7 @@ public class AnalysisServlet extends HttpServlet {
     String videoId = input; // assume user enters id
 
     commentArgs.put("part", "snippet");
-    commentArgs.put("videoId", input);
+    commentArgs.put("videoId", input); 
     String commentsJson;
     try {
       commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
@@ -219,8 +217,9 @@ public class AnalysisServlet extends HttpServlet {
 
     for (String comment : comments) {
       comment = comment.replace("\"", "");
-      
-      if (comment.length() - 1 <= 0){
+      // comment.replace() could potentially give an empty string,
+      // which messes up lastCharacter.
+      if (comment.length() <= 1){
           continue;
       }
       // Make sure each comment is treated as its own sentence

@@ -10,6 +10,9 @@ window.onload = function() {
  */
 async function fetchResponse() {
   const param = document.getElementById('searchbar').value;
+  if (param == null) {
+      return;
+  }
   const response = await fetch(`/api/analysis?name=${param}`);
   const value = await response.json();
   console.log(value);
