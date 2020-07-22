@@ -45,20 +45,20 @@ public class AnalysisServlet extends HttpServlet {
     nameArgs.put("part", "snippet");
     nameArgs.put("id", videoId);
     String nameJson = new YoutubeRequest("videos", nameArgs).getResult();
-    NameAndChannel videoInfo = getNameAndChannel(nameJson);
+    VideoInfo videoInfo = getVideoInfo(nameJson);
 
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
 
     String json =
         convertToJsonUsingGson(
-            new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
+            new VideoAnalysis(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
 
   /** @param arr the array that will be converted to json */
-  private String convertToJsonUsingGson(AnalysisGroup group) {
+  private String convertToJsonUsingGson(VideoAnalysis group) {
     Gson gson = new Gson();
     String json = gson.toJson(group);
     return json;
@@ -128,7 +128,7 @@ public class AnalysisServlet extends HttpServlet {
     return perspectiveResults;
   }
 
-  private NameAndChannel getNameAndChannel(String response) {
+  private VideoInfo getVideoInfo(String response) {
 
     // Accessing the items JSON Array
     JsonElement jElement = JsonParser.parseString(response);
@@ -142,7 +142,7 @@ public class AnalysisServlet extends HttpServlet {
     JsonElement videoName = data.get("title");
     JsonElement channelName = data.get("channelTitle");
 
-    return new NameAndChannel(
+    return new VideoInfo(
         videoName.toString().replace("\"", ""), channelName.toString().replace("\"", ""));
   }
 

@@ -70,8 +70,6 @@ function createCard(json) {
   img.setAttribute('src', `https://img.youtube.com/vi/${id}/sddefault.jpg`);
   card.appendChild(img);
 
-  const videoInfo = document.createElement('div');
-
   const link = document.createElement('a');
   link.setAttribute('href', `https://www.youtube.com/watch?v=${id}`);
   link.setAttribute('target', '_blank');
@@ -79,8 +77,9 @@ function createCard(json) {
   const title = document.createElement('h3');
   title.setAttribute('id', 'card-title');
   title.innerText = name;
-
   link.appendChild(title);
+
+  const videoInfo = document.createElement('div');
   videoInfo.appendChild(link);
 
   const author = document.createElement('p');
@@ -158,8 +157,8 @@ function removeAllChildNodes(parent) {
  */
 function showCommentHeader() {
   const el = document.getElementById('commentHeader');
-  el.classList.toggle('hidden');
-  el.classList.toggle('fade');
+  el.classList.toggle('hidden', false);
+  el.classList.toggle('fade', true);
 }
 
 /**
