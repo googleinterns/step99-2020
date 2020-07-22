@@ -136,7 +136,7 @@ input:focus, button:focus {
 }
 
 /* DONUT CHARTS */
-#a-chart {
+.a-chart {
   --percent: 8;
 }
 

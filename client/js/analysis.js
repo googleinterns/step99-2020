@@ -48,7 +48,7 @@ function addFeedbackResult(result) {
   el.classList = 'center fade';
   const text = document.createElement('h1');
   text.setAttribute('id', 'overall');
-  text.innerHTML = 'Overall Response\n: ' + result;
+  text.innerHTML = 'Overall Response: ' + result;
   el.appendChild(text);
 
   const list = document.getElementById('list');
@@ -64,7 +64,7 @@ function addFeedbackResult(result) {
 function addDonutChart(str, percent) {
   const div = document.createElement('div');
 
-  div.setAttribute('id', 'a-chart');
+  div.classList = 'a-chart';
   div.className = 'item donut';
   div.style.setProperty('--percent', percent);
 
