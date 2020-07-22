@@ -31,11 +31,6 @@
   justify-items: center;
   width: 100%; /* don't use 100vw, that will cause horizontal scrollbar */
   height: 100vh;
-  
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-  background-attachment: fixed;
 }
 
 #graphic {
