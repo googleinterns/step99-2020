@@ -21,7 +21,8 @@ export function createChart(container, histories, dates) {
   const colors = ['blue', 'red', 'green', 'purple', 'orange'];
 
   // get only the first 7 tracks for now
-  for (const history of [...histories.values()].slice(0, 7)) {
+  const MAX_TRACKS_INCLUDED = 7;
+  for (const history of [...histories.values()].slice(0, MAX_TRACKS_INCLUDED)) {
     const color = colors[index % colors.length];
     const series = createSeries(history, color);
     seriesContainer.append(series);
