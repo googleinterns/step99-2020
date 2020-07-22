@@ -1,5 +1,6 @@
 const COMMENT_APPEARANCE_TIME = 1500;
 const COMMENT_TO_STOP_AT = 5;
+const FEEDBACK_APPEARANCE_TIME = 1500;
 
 window.onload = function() {
   // Listen for submission click
@@ -15,7 +16,7 @@ async function fetchResponse() {
   const videoQuery = document.getElementById('searchbar').value;
   const response = await fetch(`/api/analysis?name=${videoQuery}`);
   const responseJson = await response.json();
-  populationHandler(responseJson);
+  renderingHandler(responseJson);
 }
 
 /**
@@ -24,20 +25,21 @@ async function fetchResponse() {
  * @param {object} videoAnalysis the object returned from the HTTP request
  * which contains all of the data.
  */
-function populationHandler(videoAnalysis) {
+function renderingHandler(videoAnalysis) {
   const charts = document.getElementById('charts');
   const list = document.getElementById('list');
 
   removeAllChildNodes(charts);
   removeAllChildNodes(list);
-  populateDonutCharts(videoAnalysis.perspectiveMap);
-  // The +1 allows for determineOverall() to run correctly.
-  const time = renderComments(videoAnalysis.commentArray) + 1;
-  const overall = determineOverall(videoAnalysis.magnitudeAndScore.magnitude,
+  renderDonutCharts(videoAnalysis.perspectiveMap);
+ 
+  const totalComments = renderComments(videoAnalysis.commentArray);
+  const commentsRenderTime = totalComments * COMMENT_APPEARANCE_TIME;
+  const overall = determineSentiment(videoAnalysis.magnitudeAndScore.magnitude,
       videoAnalysis.magnitudeAndScore.score);
   setTimeout(() => {
     addFeedbackResult(overall);
-  }, time*COMMENT_APPEARANCE_TIME);
+  }, commentsRenderTime + FEEDBACK_APPEARANCE_TIME);
 }
 
 /**
@@ -45,10 +47,9 @@ function populationHandler(videoAnalysis) {
  *
  * @param {Map<string, number>} map the map from the videoAnalysis object
  */
-function populateDonutCharts(map) {
+function renderDonutCharts(map) {
   for (const key in map) {
     if (Object.prototype.hasOwnProperty.call(map, key)) {
-      // Convert to string for type compatibility
       addDonutChart(key, map[key]);
     }
   }
@@ -58,7 +59,7 @@ function populateDonutCharts(map) {
  * Puts the comments on the screen
  *
  * @param {Array} array the comment array from the json response
- * @returns {number} the stop index so that overall knows when to come in
+ * @returns {number} the total number of comments rendered
  */
 function renderComments(array) {
   const totalComments = Math.min(COMMENT_TO_STOP_AT, array.length);
@@ -68,7 +69,7 @@ function renderComments(array) {
       addListElement(filteredValue);
     }, (i+1) * COMMENT_APPEARANCE_TIME);
   }
-  // so that the overall knows when to come in
+
   return totalComments;
 }
 
@@ -79,7 +80,7 @@ function renderComments(array) {
  * @param {number} score the score returned by Perspective API
  * @returns {string} a string describing the magnitude and score in words
  */
-function determineOverall(magnitude, score) {
+function determineSentiment(magnitude, score) {
   let isClear = '';
   let tone = '';
 
@@ -130,7 +131,7 @@ function addFeedbackResult(result) {
   el.classList = 'center fade';
   const text = document.createElement('h1');
   text.setAttribute('id', 'overall');
-  text.innerHTML = 'Overall Response:\n ' + result;
+  text.innerHTML = 'Overall Response: ' + result;
   el.appendChild(text);
 
   const list = document.getElementById('list');
@@ -141,23 +142,23 @@ function addFeedbackResult(result) {
  * Adds a donut chart
  *
  * @param {string} str the header string of the circle
- * @param {string} percent the amount the circle will be filled
+ * @param {number} percentFull the amount the circle will be filled
  */
-function addDonutChart(str, percent) {
+function addDonutChart(str, percentFull) {
   const div = document.createElement('div');
 
   // Conversion math for CSS
-  percent = 100 - percent*100;
+  const percentRemaining = 100 - percentFull*100;
 
   div.setAttribute('id', 'a-chart');
   div.className = 'item donut';
-  div.style.setProperty('--percent', percent.toString());
+  div.style.setProperty('--percent', percentRemaining.toString());
 
   // Convert back to actual percentage
-  const percentString = (100 - percent).toString();
+  const percentString = (percentFull*100).toString();
 
   const header = document.createElement('h2');
-  header.innerText = str + ': ' + percentString.substring(0, 2) + '%';
+  header.innerText = `${str}: ${percentString.substring(0, 2)}%`;
   div.appendChild(header);
 
   const svg = createSVGElement('svg');

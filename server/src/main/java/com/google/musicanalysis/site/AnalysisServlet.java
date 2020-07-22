@@ -44,13 +44,13 @@ public class AnalysisServlet extends HttpServlet {
     NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
 
     String json =
-        convertToJsonUsingGson(new AnalysisTrio(perspectiveMap, commentsSentiment, commentArray));
+        convertToJsonUsingGson(new CommentAnalysis(perspectiveMap, commentsSentiment, commentArray));
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
 
   /** @param arr the array that will be converted to json */
-  private String convertToJsonUsingGson(AnalysisTrio trio) {
+  private String convertToJsonUsingGson(CommentAnalysis trio) {
     Gson gson = new Gson();
     String json = gson.toJson(trio);
     return json;
