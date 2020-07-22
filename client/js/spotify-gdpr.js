@@ -87,66 +87,7 @@ async function populateChart(collatedRecords) {
         });
   }
 
-  const chartSeries = Array.from(rankingHistory.entries());
-  const chartData = new google.visualization.DataTable();
-  chartData.addColumn('date', 'Date');
-
-  for (const [key] of chartSeries) {
-    chartData.addColumn('number', key);
-  }
-
-  for (let i = 0; i < rankingDates.length; i++) {
-    const row = [rankingDates[i]];
-
-    for (const [, positions] of chartSeries) {
-      row.push(positions[i]);
-    }
-
-    chartData.addRow(row);
-  }
-
-  const chart =
-    new google.charts.Line(document.getElementById('chart'));
-
-  // load data in segments to avoid hanging the browser
-  chart.draw(
-      chartData,
-      google.charts.Line.convertOptions({
-        aggregationTarget: 'series',
-        backgroundColor: {
-          fill: '#1c1c1c',
-        },
-        chartArea: {
-          backgroundColor: '#1c1c1c',
-        },
-        vAxis: {
-          textStyle: {
-            color: '#ffffff',
-          },
-          direction: -1,
-          gridlines: {
-            color: '#1f1f1f',
-          },
-          minorGridlines: {
-            color: '#1d1d1d',
-          },
-        },
-        hAxis: {
-          textStyle: {
-            color: '#ffffff',
-          },
-        },
-        pointsVisible: false,
-        height: 700,
-        legend: {position: 'none'},
-        explorer: {
-          axis: 'horizontal',
-          keepInBounds: true,
-          maxZoomIn: 0.05,
-          maxZoomOut: 0.5,
-        },
-      }),
-  );
+  createChart(document.getElementById('chart'), rankingHistory, rankingDates);
 }
 
 const btnUpload =
