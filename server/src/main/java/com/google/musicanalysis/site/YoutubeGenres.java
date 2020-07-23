@@ -1,24 +1,22 @@
 package com.google.musicanalysis.site;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.Gson;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.lang.Math;
 
 /** contains final object that YoutubeServlet.java sends to frontend */
 public class YoutubeGenres {
-  private List<VideoGenreCount> genreData;
+  private HashMap<String, Integer> genreData;
   private final int totalLiked;
   private int totalMusic = 0;
   private boolean isMusic;
   private int maxGenreCount = 0;
 
-  public YoutubeGenres(List<VideoGenreCount> genreCountList, int totalLiked) {
+  public YoutubeGenres(HashMap<VideoGenreCount> genreCountList, int totalLiked) {
     this.genreData = genreCountList;
     this.totalLiked = totalLiked;
   }
@@ -49,7 +47,7 @@ public class YoutubeGenres {
   }
 
     /**
-   * updates genreCountList with new genre or count
+   * updates genreCountlist with new genre or count
    * by checking if .genre attribute of VideoGenreCount obj exists
    * @param topic identifies youtube video music category e.g. Pop music
    */
