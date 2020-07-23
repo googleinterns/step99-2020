@@ -1,11 +1,11 @@
-import {SVG_NS} from '../../util.js';
+import {SVG_NS} from '../util.js';
 
 const RUN_SCALE_X = 30;
 const RUN_SCALE_Y = 30;
 const NUM_POSITIONS = 15;
 
 /**
- * Creates an SVG chart inside of `el` with the given data.
+ * Creates an SVG chart inside of `container` with the given data.
  *
  * @param {HTMLElement} container The container element for this chart.
  * @param {Map<string, number[]>} histories The ranking history for each
@@ -20,10 +20,12 @@ export function createChart(container, histories, dates) {
   svg.setAttribute('class', 'chart');
   svg.setAttribute(
       'viewBox',
-      `0 0 ${dates.length * RUN_SCALE_X} ${NUM_POSITIONS * RUN_SCALE_Y}`,
+      // shift down so that lines are vertically centered
+      `0 ${RUN_SCALE_Y * 0.5} ` +
+      `${dates.length * RUN_SCALE_X} ${(NUM_POSITIONS + 0.5) * RUN_SCALE_Y}`,
   );
   svg.append(createDefs());
-  svg.append(createGrid(dates, NUM_POSITIONS));
+  svg.append(createGrid(dates));
 
   scrollContainer.append(svg);
 
@@ -40,7 +42,11 @@ export function createChart(container, histories, dates) {
     rows.push([]);
   }
 
-  historyEntries.forEach(([, history], index) => {
+  let index = 0;
+
+  for (const [, history] of historyEntries) {
+    // each track is given one of 24 colours, which are spaced 15 degrees apart
+    // in hue
     const hue = index * 15 % 360;
     const color = `hsl(${hue},50%,33%)`;
     const series = createSeries(history, color);
@@ -51,7 +57,8 @@ export function createChart(container, histories, dates) {
 
     seriesContainer.append(series);
     seriesElements.push(series);
-  });
+    index++;
+  }
 
   seriesContainer.setAttribute('class', 'series-container');
   svg.append(seriesContainer);
@@ -68,7 +75,7 @@ export function createChart(container, histories, dates) {
     // index in history
     const x = Math.round(chartPos.x / RUN_SCALE_X);
     // value in history
-    const y = Math.round(chartPos.y / RUN_SCALE_Y + 0.5);
+    const y = Math.round(chartPos.y / RUN_SCALE_Y);
 
     // don't recalculate the hit if we're in the same place
     // as the last hit
@@ -83,7 +90,7 @@ export function createChart(container, histories, dates) {
       );
     }
 
-    if (hit < 0) {
+    if (hit === null) {
       hoverState.series = null;
       hoverState.x = null;
       hoverState.y = null;
@@ -123,7 +130,7 @@ export function createChart(container, histories, dates) {
   svg.addEventListener('mouseleave', () => clearHover());
   scrollContainer.addEventListener('scroll', () => clearHover());
 
-  const tooltip = createTooltip(container, svg, dates);
+  const tooltip = createTooltip(container, svg, histories, dates);
 
   container.append(scrollContainer);
   container.append(tooltip);
@@ -182,7 +189,7 @@ function createSeries(history, color) {
     series.append(marker);
     series.classList.add('series-active');
     marker.setAttribute('cx', x * RUN_SCALE_X + 'px');
-    marker.setAttribute('cy', (y - 0.5) * RUN_SCALE_Y + 'px');
+    marker.setAttribute('cy', y * RUN_SCALE_Y + 'px');
   });
 
   series.addEventListener('series-clear', () => {
@@ -205,11 +212,15 @@ function createSeries(history, color) {
 function createRun(history, start, end) {
   const runContainer = document.createElementNS(SVG_NS, 'g');
 
-  const pointsStr = history
+  const points = history
       .slice(start, end)
-      .map((val, idx) =>
-        (idx + start) * RUN_SCALE_X + ',' +
-        (val - 0.5) * RUN_SCALE_Y)
+      .map((val, idx) => ({
+        x: (idx + start) * RUN_SCALE_X,
+        y: val * RUN_SCALE_Y,
+      }));
+
+  const pointsStr = points
+      .map(({x, y}) => `${x}, ${y}`)
       .join(' ');
 
   // line that is displayed
@@ -230,11 +241,11 @@ function createRun(history, start, end) {
   endCap.setAttribute('class', 'series-run-cap');
 
   startCap.setAttribute('r', '5');
-  startCap.setAttribute('cx', start * RUN_SCALE_X + 'px');
-  startCap.setAttribute('cy', (history[start] - 0.5) * RUN_SCALE_Y + 'px');
+  startCap.setAttribute('cx', points[0].x + 'px');
+  startCap.setAttribute('cy', points[0].y + 'px');
   endCap.setAttribute('r', '5');
-  endCap.setAttribute('cx', (end - 1) * RUN_SCALE_X + 'px');
-  endCap.setAttribute('cy', (history[end - 1] - 0.5) * RUN_SCALE_Y + 'px');
+  endCap.setAttribute('cx', points[points.length - 1].x + 'px');
+  endCap.setAttribute('cy', points[points.length - 1].y + 'px');
 
   runContainer.append(startCap, line, touchTarget, endCap);
   return runContainer;
@@ -260,8 +271,8 @@ function createDefs() {
     </feComponentTransfer>
     <feGaussianBlur in="boost" stdDeviation="2.5" result="glow"/>
     <feMerge>
-        <feMergeNode in="glow"/>
-        <feMergeNode in="boost"/>
+      <feMergeNode in="glow"/>
+      <feMergeNode in="boost"/>
     </feMerge>
   `;
 
@@ -274,11 +285,9 @@ function createDefs() {
  * Creates gridlines that appear in the back of the chart.
  *
  * @param {Date[]} dates The dates that are covered by this chart
- * @param {number} positions The number of song positions showed by this chart
- * (i.e., 15 for top 15)
  * @returns {SVGGElement} An SVG group containing the grid.
  */
-function createGrid(dates, positions) {
+function createGrid(dates) {
   const grid = document.createElementNS(SVG_NS, 'g');
   grid.classList.add('grid');
 
@@ -289,7 +298,7 @@ function createGrid(dates, positions) {
     verticalLine.setAttribute('x1', RUN_SCALE_X * i + 'px');
     verticalLine.setAttribute('x2', RUN_SCALE_X * i + 'px');
     verticalLine.setAttribute('y1', '0px');
-    verticalLine.setAttribute('y2', RUN_SCALE_Y * positions + 'px');
+    verticalLine.setAttribute('y2', RUN_SCALE_Y * (NUM_POSITIONS + 0.5) + 'px');
 
     grid.append(verticalLine);
   }
@@ -302,11 +311,13 @@ function createGrid(dates, positions) {
  *
  * @param {HTMLElement} container The element that contains the whole chart.
  * @param {SVGSVGElement} svg The SVG element for the chart.
+ * @param {Map<string, number[]>} rankingHistories The ranking history for each
+ * track.
  * @param {Date[]} rankingDates The dates corresponding to each entry in
  * rankingHistories.
  * @returns {HTMLDivElement} An element for the tooltip.
  */
-function createTooltip(container, svg, rankingDates) {
+function createTooltip(container, svg, rankingHistories, rankingDates) {
   const tooltip = document.createElement('div');
   tooltip.classList.add('chart-tooltip');
 
@@ -336,6 +347,7 @@ function createTooltip(container, svg, rankingDates) {
     pos.x = x * RUN_SCALE_X;
     pos.y = y * RUN_SCALE_Y;
     pos = pos.matrixTransform(svg.getScreenCTM());
+    // position of tooltip is relative to boundary of chart
     pos.x -= chartBounds.x;
     pos.y -= chartBounds.y;
 
