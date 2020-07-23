@@ -4,12 +4,12 @@
  */
 // @ts-check
 // eslint-disable-next-line max-len
-/** @typedef {import('./analysis/gdpr.js').CollatedGDPRRecords} CollatedGDPRRecords */
+/** @typedef {import('./analysis.js').CollatedGDPRRecords} CollatedGDPRRecords */
 
 import {
   collateStreamingData, getStreamingData, getStreamingHistory
-} from './analysis/gdpr.js';
-import {createChart} from './chart/index.js';
+} from './analysis.js';
+import {createChart} from './chart.js';
 
 const {zip} = window;
 
