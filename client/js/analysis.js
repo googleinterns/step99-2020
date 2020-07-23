@@ -35,10 +35,10 @@ function renderingHandler(videoAnalysis) {
  
   const totalComments = renderComments(videoAnalysis.commentArray);
   const commentsRenderTime = totalComments * COMMENT_APPEARANCE_TIME;
-  const overall = determineSentiment(videoAnalysis.magnitudeAndScore.magnitude,
+  const sentiment = determineSentiment(videoAnalysis.magnitudeAndScore.magnitude,
       videoAnalysis.magnitudeAndScore.score);
   setTimeout(() => {
-    addFeedbackResult(overall);
+    addFeedbackResult(sentiment);
   }, commentsRenderTime + FEEDBACK_APPEARANCE_TIME);
 }
 

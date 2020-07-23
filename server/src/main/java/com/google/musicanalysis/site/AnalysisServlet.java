@@ -50,9 +50,9 @@ public class AnalysisServlet extends HttpServlet {
   }
 
   /** @param arr the array that will be converted to json */
-  private String convertToJsonUsingGson(CommentAnalysis trio) {
+  private String convertToJsonUsingGson(CommentAnalysis analysisData) {
     Gson gson = new Gson();
-    String json = gson.toJson(trio);
+    String json = gson.toJson(analysisData);
     return json;
   }
 
