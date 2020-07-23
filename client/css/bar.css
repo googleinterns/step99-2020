@@ -1,3 +1,35 @@
+.hero {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  width: 100%; /* don't use 100vw, that will cause horizontal scrollbar */
+  height: 100vh;
+}
+
+#vis {
+  position: sticky;
+  top: 60px;
+  z-index: 1;
+
+  display: block;
+  width: 50vh;
+
+  height: 60vh;
+  margin-left: 0;
+
+  background-color: #222425;
+}
+
+#graph {
+  display: inline-block;
+  width: 70%;
+}
+
+#graphic {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
 .bar {
   cursor: pointer;
 
@@ -23,17 +55,13 @@
 .category {
   text-align: right;
   /* add text overflow */
-  
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  float: right;
 }
 
 .toolTip {
   left: 200px;
   position: relative;
-}
-
-.category-container{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  float: right;
 }

@@ -11,36 +11,3 @@
   margin-bottom: 200px;
 }
   
-#vis {
-  position: sticky;
-  top: 60px;
-  z-index: 1;
-
-  display: block;
-  width: 50vh;
-
-  height: 60vh;
-  margin-left: 0;
-
-  background-color: #222425;
-}
-
-#graph {
-  display: inline-block;
-  width: 70%;
-
-  background-color: #222425;
-}
-
-.hero {
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  width: 100%; /* don't use 100vw, that will cause horizontal scrollbar */
-  height: 100vh;
-}
-
-#graphic {
-  display: flex;
-  flex-flow: row nowrap;
-}
