@@ -341,6 +341,7 @@ function createTooltip(container, svg, rankingHistories, rankingDates) {
     pos.x = x * RUN_SCALE_X;
     pos.y = y * RUN_SCALE_Y;
     pos = pos.matrixTransform(svg.getScreenCTM());
+    // position of tooltip is relative to boundary of chart
     pos.x -= chartBounds.x;
     pos.y -= chartBounds.y;
 
@@ -352,7 +353,7 @@ function createTooltip(container, svg, rankingHistories, rankingDates) {
     date.innerText = format.format(rankingDates[x]);
   });
 
-  svg.addEventListener('series-clear', (ev) => {
+  svg.addEventListener('series-clear', () => {
     tooltip.classList.remove('chart-tooltip-active');
   });
 
