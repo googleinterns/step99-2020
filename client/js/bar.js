@@ -11,7 +11,12 @@ barTextContainer.setAttribute('height', svg.getBoundingClientRect().height);
 // hard coded data for bar chart for now
 const counts = [1, 3, 1, 2];
 const maxCount = 3;
-const genres = ['Pop Music', 'Other Music', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor ', 'Music of Latin America'];
+const genres = [
+  'Pop Music',
+  'Other Music',
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor',
+  'Music of Latin America',
+];
 
 const GRAPH_HEIGHT = 100;
 const BAR_CONTAINER_HEIGHT = GRAPH_HEIGHT / counts.length;
