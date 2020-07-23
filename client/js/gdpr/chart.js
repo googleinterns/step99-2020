@@ -20,11 +20,12 @@ export function createChart(container, histories, dates) {
   svg.setAttribute('class', 'chart');
   svg.setAttribute(
       'viewBox',
-      `0 ${-RUN_SCALE_Y / 2} ` + 
-      `${dates.length * RUN_SCALE_X} ${NUM_POSITIONS * RUN_SCALE_Y}`,
+      // shift down so that lines are vertically centered
+      `0 ${RUN_SCALE_Y * 0.5} ` +
+      `${dates.length * RUN_SCALE_X} ${(NUM_POSITIONS + 0.5) * RUN_SCALE_Y}`,
   );
   svg.append(createDefs());
-  svg.append(createGrid(dates, NUM_POSITIONS));
+  svg.append(createGrid(dates));
 
   scrollContainer.append(svg);
 
@@ -270,8 +271,8 @@ function createDefs() {
     </feComponentTransfer>
     <feGaussianBlur in="boost" stdDeviation="2.5" result="glow"/>
     <feMerge>
-        <feMergeNode in="glow"/>
-        <feMergeNode in="boost"/>
+      <feMergeNode in="glow"/>
+      <feMergeNode in="boost"/>
     </feMerge>
   `;
 
@@ -284,11 +285,9 @@ function createDefs() {
  * Creates gridlines that appear in the back of the chart.
  *
  * @param {Date[]} dates The dates that are covered by this chart
- * @param {number} positions The number of song positions showed by this chart
- * (i.e., 15 for top 15)
  * @returns {SVGGElement} An SVG group containing the grid.
  */
-function createGrid(dates, positions) {
+function createGrid(dates) {
   const grid = document.createElementNS(SVG_NS, 'g');
   grid.classList.add('grid');
 
@@ -298,8 +297,8 @@ function createGrid(dates, positions) {
 
     verticalLine.setAttribute('x1', RUN_SCALE_X * i + 'px');
     verticalLine.setAttribute('x2', RUN_SCALE_X * i + 'px');
-    verticalLine.setAttribute('y1', -RUN_SCALE_Y / 2);
-    verticalLine.setAttribute('y2', RUN_SCALE_Y * positions + 'px');
+    verticalLine.setAttribute('y1', '0px');
+    verticalLine.setAttribute('y2', RUN_SCALE_Y * (NUM_POSITIONS + 0.5) + 'px');
 
     grid.append(verticalLine);
   }
