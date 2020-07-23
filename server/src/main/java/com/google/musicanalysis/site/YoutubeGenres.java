@@ -16,7 +16,7 @@ public class YoutubeGenres {
   private boolean isMusic;
   private int maxGenreCount = 0;
 
-  public YoutubeGenres(HashMap<VideoGenreCount> genreCountList, int totalLiked) {
+  public YoutubeGenres(HashMap<String, Integer> genreCountList, int totalLiked) {
     this.genreData = genreCountList;
     this.totalLiked = totalLiked;
   }
@@ -47,25 +47,14 @@ public class YoutubeGenres {
   }
 
     /**
-   * updates genreCountlist with new genre or count
-   * by checking if .genre attribute of VideoGenreCount obj exists
+   * updates this.genreData HashMap with new genre or count
+   * by checking if key exists
    * @param topic identifies youtube video music category e.g. Pop music
    */
   protected void updateGenre(String topic) {
-      Boolean containsGenre = false;
-      for (VideoGenreCount videoGenre : this.genreData) {
-          if (videoGenre.genre.equals(topic)) {
-              containsGenre = true;
-              videoGenre.count = videoGenre.count + 1;
-              this.maxGenreCount = Math.max(videoGenre.count, this.maxGenreCount);
-          }
-      }
-
-      if (!containsGenre) {
-          // check if equal to "Music"
-          this.genreData.add(new VideoGenreCount(topic, 1));
-          this.maxGenreCount = Math.max(1, this.maxGenreCount);
-      }
+      int count = this.genreData.containsKey(topic) ? this.genreData.get(topic) : 0;
+      this.genreData.put(topic, count + 1);
+      
   }
 
     /**
