@@ -22,6 +22,12 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SealedObject;
 import javax.crypto.spec.SecretKeySpec;
 
+enum FileStatus {
+    SUCCESS,
+    CREATED,
+    EXISTS
+}
+
 public class AnalysisCache {
 
   private HashMap<String, AnalysisGroup> responseMap;
@@ -35,7 +41,7 @@ public class AnalysisCache {
   public void open() throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
     HashMap<String, AnalysisGroup> responseData = null;
 
-    int file = createFile(); // this will have use later.
+    FileStatus file = createFile(); // this will have use later.
 
     try {
       cipher.init(Cipher.DECRYPT_MODE, generateKey());
@@ -54,10 +60,7 @@ public class AnalysisCache {
       System.out.println("Analysis Group class not found");
       c.printStackTrace();
       return;
-    } catch (EOFException e) {
-      // This will hit when the cache first opens
-      return;
-    }
+    } 
   }
 
   public void close() throws InvalidKeyException, IllegalBlockSizeException {
@@ -89,18 +92,18 @@ public class AnalysisCache {
     this.responseMap.remove(requestUrl);
   }
 
-  private int createFile() {
-    try { // logic here is going to improve which is why it's int
+  private FileStatus createFile() {
+    try { 
       File file = new File("cachedData.txt");
       if (file.createNewFile()) {
-        return 0;
+        return FileStatus.CREATED;
       } else {
-        return 1;
+        return FileStatus.EXISTS;
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
-    return 0;
+    return FileStatus.SUCCESS;
   }
 
   private SecretKeySpec generateKey() {
