@@ -17,12 +17,37 @@
   z-index: 1;
 
   display: block;
-  width: 50vw;
+  width: 50vh;
 
   height: 60vh;
   margin-left: 0;
 
-  background-color: #dddddd;
+  background-color: #222425;
+}
+
+#graph {
+  display: inline-block;
+  width: 70%;
+
+  background-color: #222425;
+}
+
+#text {
+  display: inline-block;
+  width: 25%;
+
+  text-align: right;
+  vertical-align: top;
+  position: relative;
+}
+
+.category {
+  position: relative;
+  float: right;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .hero {
