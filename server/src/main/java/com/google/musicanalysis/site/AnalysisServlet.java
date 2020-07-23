@@ -31,7 +31,7 @@ public class AnalysisServlet extends HttpServlet {
     String videoId = input; // assume user enters id
 
     commentArgs.put("part", "snippet");
-    commentArgs.put("videoId", input); 
+    commentArgs.put("videoId", input);
     String commentsJson;
     try {
       commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
@@ -217,8 +217,10 @@ public class AnalysisServlet extends HttpServlet {
 
     for (String comment : comments) {
       comment = comment.replace("\"", "");
-      // comment.replace() could potentially give an empty string,
-      // which messes up lastCharacter.
+      // This does two things:
+      // 1. ensure that commment.substring(comment.length() - 1)
+      //    doesn't throw an error, which ruins the loop
+      // 2. Does not allow comments with 0 or 1 characters to pass through
       if (comment.length() <= 1){
           continue;
       }
