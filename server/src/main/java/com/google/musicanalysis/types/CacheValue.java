@@ -1,7 +1,6 @@
 package com.google.musicanalysis.types;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.io.Serializable;
 
 public class CacheValue implements Serializable {
