@@ -40,7 +40,9 @@ export function createChart(container, histories, dates) {
     rows.push([]);
   }
 
-  historyEntries.forEach(([, history], index) => {
+  let index = 0;
+
+  for (const [, history] of historyEntries) {
     // each track is given one of 24 colours, which are spaced 15 degrees apart
     // in hue
     const hue = index * 15 % 360;
@@ -53,7 +55,8 @@ export function createChart(container, histories, dates) {
 
     seriesContainer.append(series);
     seriesElements.push(series);
-  });
+    index++;
+  }
 
   const hoverState = {series: null, x: null, y: null};
 
@@ -71,7 +74,7 @@ export function createChart(container, histories, dates) {
       );
     }
 
-    if (hit < 0) {
+    if (hit === null) {
       hoverState.series = null;
       hoverState.x = null;
       hoverState.y = null;

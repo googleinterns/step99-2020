@@ -4,13 +4,11 @@ import com.google.gson.*;
 import com.google.musicanalysis.api.naturallanguage.*;
 import com.google.musicanalysis.api.perspective.*;
 import com.google.musicanalysis.api.youtube.*;
+import com.google.musicanalysis.types.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -23,9 +21,7 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    res.getWriter().write("<h1>Comment Analysis</h1>\n");
-
-    String videoName = "seun omonije";
+    String videoName = "sharks 101";
 
     // Use like this: {url_parameter, value}
     HashMap<String, String> videoArgs = new HashMap<>();
@@ -37,37 +33,24 @@ public class AnalysisServlet extends HttpServlet {
 
     commentArgs.put("part", "snippet");
     commentArgs.put("videoId", videoId);
-    String commentsJson = new YoutubeRequest("commentThreads", args).getResult();
+    String commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
 
-    res.getWriter().write(commentsJson);
+    ArrayList<String> commentArray = retrieveComments(commentsJson);
+    String cumulativeComments = convertToString(commentArray);
 
-    res.getWriter().write("<h3>Comments</h3>");
-    String comment = "I love you.";
-    res.getWriter().println(comment);
+    HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
+    NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
 
-    res.getWriter().write("<h3>Perspective</h3>");
-    HashMap<String, String> perspectiveMap = analyzeWithPerspective(comment);
-    // Print on the screen (won't make it in final cut)
-    Set set = perspectiveMap.entrySet();
-    Iterator mapIterator = set.iterator();
-    while (mapIterator.hasNext()) {
-      Map.Entry entry = (Map.Entry) mapIterator.next();
-      res.getWriter().println(entry.getKey() + ": " + entry.getValue());
-    }
-
-    res.getWriter().write("<h3>NLP</h3>");
-    NLPResult nlpObject = analyzeWithNLP(comment);
-    res.getWriter().println("Magnitude: " + nlpObject.magnitude + "Score: " + nlpObject.score);
+    String json = convertToJsonUsingGson(new AnalysisPair(perspectiveMap, commentsSentiment));
+    res.setContentType("application/json;");
+    res.getWriter().println(json);
   }
 
-  private class NLPResult {
-    Double magnitude;
-    Double score;
-
-    public NLPResult(Double magnitude, Double score) {
-      this.magnitude = magnitude;
-      this.score = score;
-    }
+  /** @param arr the array that will be converted to json */
+  private String convertToJsonUsingGson(AnalysisPair pair) {
+    Gson gson = new Gson();
+    String json = gson.toJson(pair);
+    return json;
   }
 
   /**
@@ -155,5 +138,60 @@ public class AnalysisServlet extends HttpServlet {
 
     // Only returning the first for now, potential to change if I optimize search results.
     return searchResults.get(0);
+  }
+
+  /**
+   * Parses the comment JSON string and retrieves the comments.
+   *
+   * @param response The JSON string to be parsed.
+   * @return An ArrayList with each comment
+   */
+  private ArrayList<String> retrieveComments(String response) {
+    ArrayList<String> commentList = new ArrayList<>();
+
+    JsonElement jElement = JsonParser.parseString(response);
+    JsonObject jObject = jElement.getAsJsonObject();
+    JsonArray itemsArray = jObject.getAsJsonArray("items");
+
+    for (JsonElement el : itemsArray) {
+      String topComment =
+          el.getAsJsonObject()
+              .getAsJsonObject("snippet")
+              .getAsJsonObject("topLevelComment")
+              .getAsJsonObject("snippet")
+              .get("textOriginal")
+              .toString();
+
+      // Remove all non-ASCII characters
+      commentList.add(topComment.replaceAll("[^\\x00-\\x7F]", ""));
+    }
+
+    return commentList;
+  }
+
+  /**
+   * Condenses array of comments into one large string, formatting it along the way and separating
+   * unpunctuated sentences with a period
+   *
+   * @param comments The array to be condensed.
+   * @return A properly formatted String
+   */
+  private String convertToString(ArrayList<String> comments) {
+    StringBuilder res = new StringBuilder();
+
+    for (String comment : comments) {
+      comment = comment.replace("\"", "");
+      // Make sure each comment is treated as its own sentence
+      // Not sure char datatype works with regex so used String
+      String lastCharacter = comment.substring(comment.length() - 1);
+      if (!lastCharacter.matches("\\.|!|\\?")) {
+        comment += ". ";
+      } else {
+        comment += " ";
+      }
+      res.append(comment);
+    }
+
+    return res.toString();
   }
 }
