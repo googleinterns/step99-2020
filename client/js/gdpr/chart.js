@@ -94,26 +94,24 @@ export class GdprChart extends HTMLElement {
     }
 
     if (hitIndex >= 0) {
-      const key = this.rows[x][0];
-
-  //           detail: {
-  //             x,
-
-  // onMouseLeave() {
-
-  //         detail: {
-  //           x,
-  //           y,
-  //           key,
-  //         },
-  //         bubbles: true,
-  //       }),
-  //   );
+      this.setHover(x, y, hitIndex);
     }
+  }
 
-    this.hoverState.seriesIndex = seriesIndex;
-    this.hoverState.x = x;
-    this.hoverState.y = y;
+  setHover(x, y, seriesIndex) {
+    const key = this.rows[0][seriesIndex];
+    const seriesEl = this.svg.querySelectorAll('.series')[seriesIndex];
+
+    seriesEl.dispatchEvent(
+        new CustomEvent('series-hit', {
+          detail: {
+            x,
+            y,
+            key,
+          },
+          bubbles: true,
+        }),
+    );
   }
 
   clearHover() {
@@ -141,7 +139,7 @@ export class GdprChart extends HTMLElement {
         `${this.dates.length * RUN_SCALE_X} ${(NUM_POSITIONS + 0.5) * RUN_SCALE_Y}`,
     );
     svg.append(this.createDefs());
-    svg.append(this.createGrid(NUM_POSITIONS));
+    svg.append(this.createGrid());
 
     const seriesContainer = document.createElementNS(SVG_NS, 'g');
 
