@@ -2,6 +2,7 @@ import {SVG_NS} from '../util.js';
 
 const RUN_SCALE_X = 30;
 const RUN_SCALE_Y = 30;
+const NUM_POSITIONS = 15;
 
 /**
  * Creates an SVG chart inside of `container` with the given data.
@@ -19,7 +20,7 @@ export function createChart(container, histories, dates) {
   svg.setAttribute('class', 'chart');
   svg.setAttribute(
       'viewBox',
-      `0 0 ${dates.length * RUN_SCALE_X} ${15 * RUN_SCALE_Y}`,
+      `0 0 ${dates.length * RUN_SCALE_X} ${NUM_POSITIONS * RUN_SCALE_Y}`,
   );
   svg.append(createDefs());
 
