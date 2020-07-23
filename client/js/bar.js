@@ -39,10 +39,5 @@ for (var i = 0; i < counts.length; i++) {
   text.textContent = genres[i];
   console.log(barHeightContainer / 100 * textBlock.getAttribute('height'));
   textContainer.style.height = barHeightContainer / 100 * textBlock.getAttribute('height') + 'px';
-
-  const toolTip = document.createElement('span');
-  toolTip.textContent = genres[i] + ': ' + counts[i];
-  toolTip.setAttribute('class', 'toolTip');
-  textContainer.appendChild(toolTip);
 }
 
