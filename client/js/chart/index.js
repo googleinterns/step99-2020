@@ -29,14 +29,19 @@ export function createChart(container, histories, dates) {
   /** @type {SVGGElement[]} */
   const seriesElements = [];
   const historyEntries = [...histories];
+  let index = 0;
 
-  historyEntries.forEach(([, history], index) => {
+  // get only the first 7 tracks for now
+  const MAX_TRACKS_INCLUDED = 7;
+  for (const [, history] of historyEntries.slice(0, MAX_TRACKS_INCLUDED)) {
+    // each line is given a colour 15 degrees apart in hue, totaling 24 colours
     const hue = index * 15 % 360;
     const color = `hsl(${hue},50%,50%)`;
     const series = createSeries(history, color);
     seriesContainer.append(series);
     seriesElements.push(series);
-  });
+    index++;
+  }
 
   let activeSeries = null;
   let activeX = null;
