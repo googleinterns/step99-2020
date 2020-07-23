@@ -124,7 +124,7 @@ export function createChart(container, histories, dates) {
     activeY = null;
   });
 
-  const tooltip = createTooltip(svg, histories, dates);
+  const tooltip = createTooltip(container, svg, histories, dates);
 
   container.append(scrollContainer);
   container.append(tooltip);
@@ -177,7 +177,7 @@ function createSeries(history, color) {
   // create marker for when the user mouses near a point
   const marker = document.createElementNS(SVG_NS, 'circle');
   marker.classList.add('series-marker');
-  marker.setAttribute('r', '5px');
+  marker.setAttribute('r', '6');
 
   series.addEventListener('series-hit', (ev) => {
     const {x, y} = ev.detail;
@@ -256,9 +256,9 @@ function createDefs() {
 
   // need to create SVG brightness filter b/c CSS filters
   // don't work on SVG elements in Chrome
-  const highlightFilter = document.createElementNS(SVG_NS, 'filter');
-  highlightFilter.id = 'filter-highlight';
-  highlightFilter.innerHTML = `
+  const dimFilter = document.createElementNS(SVG_NS, 'filter');
+  dimFilter.id = 'filter-dim';
+  dimFilter.innerHTML = `
     <feComponentTransfer>
       <feFuncR type="linear" slope="0.5" />
       <feFuncG type="linear" slope="0.5" />
@@ -266,7 +266,17 @@ function createDefs() {
     </feComponentTransfer>
   `;
 
-  defs.append(highlightFilter);
+  const highlightFilter = document.createElementNS(SVG_NS, 'filter');
+  highlightFilter.id = 'filter-highlight';
+  highlightFilter.innerHTML = `
+    <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+    <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  `;
+
+  defs.append(dimFilter, highlightFilter);
 
   return defs;
 }
@@ -274,6 +284,7 @@ function createDefs() {
 /**
  * Creates a tooltip that responds to the user pointing at things on the chart.
  *
+ * @param {HTMLElement} container The element that contains the whole chart.
  * @param {SVGSVGElement} svg The SVG element for the chart.
  * @param {Map<string, number[]>} rankingHistories The ranking history for each
  * track.
@@ -281,29 +292,45 @@ function createDefs() {
  * rankingHistories.
  * @returns {HTMLDivElement} An element for the tooltip.
  */
-function createTooltip(svg, rankingHistories, rankingDates) {
+function createTooltip(container, svg, rankingHistories, rankingDates) {
   const tooltip = document.createElement('div');
   tooltip.classList.add('chart-tooltip');
-  const content = document.createElement('span');
-  tooltip.append(content);
+
+  const rank = document.createElement('span');
+  rank.classList.add('chart-tooltip-rank');
+  tooltip.append(rank);
+
+  const title = document.createElement('span');
+  title.classList.add('chart-tooltip-title');
+  tooltip.append(title);
+
+  const date = document.createElement('span');
+  date.classList.add('chart-tooltip-date');
+  tooltip.append(date);
+
+  const format = new Intl.DateTimeFormat(
+      undefined,
+      {year: 'numeric', month: 'long', day: '2-digit'},
+  );
 
   svg.addEventListener('series-hit', (ev) => {
     const {key, x, y} = ev.detail;
-    const svgBounds = svg.getBoundingClientRect();
+    const chartBounds = container.getBoundingClientRect();
 
     // convert SVG coords to HTML coords
     let pos = svg.createSVGPoint();
     pos.x = x * RUN_SCALE_X;
     pos.y = y * RUN_SCALE_Y;
     pos = pos.matrixTransform(svg.getScreenCTM());
-    pos.x -= svgBounds.x;
-    pos.y -= svgBounds.y;
+    pos.x -= chartBounds.x;
+    pos.y -= chartBounds.y;
 
     tooltip.classList.add('chart-tooltip-active');
     tooltip.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
 
-    const date = rankingDates[x];
-    content.innerText = key + ' ' + date + ' ' + y;
+    title.innerText = key;
+    rank.innerText = y + 1;
+    date.innerText = format.format(rankingDates[x]);
   });
 
   svg.addEventListener('series-clear', (ev) => {
