@@ -1,4 +1,4 @@
-import {SVG_NS} from '../../util.js';
+import {SVG_NS} from '../util.js';
 
 const RUN_SCALE_X = 30;
 const RUN_SCALE_Y = 30;
@@ -80,7 +80,7 @@ export class GdprChart extends HTMLElement {
     // index in history
     const x = Math.round(chartPos.x / RUN_SCALE_X);
     // value in history
-    const y = Math.round(chartPos.y / RUN_SCALE_Y + 0.5);
+    const y = Math.round(chartPos.y / RUN_SCALE_Y);
 
     // don't recalculate the hit if we're in the same place
     // as the last hit
@@ -96,47 +96,20 @@ export class GdprChart extends HTMLElement {
     if (hitIndex >= 0) {
       const key = this.rows[x][0];
 
-      const seriesEntry = historyEntries[hitIndex];
-      const seriesElement = seriesElements[hitIndex];
-      seriesElement.dispatchEvent(
-          new CustomEvent('series-hit', {
-            detail: {
-              x,
-              y,
-              key,
-            },
-            bubbles: true,
-          }),
-      );
+  //           detail: {
+  //             x,
 
-      this.hoverState.seriesIndex = hitIndex;
-      this.hoverState.x = x;
-      this.hoverState.y = y;
+  // onMouseLeave() {
+
+  //         detail: {
+  //           x,
+  //           y,
+  //           key,
+  //         },
+  //         bubbles: true,
+  //       }),
+  //   );
     }
-  }
-
-  onMouseLeave() {
-    this.clearHover();
-  }
-
-  onScroll() {
-    this.clearHover();
-  }
-
-  setHover(x, y, seriesIndex) {
-    const key = this.rows[0][seriesIndex];
-    const seriesEl = this.svg.querySelectorAll('.series')[seriesIndex];
-
-    seriesEl.dispatchEvent(
-        new CustomEvent('series-hit', {
-          detail: {
-            x,
-            y,
-            key,
-          },
-          bubbles: true,
-        }),
-    );
 
     this.hoverState.seriesIndex = seriesIndex;
     this.hoverState.x = x;
@@ -163,7 +136,9 @@ export class GdprChart extends HTMLElement {
     svg.setAttribute('class', 'chart');
     svg.setAttribute(
         'viewBox',
-        `0 0 ${this.dates.length * RUN_SCALE_X} ${NUM_POSITIONS * RUN_SCALE_Y}`,
+        // shift down so that lines are vertically centered
+        `0 ${RUN_SCALE_Y * 0.5} ` +
+        `${this.dates.length * RUN_SCALE_X} ${(NUM_POSITIONS + 0.5) * RUN_SCALE_Y}`,
     );
     svg.append(this.createDefs());
     svg.append(this.createGrid(NUM_POSITIONS));
@@ -269,23 +244,21 @@ export class GdprChart extends HTMLElement {
   createRun(history, start, end) {
     const runContainer = document.createElementNS(SVG_NS, 'g');
 
-    const pointsStr = history
+    const points = history
         .slice(start, end)
-        .map((val, idx) =>
-          (idx + start) * RUN_SCALE_X + ',' +
-          (val - 0.5) * RUN_SCALE_Y)
+        .map((val, idx) => ({
+          x: (idx + start) * RUN_SCALE_X,
+          y: val * RUN_SCALE_Y,
+        }));
+
+    const pointsStr = points
+        .map(({x, y}) => `${x}, ${y}`)
         .join(' ');
 
     // line that is displayed
     const line = document.createElementNS(SVG_NS, 'polyline');
     line.setAttribute('class', 'series-run');
     line.setAttribute('points', pointsStr);
-
-    // secondary (wider) invisible line to make it easier to hit the line with the
-    // mouse
-    const touchTarget = document.createElementNS(SVG_NS, 'polyline');
-    touchTarget.setAttribute('class', 'series-run-touch-target');
-    touchTarget.setAttribute('points', pointsStr);
 
     const startCap = document.createElementNS(SVG_NS, 'circle');
     const endCap = document.createElementNS(SVG_NS, 'circle');
@@ -294,13 +267,13 @@ export class GdprChart extends HTMLElement {
     endCap.setAttribute('class', 'series-run-cap');
 
     startCap.setAttribute('r', '5');
-    startCap.setAttribute('cx', start * RUN_SCALE_X + 'px');
-    startCap.setAttribute('cy', (history[start] - 0.5) * RUN_SCALE_Y + 'px');
+    startCap.setAttribute('cx', points[0].x + 'px');
+    startCap.setAttribute('cy', points[0].y + 'px');
     endCap.setAttribute('r', '5');
-    endCap.setAttribute('cx', (end - 1) * RUN_SCALE_X + 'px');
-    endCap.setAttribute('cy', (history[end - 1] - 0.5) * RUN_SCALE_Y + 'px');
+    endCap.setAttribute('cx', points[points.length - 1].x + 'px');
+    endCap.setAttribute('cy', points[points.length - 1].y + 'px');
 
-    runContainer.append(startCap, line, touchTarget, endCap);
+    runContainer.append(startCap, line, endCap);
     return runContainer;
   }
 
@@ -338,12 +311,10 @@ export class GdprChart extends HTMLElement {
   /**
    * Creates gridlines that appear in the back of the chart.
    *
-   * @param {number} positions The number of song positions showed by this chart
-   * (i.e., 15 for top 15)
    * @returns {SVGGElement} An SVG group containing the grid.
    * @private
    */
-  createGrid(positions) {
+  createGrid() {
     const grid = document.createElementNS(SVG_NS, 'g');
     grid.classList.add('grid');
 
@@ -354,7 +325,7 @@ export class GdprChart extends HTMLElement {
       verticalLine.setAttribute('x1', RUN_SCALE_X * i + 'px');
       verticalLine.setAttribute('x2', RUN_SCALE_X * i + 'px');
       verticalLine.setAttribute('y1', '0px');
-      verticalLine.setAttribute('y2', RUN_SCALE_Y * positions + 'px');
+      verticalLine.setAttribute('y2', RUN_SCALE_Y * NUM_POSITIONS + 'px');
 
       grid.append(verticalLine);
     }
