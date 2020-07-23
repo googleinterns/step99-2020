@@ -25,7 +25,7 @@
 
   transition: fill .3s ease;
 
-  fill: var(--color-accent-primary-2); /* how to make global? */
+  fill: var(--color-accent-primary-2);
 }
 
 .bar:hover, .bar:focus {
@@ -33,8 +33,6 @@
 }
 
 #bar-text {
-  position: relative;
-
   display: inline-block;
   width: 25%;
 
