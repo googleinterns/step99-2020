@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.io.Serializable;
 
 public class CacheValue implements Serializable {
-    public final AnalysisGroup responseMap;
+    public final AnalysisGroup responseData;
     public final Instant timestamp;
 
-    public CacheValue(AnalysisGroup responseMap) {
-        this.responseMap = responseMap;
+    public CacheValue(AnalysisGroup responseData) {
+        this.responseData = responseData;
         this.timestamp = Instant.now();
     }
 }
