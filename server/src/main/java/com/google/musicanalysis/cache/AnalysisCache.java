@@ -33,14 +33,13 @@ public class AnalysisCache {
             // .ser for serialized 
             FileInputStream inFile = new FileInputStream("cachedData.txt");
             ObjectInputStream inData = new ObjectInputStream(inFile);
-            responseMap = (HashMap<String, AnalysisGroup>)inData.readObject();
+            responseMap = (HashMap<String, AnalysisGroup>) inData.readObject();
             inData.close();
             inFile.close();
         } catch (IOException e) {
             e.printStackTrace();
             return;
         } catch (ClassNotFoundException c) {
-            System.out.println("Analysis Group class not found");
             c.printStackTrace();
             return;
         }
