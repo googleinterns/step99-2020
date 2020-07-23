@@ -12,7 +12,7 @@ import java.lang.Math;
 
 /** contains final object that YoutubeServlet.java sends to frontend */
 public class YoutubeGenres {
-  private List<VideoGenreCount> data;
+  private List<VideoGenreCount> genreData;
   private final int totalLiked;
   private int totalMusic = 0;
   private boolean isMusic;
