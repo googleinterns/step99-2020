@@ -32,24 +32,6 @@
   background-color: #222425;
 }
 
-#text {
-  display: inline-block;
-  width: 25%;
-
-  text-align: right;
-  vertical-align: top;
-  position: relative;
-}
-
-.category {
-  position: relative;
-  float: right;
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
 .hero {
   display: grid;
   align-content: center;
