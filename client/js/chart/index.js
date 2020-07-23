@@ -17,17 +17,92 @@ export function createChart(container, histories, dates) {
   seriesContainer.setAttribute('class', 'series-container');
   svg.append(seriesContainer);
 
+  /** @type {SVGGElement[]} */
+  const seriesElements = [];
+  const historyEntries = [...histories];
   let index = 0;
-  const colors = ['blue', 'red', 'green', 'purple', 'orange'];
 
   // get only the first 7 tracks for now
   const MAX_TRACKS_INCLUDED = 7;
-  for (const history of [...histories.values()].slice(0, MAX_TRACKS_INCLUDED)) {
-    const color = colors[index % colors.length];
-    const series = createSeries(history, color);
+  for (const [, history] of historyEntries.slice(0, MAX_TRACKS_INCLUDED)) {
+    // each line is given a colour 15 degrees apart in hue, totaling 24 colours
+    const hue = index * 15 % 360;
+    const color = `hsl(${hue},50%,50%)`;
+    const series = createSeries(svg, history, color);
     seriesContainer.append(series);
+    seriesElements.push(series);
     index++;
   }
+
+  let activeSeries = null;
+  let activeX = null;
+  let activeY = null;
+
+  // do some hit-testing
+  svg.addEventListener('mousemove', (ev) => {
+    const svgBounds = svg.getBoundingClientRect();
+    const chartX = ev.clientX - svgBounds.x;
+    const chartY = ev.clientY - svgBounds.y;
+
+    // index in history
+    const x = Math.round(chartX / RUN_SCALE_X);
+    // value in history
+    const y = Math.round(chartY / RUN_SCALE_Y);
+
+    // don't recalculate the hit if we're in the same place
+    // as the last hit
+    if (activeX === x && activeY === y) return;
+
+    let hit = null;
+
+    historyEntries.forEach(([, history], index) => {
+      // include only series where there is a data point for this x value
+      if (x >= history.length || history[x] === null) return;
+
+      // get distance from mouse y to series y for each series
+      const dist = history[x] - y;
+
+      // filter items where distance is too great; there should only be one
+      // remaining (impossible to be less than 0.4 away from both 1 and 2, for
+      // example)
+      if (Math.abs(dist) > 0.4) return;
+
+      hit = index;
+    });
+
+    if (activeSeries && activeSeries !== hit) {
+      const seriesElement = seriesElements[activeSeries];
+      seriesElement.dispatchEvent(new CustomEvent('series-clear'));
+    }
+
+    if (hit === null) {
+      activeSeries = null;
+      activeX = null;
+      activeY = null;
+    } else {
+      const seriesEntry = historyEntries[hit];
+      const seriesElement = seriesElements[hit];
+      seriesElement.dispatchEvent(
+          new CustomEvent('series-hit', {
+            detail: {x, y, key: seriesEntry[0]},
+          }),
+      );
+
+      activeSeries = hit;
+      activeX = x;
+      activeY = y;
+    }
+  });
+
+  svg.addEventListener('mouseleave', () => {
+    if (activeSeries) {
+      const seriesElement = seriesElements[activeSeries];
+      seriesElement.dispatchEvent(new CustomEvent('series-clear'));
+    }
+
+    activeX = null;
+    activeY = null;
+  });
 
   container.append(svg);
 }
@@ -38,12 +113,13 @@ const RUN_SCALE_Y = 30;
 /**
  * Creates a new series (set of lines on the chart for a specific song).
  *
+ * @param {SVGSVGElement} svg The root SVG element of the chart.
  * @param {number[]} history The historical positions of this track on the
  * leaderboard.
  * @param {string} color The color of this series.
  * @returns {SVGGElement} A group containing the series.
  */
-function createSeries(history, color) {
+function createSeries(svg, history, color) {
   const series = document.createElementNS(SVG_NS, 'g');
   series.setAttribute('class', 'series');
   series.style.setProperty('--run-color', color);
@@ -77,6 +153,24 @@ function createSeries(history, color) {
   if (end > start) {
     series.append(createRun(history, start, end));
   }
+
+  // create marker for when the user mouses near a point
+  const marker = document.createElementNS(SVG_NS, 'circle');
+  marker.classList.add('series-marker');
+  marker.setAttribute('r', '5px');
+
+  series.addEventListener('series-hit', (ev) => {
+    const {x, y} = ev.detail;
+    series.append(marker);
+    series.classList.add('series-active');
+    marker.setAttribute('cx', x * RUN_SCALE_X + 'px');
+    marker.setAttribute('cy', y * RUN_SCALE_Y + 'px');
+  });
+
+  series.addEventListener('series-clear', () => {
+    series.classList.remove('series-active');
+    marker.remove();
+  });
 
   return series;
 }
