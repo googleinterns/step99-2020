@@ -8,6 +8,8 @@ export class GdprChart extends HTMLElement {
   constructor() {
     super();
 
+    this.attachShadow({mode: 'open'});
+
     /** @type {Map<string, number[]>} */
     this.histories = new Map();
 
@@ -20,6 +22,7 @@ export class GdprChart extends HTMLElement {
     this.hoverState = {seriesIndex: null, x: null, y: null};
 
     this.scrollContainer = document.createElement('div');
+    this.scrollContainer.classList.add('chart-scroll-container');
     this.scrollContainer.addEventListener('scroll', this.onScroll.bind(this));
 
     this.tooltip = this.createTooltip();
@@ -28,7 +31,6 @@ export class GdprChart extends HTMLElement {
     stylesheet.rel = 'stylesheet';
     stylesheet.href = '/css/spotify-gdpr-chart.css';
 
-    this.attachShadow({mode: 'open'});
     this.shadowRoot.append(stylesheet);
     this.shadowRoot.append(this.scrollContainer);
     this.shadowRoot.append(this.tooltip);
@@ -86,16 +88,27 @@ export class GdprChart extends HTMLElement {
     // as the last hit
     if (this.hoverState.x === x && this.hoverState.y === y) return;
 
-    // subtract 1 b/c first row is key
-    const hitIndex = this.rows[x].findIndex((rank) => rank === y) - 1;
+    // add 1 b/c first row is key
+    const hitIndex = this.rows[x + 1].findIndex((rank) => rank === y);
 
-    if (this.hoverState.seriesIndex && this.hoverState.seriesIndex !== hitIndex) {
+    if (
+      this.hoverState.seriesIndex !== null &&
+      this.hoverState.seriesIndex !== hitIndex
+    ) {
       this.clearHover();
     }
 
     if (hitIndex >= 0) {
       this.setHover(x, y, hitIndex);
     }
+  }
+
+  onMouseLeave() {
+    this.clearHover();
+  }
+
+  onScroll() {
+    this.clearHover();
   }
 
   setHover(x, y, seriesIndex) {
@@ -112,6 +125,10 @@ export class GdprChart extends HTMLElement {
           bubbles: true,
         }),
     );
+
+    this.hoverState.seriesIndex = seriesIndex;
+    this.hoverState.x = x;
+    this.hoverState.y = y;
   }
 
   clearHover() {
@@ -218,7 +235,7 @@ export class GdprChart extends HTMLElement {
       series.append(marker);
       series.classList.add('series-active');
       marker.setAttribute('cx', x * RUN_SCALE_X + 'px');
-      marker.setAttribute('cy', (y - 0.5) * RUN_SCALE_Y + 'px');
+      marker.setAttribute('cy', y * RUN_SCALE_Y + 'px');
     });
 
     series.addEventListener('series-clear', () => {
@@ -359,7 +376,7 @@ export class GdprChart extends HTMLElement {
         {year: 'numeric', month: 'long', day: '2-digit'},
     );
 
-    this.addEventListener('series-hit', (ev) => {
+    this.shadowRoot.addEventListener('series-hit', (ev) => {
       const {key, x, y} = ev.detail;
       const chartBounds = this.getBoundingClientRect();
 
@@ -379,7 +396,7 @@ export class GdprChart extends HTMLElement {
       date.innerText = format.format(this.dates[x]);
     });
 
-    this.addEventListener('series-clear', () => {
+    this.shadowRoot.addEventListener('series-clear', () => {
       tooltip.classList.remove('chart-tooltip-active');
     });
 
