@@ -33,7 +33,7 @@ for (var i = 0; i < counts.length; i++) {
   textBlock.appendChild(textContainer);
   textContainer.setAttribute('class', 'category-container');
 
-  const text = document.createElement('span');
+  const text = document.createElement('div');
   textContainer.appendChild(text);
   text.setAttribute('class', 'category');
   text.textContent = genres[i];
