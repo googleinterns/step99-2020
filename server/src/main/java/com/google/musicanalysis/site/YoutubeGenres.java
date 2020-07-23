@@ -19,7 +19,7 @@ public class YoutubeGenres {
   private int maxGenreCount = 0;
 
   public YoutubeGenres(List<VideoGenreCount> genreCountList, int totalLiked) {
-    this.data = genreCountList;
+    this.genreData = genreCountList;
     this.totalLiked = totalLiked;
   }
 
@@ -55,7 +55,7 @@ public class YoutubeGenres {
    */
   protected void updateGenre(String topic) {
       Boolean containsGenre = false;
-      for (VideoGenreCount videoGenre : this.data) {
+      for (VideoGenreCount videoGenre : this.genreData) {
           if (videoGenre.genre.equals(topic)) {
               containsGenre = true;
               videoGenre.count = videoGenre.count + 1;
@@ -65,7 +65,7 @@ public class YoutubeGenres {
 
       if (!containsGenre) {
           // check if equal to "Music"
-          this.data.add(new VideoGenreCount(topic, 1));
+          this.genreData.add(new VideoGenreCount(topic, 1));
           this.maxGenreCount = Math.max(1, this.maxGenreCount);
       }
   }
