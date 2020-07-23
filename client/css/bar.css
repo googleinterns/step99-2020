@@ -7,11 +7,6 @@
 }
 
 #vis {
-  position: sticky;
-  top: 60px;
-  z-index: 1;
-
-  display: block;
   width: 50vh;
 
   height: 60vh;
@@ -25,17 +20,12 @@
   width: 70%;
 }
 
-#graphic {
-  display: flex;
-  flex-flow: row nowrap;
-}
-
 .bar {
   cursor: pointer;
 
   transition: fill .3s ease;
 
-  fill: var(--color-accent-primary-2); /* how to make global? */
+  fill: var(--color-accent-primary-2);
 }
 
 .bar:hover, .bar:focus {
@@ -43,25 +33,6 @@
 }
 
 #bar-text {
-  position: relative;
-
   display: inline-block;
   width: 25%;
-
-  text-align: right;
-  vertical-align: top;
-}
-
-.category {
-  text-align: right;
-  /* add text overflow */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  float: right;
-}
-
-.toolTip {
-  left: 200px;
-  position: relative;
 }

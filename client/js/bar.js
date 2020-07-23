@@ -1,24 +1,15 @@
 /* constructs bar graph from scratch */
 
-const barTextContainer = document.getElementById('bar-text');
 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 svg.setAttribute('viewBox', '0 0 100 100'); // change height in css
 document.getElementById('graph').appendChild(svg);
 
-// textBlock should align vertically with bar chart
-barTextContainer.setAttribute('height', svg.getBoundingClientRect().height);
-
 // hard coded data for bar chart for now
 const counts = [1, 3, 1, 2];
 const maxCount = 3;
-const genres = ['Pop Music', 'Other Music', 'Electronic Music', 'Music of Latin America'];
 
 const GRAPH_HEIGHT = 100;
 const BAR_CONTAINER_HEIGHT = GRAPH_HEIGHT / counts.length;
-
-// height of each category div must equal bar thickness
-const CATEGORY_HEIGHT =
-  BAR_CONTAINER_HEIGHT / 100 * barTextContainer.getAttribute('height');
 
 // bar container contains a bar. It is composed of bar padding and fill
 const BAR_PERCENT_FILL = 0.8;
@@ -41,10 +32,4 @@ for (let i = 0; i < counts.length; i++) {
   bar.setAttribute('height', BAR_THICKNESS);
   bar.setAttribute('x', GRAPH_LEFT_PADDING);
   bar.setAttribute('y', GRAPH_TOP_PADDING + BAR_CONTAINER_HEIGHT * i);
-
-  const category = document.createElement('div');
-  barTextContainer.appendChild(category);
-  category.setAttribute('class', 'category');
-  category.style.height = CATEGORY_HEIGHT + 'px';
-  category.textContent = genres[i];
 }
