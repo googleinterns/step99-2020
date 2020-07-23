@@ -1,6 +1,5 @@
 const COMMENT_APPEARANCE_TIME = 1500;
 const TOTAL_COMMENTS_TO_DISPLAY = 6;
-const TOTAL_COMMENTS_TIME = COMMENT_APPEARANCE_TIME * TOTAL_COMMENTS_TO_DISPLAY;
 
 window.onload = function() {
   for (let i = 1; i < 6; i++) {
@@ -64,8 +63,7 @@ function addFeedbackResult(result) {
 function addDonutChart(str, percent) {
   const div = document.createElement('div');
 
-  div.classList = 'a-chart';
-  div.className = 'item donut';
+  div.className = 'item donut a-chart';
   div.style.setProperty('--percent', percent);
 
   const header = document.createElement('h2');
@@ -86,6 +84,8 @@ function addDonutChart(str, percent) {
 
 /**
  * builds the circle parts of the donut charts
+ *
+ * @returns {SVGElement} the svg circle
  */
 function buildCircle() {
   const g = createSVGElement('g');
@@ -118,6 +118,8 @@ function buildCircle() {
 
 /**
  * Helper function that creates an SVG element
+ *
+ * @returns {SVGElement} the wanted SVG element
  *
  * @param {string} el the string for the svg element
  */
