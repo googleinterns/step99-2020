@@ -24,7 +24,8 @@ export function createChart(container, histories, dates) {
 
   // get only the first 7 tracks for now
   const MAX_TRACKS_INCLUDED = 7;
-  for (const history of [...histories.values()].slice(0, MAX_TRACKS_INCLUDED)) {
+  for (const [, history] of historyEntries.slice(0, MAX_TRACKS_INCLUDED)) {
+    // each line is given a colour 15 degrees apart in hue, totaling 24 colours
     const hue = index * 15 % 360;
     const color = `hsl(${hue},50%,50%)`;
     const series = createSeries(svg, history, color);
