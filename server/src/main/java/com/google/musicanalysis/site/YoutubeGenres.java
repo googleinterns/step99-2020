@@ -46,11 +46,11 @@ public class YoutubeGenres {
       return -1;
   }
 
-    /**
-   * updates this.genreData HashMap with new genre or count
-   * by checking if key exists
-   * @param topic identifies youtube video music category e.g. Pop music
-   */
+  /**
+ * updates this.genreData HashMap with new genre or count
+ * by checking if key exists
+ * @param topic identifies youtube video music category e.g. Pop music
+ */
   protected void updateGenre(String topic) {
       int count = this.genreData.containsKey(topic) ? this.genreData.get(topic) : 0;
       this.genreData.put(topic, count + 1);
