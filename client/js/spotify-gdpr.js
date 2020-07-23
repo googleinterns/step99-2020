@@ -87,7 +87,11 @@ async function populateChart(collatedRecords) {
         });
   }
 
-  createChart(document.getElementById('chart'), rankingHistory, rankingDates);
+  createChart(
+      document.getElementById('chart-container'),
+      rankingHistory,
+      rankingDates,
+  );
 }
 
 const btnUpload =
