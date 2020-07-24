@@ -29,10 +29,12 @@ export class GdprTable extends HTMLElement {
     stylesheet.href = '/css/spotify-gdpr-table.css';
 
     this.shadowRoot.append(stylesheet, this.table);
-
   }
 
   /**
+   * Loads the given data into this GDPR table. This must be called in order for
+   * the table to respond to the chart properly.
+   *
    * @param {Map<string, number[]>} histories The ranking history for each
    * track.
    * @param {Date[]} dates The date of each history entry.
@@ -42,7 +44,7 @@ export class GdprTable extends HTMLElement {
     this.histories = histories;
     this.dates = dates;
   }
-  
+
   /**
    * Fires when the user hovers over a series on the chart.
    *
