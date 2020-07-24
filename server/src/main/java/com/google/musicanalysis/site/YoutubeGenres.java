@@ -81,17 +81,8 @@ public class YoutubeGenres {
         return 0;
     }
 
-    String firstWord = topic;
-    if (topic.indexOf(" ") != -1) {
-      firstWord = topic.substring(0, topic.indexOf(" "));
-    }
+    return topic.toLowerCase().contains("music") ? MUSIC_SUBGENRE : NON_MUSIC_TOPIC;
 
-    String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);   
-    if (lastWord.equalsIgnoreCase("music") || firstWord.equalsIgnoreCase("music")) {
-        return 1;
-    }
-
-    return -1;
   }
 
 /**
