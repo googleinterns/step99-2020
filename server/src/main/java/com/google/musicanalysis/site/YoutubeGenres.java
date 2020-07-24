@@ -10,51 +10,14 @@ import java.lang.Math;
 
 /** contains final object that YoutubeServlet.java sends to frontend */
 public class YoutubeGenres {
-  private HashMap<String, Integer> genreData;
+  private HashMap<String, Integer> genreData = new HashMap<String, Integer>();
   private final int totalLiked;
   private int totalMusic = 0;
   private boolean isMusic;
   private int maxGenreCount = 0;
 
-  public YoutubeGenres(HashMap<String, Integer> genreCountList, int totalLiked) {
-    this.genreData = genreCountList;
+  public YoutubeGenres(int totalLiked) {
     this.totalLiked = totalLiked;
-  }
-
-  /**
-   * checks whether topic is categorized as music
-   * and whether it has other 
-   * @param topic identifies youtube video category e.g. Knowledge or Pop music
-   * @return 0 is topic is "Music", 1 if topic is a specific music category (Pop Music), 
-   *        -1 if topic is not music
-   */
-  protected int getMusicCategory(String topic) {
-      if (topic.equals("Music")) {
-          return 0;
-      }
-
-      String firstWord = topic;
-      if (topic.indexOf(" ") != -1) {
-        firstWord = topic.substring(0, topic.indexOf(" "));
-      }
-
-      String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);   
-      if (lastWord.equalsIgnoreCase("music") || firstWord.equalsIgnoreCase("music")) {
-          return 1;
-      }
-
-      return -1;
-  }
-
-  /**
- * updates this.genreData HashMap with new genre or count
- * by checking if key exists
- * @param topic identifies youtube video music category e.g. Pop music
- */
-  protected void updateGenre(String topic) {
-      int count = this.genreData.containsKey(topic) ? this.genreData.get(topic) : 0;
-      this.genreData.put(topic, count + 1);
-      
   }
 
     /**
@@ -104,5 +67,41 @@ public class YoutubeGenres {
         }
     }
     return;
+  }
+
+  /**
+   * checks whether topic is categorized as music
+   * and whether it has other 
+   * @param topic identifies youtube video category e.g. Knowledge or Pop music
+   * @return 0 is topic is "Music", 1 if topic is a specific music category (Pop Music), 
+   *        -1 if topic is not music
+   */
+  private int getMusicCategory(String topic) {
+    if (topic.equals("Music")) {
+        return 0;
+    }
+
+    String firstWord = topic;
+    if (topic.indexOf(" ") != -1) {
+      firstWord = topic.substring(0, topic.indexOf(" "));
+    }
+
+    String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);   
+    if (lastWord.equalsIgnoreCase("music") || firstWord.equalsIgnoreCase("music")) {
+        return 1;
+    }
+
+    return -1;
+  }
+
+  /**
+   * updates this.genreData HashMap with new genre or count
+   * by checking if key exists
+   * @param topic identifies youtube video music category e.g. Pop music
+   */
+  private void updateGenre(String topic) {
+    int count = this.genreData.containsKey(topic) ? this.genreData.get(topic) : 0;
+    this.genreData.put(topic, count + 1);
+    
   }
 }

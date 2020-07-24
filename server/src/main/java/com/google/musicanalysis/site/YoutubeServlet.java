@@ -19,8 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.annotation.WebServlet;
-import java.util.ArrayList;
-import java.util.List;
 
 /** Servlet handles youtube api call to get genres of liked videos */
 @WebServlet("/api/youtube")
@@ -91,9 +89,8 @@ public class YoutubeServlet extends HttpServlet {
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString(), numVideos);
         JsonObject youtubeJsonObj = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
-        List<VideoGenreCount> genreCountList = new ArrayList<>();
         int totalLiked = getTotalResults(youtubeJsonObj);
-        YoutubeGenres jsonRes = new YoutubeGenres(genreCountList, totalLiked);
+        YoutubeGenres jsonRes = new YoutubeGenres(totalLiked);
 
         JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
         jsonRes.calculateMusicCount(videos);
