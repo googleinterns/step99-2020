@@ -1,16 +1,19 @@
-export class GdprTable {
-  /**
-   * @param {HTMLDivElement} chart The element that contains the chart.
-   * @param {Map<string, number[]>} histories The ranking history for each
-   * track.
-   * @param {Date[]} dates The date of each history entry.
-   */
-  constructor(chart, histories, dates) {
+export class GdprTable extends HTMLElement {
+  constructor() {
+    super();
+
+    this.attachShadow({mode: 'open'});
+
+    this.chart = document.getElementById(this.getAttribute('chart'));
+    this.chart.addEventListener('series-hit', this.onSeriesHit.bind(this));
+    this.histories = new Map();
+    this.dates = [];
+
     this.table = document.createElement('table');
     this.table.classList.add('gdpr-table');
 
     const thead = document.createElement('thead');
-    thead.innerHTML = 
+    thead.innerHTML =
       '<th class="gdpr-table-header gdpr-table-header-rank">Rank</th>' +
       '<th class="gdpr-table-header gdpr-table-header-track">Track</th>';
 
@@ -20,21 +23,26 @@ export class GdprTable {
     this.table.append(thead, tbody);
 
     this.tbody = tbody;
-    this.chart = chart;
-    this.histories = histories;
-    this.dates = dates;
-    this.setup();
+
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = '/css/spotify-gdpr-table.css';
+
+    this.shadowRoot.append(stylesheet, this.table);
+
   }
 
   /**
-   * Sets up the GDPR table by (attaching event handlers, etc.)
-   *
-   * @private
+   * @param {Map<string, number[]>} histories The ranking history for each
+   * track.
+   * @param {Date[]} dates The date of each history entry.
+   * @public
    */
-  setup() {
-    this.chart.addEventListener('series-hit', this.onSeriesHit.bind(this));
+  load(histories, dates) {
+    this.histories = histories;
+    this.dates = dates;
   }
-
+  
   /**
    * Fires when the user hovers over a series on the chart.
    *
@@ -84,14 +92,6 @@ export class GdprTable {
       this.tbody.append(row);
     }
   }
-
-  /**
-   * Places this table in `container`.
-   *
-   * @param {HTMLElement} container The container for this GDPR table.
-   * @public
-   */
-  mount(container) {
-    container.append(this.table);
-  }
 }
+
+customElements.define('gdpr-table', GdprTable);
