@@ -2,6 +2,7 @@ import {SVG_NS} from '../util.js';
 
 const RUN_SCALE_X = 30;
 const RUN_SCALE_Y = 30;
+const NUM_POSITIONS = 15;
 
 /**
  * Creates an SVG chart inside of `container` with the given data.
@@ -17,7 +18,10 @@ export function createChart(container, histories, dates) {
 
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'chart');
-  svg.setAttribute('viewBox', `0 0 ${dates.length * RUN_SCALE_X} ${15 * RUN_SCALE_Y}`);
+  svg.setAttribute(
+      'viewBox',
+      `0 0 ${dates.length * RUN_SCALE_X} ${NUM_POSITIONS * RUN_SCALE_Y}`,
+  );
   svg.append(createDefs());
 
   scrollContainer.append(svg);
@@ -29,69 +33,52 @@ export function createChart(container, histories, dates) {
   /** @type {SVGGElement[]} */
   const seriesElements = [];
   const historyEntries = [...histories];
+
+  // to organize data into rows to speed up hit-testing
+  const rows = [];
+
+  for (let row = 0; row < dates.length; row++) {
+    rows.push([]);
+  }
+
   let index = 0;
 
-  // get only the first 7 tracks for now
-  const MAX_TRACKS_INCLUDED = 7;
-  for (const [, history] of historyEntries.slice(0, MAX_TRACKS_INCLUDED)) {
-    // each line is given a colour 15 degrees apart in hue, totaling 24 colours
+  for (const [, history] of historyEntries) {
+    // each track is given one of 24 colours, which are spaced 15 degrees apart
+    // in hue
     const hue = index * 15 % 360;
     const color = `hsl(${hue},50%,50%)`;
     const series = createSeries(history, color);
+
+    for (let row = 0; row < dates.length; row++) {
+      rows[row].push(history[row] || null);
+    }
+
     seriesContainer.append(series);
     seriesElements.push(series);
     index++;
   }
 
-  let activeSeries = null;
-  let activeX = null;
-  let activeY = null;
+  const hoverState = {series: null, x: null, y: null};
 
-  // do some hit-testing
-  svg.addEventListener('mousemove', (ev) => {
-    // convert mouse coords to SVG coords
-    const mousePos = svg.createSVGPoint();
-    mousePos.x = ev.clientX;
-    mousePos.y = ev.clientY;
-    const chartPos = mousePos.matrixTransform(svg.getScreenCTM().inverse());
-
-    // index in history
-    const x = Math.round(chartPos.x / RUN_SCALE_X);
-    // value in history
-    const y = Math.round(chartPos.y / RUN_SCALE_Y);
+  svg.addEventListener('mousemove', ({clientX, clientY}) => {
+    const {hit, x, y} = hitTest(svg, rows, clientX, clientY);
 
     // don't recalculate the hit if we're in the same place
     // as the last hit
-    if (activeX === x && activeY === y) return;
+    if (hoverState.x === x && hoverState.y === y) return;
 
-    let hit = null;
-
-    historyEntries.forEach(([, history], index) => {
-      // include only series where there is a data point for this x value
-      if (x >= history.length || history[x] === null) return;
-
-      // get distance from mouse y to series y for each series
-      const dist = history[x] - y;
-
-      // filter items where distance is too great; there should only be one
-      // remaining (impossible to be less than 0.4 away from both 1 and 2, for
-      // example)
-      if (Math.abs(dist) > 0.4) return;
-
-      hit = index;
-    });
-
-    if (activeSeries && activeSeries !== hit) {
-      const seriesElement = seriesElements[activeSeries];
+    if (hoverState.series && hoverState.series !== hit) {
+      const seriesElement = seriesElements[hoverState.series];
       seriesElement.dispatchEvent(
           new CustomEvent('series-clear', {bubbles: true}),
       );
     }
 
     if (hit === null) {
-      activeSeries = null;
-      activeX = null;
-      activeY = null;
+      hoverState.series = null;
+      hoverState.x = null;
+      hoverState.y = null;
     } else {
       const seriesEntry = historyEntries[hit];
       const seriesElement = seriesElements[hit];
@@ -106,23 +93,27 @@ export function createChart(container, histories, dates) {
           }),
       );
 
-      activeSeries = hit;
-      activeX = x;
-      activeY = y;
+      hoverState.series = hit;
+      hoverState.x = x;
+      hoverState.y = y;
     }
   });
 
-  svg.addEventListener('mouseleave', () => {
-    if (activeSeries) {
-      const seriesElement = seriesElements[activeSeries];
+  const clearHover = () => {
+    if (hoverState.series !== null) {
+      const seriesElement = seriesElements[hoverState.series];
       seriesElement.dispatchEvent(
           new CustomEvent('series-clear', {bubbles: true}),
       );
     }
 
-    activeX = null;
-    activeY = null;
-  });
+    hoverState.series = null;
+    hoverState.x = null;
+    hoverState.y = null;
+  };
+
+  svg.addEventListener('mouseleave', () => clearHover());
+  scrollContainer.addEventListener('scroll', () => clearHover());
 
   const tooltip = createTooltip(container, svg, histories, dates);
 
@@ -130,6 +121,34 @@ export function createChart(container, histories, dates) {
   container.append(tooltip);
 }
 
+/**
+ * Tests whether the mouse is currently near a point on the chart.
+ *
+ * @param {SVGSVGElement} svg The SVG element for the chart.
+ * @param {number[][]} rows The ranks of each series at each date.
+ * @param {number} clientX The x position of the mouse.
+ * @param {number} clientY The y position of the mouse.
+ * @returns {{hit: number | null, x: number | null, y:number | null}} A hit
+ * result.
+ */
+function hitTest(svg, rows, clientX, clientY) {
+  // get mouse coordinates relative to SVG coordinate system of chart
+  const mousePos = svg.createSVGPoint();
+  mousePos.x = clientX;
+  mousePos.y = clientY;
+  const chartPos = mousePos.matrixTransform(svg.getScreenCTM().inverse());
+
+  // index in history
+  const x = Math.round(chartPos.x / RUN_SCALE_X);
+  // value in history
+  const y = Math.round(chartPos.y / RUN_SCALE_Y);
+
+  const hit = rows[x].findIndex((rank) => rank === y);
+
+  if (hit < 0) return {hit: null, x: null, y: null};
+
+  return {hit, x, y};
+}
 
 /**
  * Creates a new series (set of lines on the chart for a specific song).
@@ -322,6 +341,7 @@ function createTooltip(container, svg, rankingHistories, rankingDates) {
     pos.x = x * RUN_SCALE_X;
     pos.y = y * RUN_SCALE_Y;
     pos = pos.matrixTransform(svg.getScreenCTM());
+    // position of tooltip is relative to boundary of chart
     pos.x -= chartBounds.x;
     pos.y -= chartBounds.y;
 
@@ -329,11 +349,11 @@ function createTooltip(container, svg, rankingHistories, rankingDates) {
     tooltip.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
 
     title.innerText = key;
-    rank.innerText = y + 1;
+    rank.innerText = y;
     date.innerText = format.format(rankingDates[x]);
   });
 
-  svg.addEventListener('series-clear', (ev) => {
+  svg.addEventListener('series-clear', () => {
     tooltip.classList.remove('chart-tooltip-active');
   });
 

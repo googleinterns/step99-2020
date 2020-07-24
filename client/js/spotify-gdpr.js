@@ -7,12 +7,10 @@
 /** @typedef {import('./analysis/gdpr.js').CollatedGDPRRecords} CollatedGDPRRecords */
 
 import {getStreamingData, collateStreamingData} from './analysis/gdpr.js';
+import {createChart} from './chart/index.js';
 
-const {google, zip} = window;
-
+const {zip} = window;
 zip.workerScriptsPath = '/js/zip/';
-
-google.charts.load('current', {'packages': ['line']});
 
 /**
  * Populates `chart` with historical track data derived from `collatedRecords`.
