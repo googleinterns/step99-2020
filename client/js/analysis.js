@@ -19,9 +19,9 @@ async function fetchResponse() {
 /**
  * Handles populating all elements on the screen
  *
- * @param {object} json the json object from backend
+ * @param {object} youtubeResponse the json response from backend
  */
-function populationHandler(json) {
+function populationHandler(youtubeResponse) {
   const charts = document.getElementById('charts');
   const list = document.getElementById('list');
   const card = document.getElementById('videocard-wrapper');
@@ -29,10 +29,10 @@ function populationHandler(json) {
   removeAllChildNodes(charts);
   removeAllChildNodes(list);
   removeAllChildNodes(card);
-  populateDonutCharts(json);
+  populateDonutCharts(youtubeResponse);
   showCommentHeader();
-  const time = populateComments(json);
-  determineOverall(json, time*1500);
+  const time = populateComments(youtubeResponse);
+  determineOverall(youtubeResponse, time*1500);
 }
 
 /**
@@ -53,13 +53,11 @@ function populateDonutCharts(json) {
 /**
  * Creates the card that displays on a result match
  *
- * @param {object} json the json object from backend
+ * @param {String} id the id of the wanted video
+ * @param {String} name the name of the wanted video
+ * @param {String} channel the name of the wanted channel
  */
-function createCard(json) {
-  const id = json.videoId;
-  const name = json.videoInfo.name;
-  const channel = json.videoInfo.channel;
-
+function createCard(id, name, channel) {
   const el = document.getElementById('videocard-wrapper');
 
   const card = document.createElement('div');
@@ -136,7 +134,7 @@ function determineOverall(json, time) {
 
   setTimeout(() => {
     addFeedbackResult(isClear + tone);
-    createCard(json);
+    createCard(json.videoId, json.videoInfo.name, json.videoInfo.channel);
   }, time);
 }
 
@@ -241,7 +239,7 @@ function buildCircle() {
   outsideCircle.setAttribute('cx', '50%');
   outsideCircle.setAttribute('cy', '50%');
   outsideCircle.setAttribute('stroke-width', '25');
-  outsideCircle.setAttribute('stroke', '#ff1493'); // ff073a is good too
+  outsideCircle.setAttribute('stroke', '#ff1493');
   outsideCircle.setAttribute('fill', 'none');
   outsideCircle.setAttribute('pathLength', '100');
 

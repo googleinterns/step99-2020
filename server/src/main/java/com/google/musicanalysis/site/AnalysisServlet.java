@@ -134,13 +134,13 @@ public class AnalysisServlet extends HttpServlet {
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
     JsonArray itemsArray = jObject.getAsJsonArray("items");
-    JsonElement el = itemsArray.get(0);
+    JsonElement firstVideo = itemsArray.get(0);
 
     // Grabbing the name and channel
-    JsonObject object = el.getAsJsonObject();
-    JsonObject data = object.getAsJsonObject("snippet");
-    JsonElement videoName = data.get("title");
-    JsonElement channelName = data.get("channelTitle");
+    JsonObject object = firstVideo.getAsJsonObject();
+    JsonObject videoData = object.getAsJsonObject("snippet");
+    JsonElement videoName = videoData.get("title");
+    JsonElement channelName = videoData.get("channelTitle");
 
     return new VideoInfo(
         videoName.toString().replace("\"", ""), channelName.toString().replace("\"", ""));
@@ -157,8 +157,8 @@ public class AnalysisServlet extends HttpServlet {
     for (JsonElement el : itemsArray) {
       // Grabbing each item and adding to a result array
       JsonObject object = el.getAsJsonObject();
-      JsonObject data = object.getAsJsonObject("id");
-      JsonElement videoId = data.get("videoId");
+      JsonObject idObject = object.getAsJsonObject("id");
+      JsonElement videoId = idObject.get("videoId");
 
       if (videoId != null) {
         searchResults.add(videoId.toString().replace("\"", ""));

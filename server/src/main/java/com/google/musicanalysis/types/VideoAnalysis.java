@@ -8,14 +8,14 @@ public class VideoAnalysis {
   public final NLPResult magnitudeAndScore;
   public final ArrayList<String> commentArray;
   public final String videoId;
-  public final NameAndChannel videoInfo;
+  public final VideoInfo videoInfo;
 
   public VideoAnalysis(
       HashMap<String, String> perspectiveMap,
       NLPResult magnitudeAndScore,
       ArrayList<String> commentArray,
       String videoId,
-      NameAndChannel videoInfo) {
+      VideoInfo videoInfo) {
     this.perspectiveMap = perspectiveMap;
     this.magnitudeAndScore = magnitudeAndScore;
     this.commentArray = commentArray;
