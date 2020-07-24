@@ -132,7 +132,7 @@ export function createChart(container, histories, dates) {
  * result.
  */
 function hitTest(svg, rows, clientX, clientY) {
-  // convert mouse coords to SVG coords
+  // get mouse coordinates relative to SVG coordinate system of chart
   const mousePos = svg.createSVGPoint();
   mousePos.x = clientX;
   mousePos.y = clientY;
