@@ -43,6 +43,12 @@
   fill: var(--run-color);
 }
 
+.chart .grid .date-line {
+  stroke: rgba(255 255 255 / 0.20);
+  stroke-width: 1px;
+  stroke-dasharray: 5 5;
+}
+
 .chart-tooltip {
   position: absolute;
   top: 1rem;

@@ -20,15 +20,16 @@ export function createChart(container, histories, dates) {
   svg.setAttribute('class', 'chart');
   svg.setAttribute(
       'viewBox',
-      `0 0 ${dates.length * RUN_SCALE_X} ${NUM_POSITIONS * RUN_SCALE_Y}`,
+      // shift down so that lines are vertically centered
+      `0 ${RUN_SCALE_Y * 0.5} ` +
+      `${dates.length * RUN_SCALE_X} ${(NUM_POSITIONS + 0.5) * RUN_SCALE_Y}`,
   );
   svg.append(createDefs());
+  svg.append(createGrid(dates));
 
   scrollContainer.append(svg);
 
   const seriesContainer = document.createElementNS(SVG_NS, 'g');
-  seriesContainer.setAttribute('class', 'series-container');
-  svg.append(seriesContainer);
 
   /** @type {SVGGElement[]} */
   const seriesElements = [];
@@ -58,6 +59,9 @@ export function createChart(container, histories, dates) {
     seriesElements.push(series);
     index++;
   }
+
+  seriesContainer.setAttribute('class', 'series-container');
+  svg.append(seriesContainer);
 
   const hoverState = {series: null, x: null, y: null};
 
@@ -267,14 +271,39 @@ function createDefs() {
     </feComponentTransfer>
     <feGaussianBlur in="boost" stdDeviation="2.5" result="glow"/>
     <feMerge>
-        <feMergeNode in="glow"/>
-        <feMergeNode in="boost"/>
+      <feMergeNode in="glow"/>
+      <feMergeNode in="boost"/>
     </feMerge>
   `;
 
   defs.append(highlightFilter);
 
   return defs;
+}
+
+/**
+ * Creates gridlines that appear in the back of the chart.
+ *
+ * @param {Date[]} dates The dates that are covered by this chart
+ * @returns {SVGGElement} An SVG group containing the grid.
+ */
+function createGrid(dates) {
+  const grid = document.createElementNS(SVG_NS, 'g');
+  grid.classList.add('grid');
+
+  for (let i = 0; i < dates.length; i++) {
+    const verticalLine = document.createElementNS(SVG_NS, 'line');
+    verticalLine.classList.add('date-line');
+
+    verticalLine.setAttribute('x1', RUN_SCALE_X * i + 'px');
+    verticalLine.setAttribute('x2', RUN_SCALE_X * i + 'px');
+    verticalLine.setAttribute('y1', '0px');
+    verticalLine.setAttribute('y2', RUN_SCALE_Y * (NUM_POSITIONS + 0.5) + 'px');
+
+    grid.append(verticalLine);
+  }
+
+  return grid;
 }
 
 /**
