@@ -14,6 +14,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.regex.Matcher; 
+import java.util.regex.Pattern; 
 
 @WebServlet("/api/analysis")
 public class AnalysisServlet extends HttpServlet {
@@ -33,10 +35,10 @@ public class AnalysisServlet extends HttpServlet {
     commentArgs.put("part", "snippet");
     commentArgs.put("videoId", input);
     String commentsJson;
-    try {
-      commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
-    } catch (IOException err) {
-      // We need to search for the id and get the comments again
+    
+    // if the input doesn't look like a standard id
+    if (thereIsWhiteSpace(input) || input.length() > 11) {
+        
       videoArgs.put("q", input);
       videoArgs.put("type", "video");
       String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
@@ -44,6 +46,18 @@ public class AnalysisServlet extends HttpServlet {
 
       commentArgs.replace("videoId", videoId);
       commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+    } else {  
+        try {
+            commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+        } catch (IOException err) {
+            videoArgs.put("q", input);
+            videoArgs.put("type", "video");
+            String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
+            videoId = getVideoId(videoIdJson);
+
+            commentArgs.replace("videoId", videoId);
+            commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+        }
     }
 
     ArrayList<String> commentArray = retrieveComments(commentsJson);
@@ -217,10 +231,11 @@ public class AnalysisServlet extends HttpServlet {
 
     for (String comment : comments) {
       comment = comment.replace("\"", "");
-      // This does two things:
-      // 1. ensure that commment.substring(comment.length() - 1)
+      // This does makes sure of two things:
+      // 1. commment.substring(comment.length() - 1)
       //    doesn't throw an error, which ruins the loop
-      // 2. Does not allow comments with 0 or 1 characters to pass through
+      // 2. One letter comments should not be considered as sentences since
+      //    they bring no value to the analysis. 
       if (comment.length() <= 1){
           continue;
       }
@@ -236,5 +251,17 @@ public class AnalysisServlet extends HttpServlet {
     }
 
     return res.toString();
+  }
+
+  /**
+   * Generic function to check for whitespace in a string
+   * 
+   * @param string The string to be searched
+   * @return whether or not there's any whitespace
+   */
+  private boolean thereIsWhiteSpace(String string) {
+    Pattern pattern = Patter.compile("\\s");
+    Matcher matcher = pattern.matcher(string):
+    return matcher.find();
   }
 }
