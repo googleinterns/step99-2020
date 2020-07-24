@@ -90,13 +90,13 @@ public class YoutubeServlet extends HttpServlet {
         JsonObject likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
         int totalLiked = getTotalResults(likedVideoRes);
-        YoutubeGenres jsonRes = new YoutubeGenres(totalLiked);
+        YoutubeGenres genreAnalysis = new YoutubeGenres(totalLiked);
 
         JsonArray videos = likedVideoRes.getAsJsonArray("items");
-        jsonRes.calculateMusicCount(videos);
+        genreAnalysis.calculateMusicCount(videos);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
-        res.getWriter().println(gson.toJson(jsonRes));
+        res.getWriter().println(gson.toJson(genreAnalysis));
     }
 }
