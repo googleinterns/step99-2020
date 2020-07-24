@@ -47,7 +47,7 @@ export function createChart(container, histories, dates) {
     // each track is given one of 24 colours, which are spaced 15 degrees apart
     // in hue
     const hue = index * 15 % 360;
-    const color = `hsl(${hue},50%,50%)`;
+    const color = `hsl(${hue},50%,33%)`;
     const series = createSeries(history, color);
 
     for (let row = 0; row < dates.length; row++) {
@@ -62,11 +62,22 @@ export function createChart(container, histories, dates) {
   const hoverState = {series: null, x: null, y: null};
 
   svg.addEventListener('mousemove', ({clientX, clientY}) => {
-    const {hit, x, y} = hitTest(svg, rows, clientX, clientY);
+    // convert mouse coords to SVG coords
+    const mousePos = svg.createSVGPoint();
+    mousePos.x = clientX;
+    mousePos.y = clientY;
+    const chartPos = mousePos.matrixTransform(svg.getScreenCTM().inverse());
+
+    // index in history
+    const x = Math.round(chartPos.x / RUN_SCALE_X);
+    // value in history
+    const y = Math.round(chartPos.y / RUN_SCALE_Y);
 
     // don't recalculate the hit if we're in the same place
     // as the last hit
     if (hoverState.x === x && hoverState.y === y) return;
+
+    const hit = rows[x].findIndex((rank) => rank === y);
 
     if (hoverState.series && hoverState.series !== hit) {
       const seriesElement = seriesElements[hoverState.series];
@@ -97,7 +108,7 @@ export function createChart(container, histories, dates) {
       hoverState.x = x;
       hoverState.y = y;
     }
-  });
+  }, {passive: true, capture: true});
 
   const clearHover = () => {
     if (hoverState.series !== null) {
@@ -119,35 +130,6 @@ export function createChart(container, histories, dates) {
 
   container.append(scrollContainer);
   container.append(tooltip);
-}
-
-/**
- * Tests whether the mouse is currently near a point on the chart.
- *
- * @param {SVGSVGElement} svg The SVG element for the chart.
- * @param {number[][]} rows The ranks of each series at each date.
- * @param {number} clientX The x position of the mouse.
- * @param {number} clientY The y position of the mouse.
- * @returns {{hit: number | null, x: number | null, y:number | null}} A hit
- * result.
- */
-function hitTest(svg, rows, clientX, clientY) {
-  // get mouse coordinates relative to SVG coordinate system of chart
-  const mousePos = svg.createSVGPoint();
-  mousePos.x = clientX;
-  mousePos.y = clientY;
-  const chartPos = mousePos.matrixTransform(svg.getScreenCTM().inverse());
-
-  // index in history
-  const x = Math.round(chartPos.x / RUN_SCALE_X);
-  // value in history
-  const y = Math.round(chartPos.y / RUN_SCALE_Y);
-
-  const hit = rows[x].findIndex((rank) => rank === y);
-
-  if (hit < 0) return {hit: null, x: null, y: null};
-
-  return {hit, x, y};
 }
 
 /**
@@ -275,27 +257,22 @@ function createDefs() {
 
   // need to create SVG brightness filter b/c CSS filters
   // don't work on SVG elements in Chrome
-  const dimFilter = document.createElementNS(SVG_NS, 'filter');
-  dimFilter.id = 'filter-dim';
-  dimFilter.innerHTML = `
-    <feComponentTransfer>
-      <feFuncR type="linear" slope="0.5" />
-      <feFuncG type="linear" slope="0.5" />
-      <feFuncB type="linear" slope="0.5" />
-    </feComponentTransfer>
-  `;
-
   const highlightFilter = document.createElementNS(SVG_NS, 'filter');
   highlightFilter.id = 'filter-highlight';
   highlightFilter.innerHTML = `
-    <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+    <feComponentTransfer in="SourceGraphic" result="boost">
+      <feFuncR type="linear" slope="3" />
+      <feFuncG type="linear" slope="3" />
+      <feFuncB type="linear" slope="3" />
+    </feComponentTransfer>
+    <feGaussianBlur in="boost" stdDeviation="2.5" result="glow"/>
     <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="boost"/>
     </feMerge>
   `;
 
-  defs.append(dimFilter, highlightFilter);
+  defs.append(highlightFilter);
 
   return defs;
 }

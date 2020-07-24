@@ -17,10 +17,6 @@
   background: transparent;
 }
 
-.chart .series {
-  filter: url('#filter-dim');
-}
-
 .chart .series.series-active {
   filter: url('#filter-highlight');
 }
