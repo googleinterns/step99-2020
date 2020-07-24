@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.Serializable;
 
-// Groups together data for easy sending/reading from front to back
+/**
+ * Groups together analysis data for easy sending/reading from the 
+ * backend to the front end
+ */
 public class AnalysisGroup implements Serializable {
   public final HashMap<String, String> perspectiveMap;
   public final NLPResult magnitudeAndScore;

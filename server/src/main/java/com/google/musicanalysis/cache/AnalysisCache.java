@@ -25,12 +25,7 @@ public class AnalysisCache {
     }
 
     public void open() {
-        HashMap<String, AnalysisGroup> responseData = null;
-
-        int file = createFile(); // this will have use later.
-
         try {
-            // .ser for serialized 
             FileInputStream inFile = new FileInputStream("cachedData.txt");
             ObjectInputStream inData = new ObjectInputStream(inFile);
             responseMap = (HashMap<String, AnalysisGroup>) inData.readObject();
@@ -57,21 +52,24 @@ public class AnalysisCache {
         }
     }
 
-    public void add(String requestUrl, AnalysisGroup responseData) {
-        this.responseMap.put(requestUrl, responseData);
+    public void add(String requestQuery, AnalysisGroup responseData) {
+        this.responseMap.put(requestQuery, responseData);
     }
 
-    public AnalysisGroup search(String requestUrl) {
+    public AnalysisGroup search(String requestQuery) {
         // map.get() returns null if not match
-        return this.responseMap.get(requestUrl);
+        return this.responseMap.get(requestQuery);
     }
 
-    public void delete(String requestUrl) {
-        this.responseMap.remove(requestUrl);
+    public void delete(String requestQuery) {
+        this.responseMap.remove(requestQuery);
     }
 
     private int createFile() {
-        try {   //logic here is going to improve which is why it's int
+        // TODO: use this function to to create a file for the cache if needed.
+        //       This will allow for multiple cache files for different types of
+        //       data.
+        try { 
             File file = new File("cachedData.txt");
             if (file.createNewFile()){
                 return 0;
