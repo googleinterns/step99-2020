@@ -59,11 +59,11 @@ public class YoutubeServlet extends HttpServlet {
     }
 
     /**
-     * @param youtubeJsonObj json obj of youtube response body 
+     * @param likedVideoRes json obj of youtube response body 
      * @return number of total results from json response
      */
-    protected int getTotalResults(JsonObject youtubeJsonObj) {
-        JsonObject pageInfo = youtubeJsonObj.getAsJsonObject("pageInfo");
+    protected int getTotalResults(JsonObject likedVideoRes) {
+        JsonObject pageInfo = likedVideoRes.getAsJsonObject("pageInfo");
         JsonPrimitive totalResults = pageInfo.getAsJsonPrimitive("totalResults");
         return totalResults.getAsInt();
     }
@@ -87,12 +87,12 @@ public class YoutubeServlet extends HttpServlet {
         }
 
         String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString(), numVideos);
-        JsonObject youtubeJsonObj = JsonParser.parseString(youtubeResBody).getAsJsonObject();
+        JsonObject likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
-        int totalLiked = getTotalResults(youtubeJsonObj);
+        int totalLiked = getTotalResults(likedVideoRes);
         YoutubeGenres jsonRes = new YoutubeGenres(totalLiked);
 
-        JsonArray videos = youtubeJsonObj.getAsJsonArray("items");
+        JsonArray videos = likedVideoRes.getAsJsonArray("items");
         jsonRes.calculateMusicCount(videos);
 
         Gson gson = new Gson();
