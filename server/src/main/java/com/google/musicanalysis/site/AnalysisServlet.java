@@ -38,7 +38,7 @@ public class AnalysisServlet extends HttpServlet {
     
     // if the input doesn't look like a standard id
     if (thereIsWhiteSpace(input) || input.length() > 11) {
-        
+      // It must be a video name so we search for it   
       videoArgs.put("q", input);
       videoArgs.put("type", "video");
       String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
