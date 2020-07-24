@@ -38,7 +38,7 @@ public class YoutubeGenres {
         JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
         
         boolean isMusic = false;
-        int specificMusicCount = 0;
+        int totalSubgenres = 0;
         for (int j = 0; j < topicCategories.size(); j++) {
             // extract music genre out of wikipedia links of topic categories
             String link = topicCategories.get(j).toString();
@@ -53,7 +53,7 @@ public class YoutubeGenres {
                 break;
               case 1:
                 // topic is a specific music category so we update genre 
-                specificMusicCount++;
+                totalSubgenres++;
                 this.updateGenre(topic);
                 break;
               case -1:
@@ -61,7 +61,7 @@ public class YoutubeGenres {
             }
         } 
 
-        if (isMusic && specificMusicCount == 0) {
+        if (isMusic && totalSubgenres == 0) {
             // video only classified as Music so we update as "Other music"
             this.updateGenre("Other music");
         }
