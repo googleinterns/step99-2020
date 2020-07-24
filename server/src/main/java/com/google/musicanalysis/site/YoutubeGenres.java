@@ -21,9 +21,11 @@ public class YoutubeGenres {
   private int totalMusic = 0;
   private boolean isMusic;
   private int maxGenreCount = 0;
+  private JsonArray videos;
 
-  public YoutubeGenres(int totalLiked) {
+  public YoutubeGenres(int totalLiked, JsonArray videos) {
     this.totalLiked = totalLiked;
+    this.calculateMusicCount(videos);
   }
 
 /**
