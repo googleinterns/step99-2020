@@ -67,7 +67,7 @@ public class YoutubeGenres {
               case NOT_MUSIC:
                 continue;
             }
-        } 
+        }
 
         if (isMusic && totalSubgenres == 0) {
             // video only classified as Music so we update as "Other music"
