@@ -8,6 +8,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.lang.Math;
 
+enum MusicTopic {
+  MUSIC_ONLY,
+  MUSIC_SUBGENRE,
+  NOT_MUSIC
+}
+
 /** contains final object that YoutubeServlet.java sends to frontend */
 public class YoutubeGenres {
   private HashMap<String, Integer> genreData = new HashMap<String, Integer>();
@@ -47,16 +53,16 @@ public class YoutubeGenres {
             topic = topic.replaceAll("_", " ");
 
             switch (this.getMusicCategory(topic)) {
-              case 0:
+              case MUSIC_ONLY:
                 isMusic = true;
                 totalMusic++;
                 break;
-              case 1:
-                // topic is a specific music category so we update genre 
+              case MUSIC_SUBGENRE:
+                // topic is a music subgenre so we update genre 
                 totalSubgenres++;
                 this.updateGenre(topic);
                 break;
-              case -1:
+              case NOT_MUSIC:
                 continue;
             }
         } 
@@ -70,19 +76,18 @@ public class YoutubeGenres {
   }
 
 /**
- * checks whether topic is categorized as music
- * and whether it has other 
+ * checks whether topic is categorized a music only, music subgenre, or not music
  * @param topic identifies youtube video category e.g. Knowledge or Pop music
- * @return 0 is topic is "Music", 1 if topic is a specific music category (Pop Music), 
- *        -1 if topic is not music
+ * @return MUSIC_ONLY if topic is "Music", 
+ *         MUSIC_SUBGENRE if topic is a specific music category (Pop Music), 
+ *         NOT_MUSIC if topic is not music
  */
-  private int getMusicCategory(String topic) {
+  private MusicTopic getMusicCategory(String topic) {
     if (topic.equals("Music")) {
-        return 0;
+        return MusicTopic.MUSIC_ONLY;
     }
 
-    return topic.toLowerCase().contains("music") ? MUSIC_SUBGENRE : NON_MUSIC_TOPIC;
-
+    return topic.toLowerCase().contains("music") ? MusicTopic.MUSIC_SUBGENRE : MusicTopic.NOT_MUSIC;
   }
 
 /**
