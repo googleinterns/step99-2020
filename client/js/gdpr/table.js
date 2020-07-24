@@ -46,7 +46,7 @@ export class GdprTable {
     }
 
     // sort by rank ascending
-    ranking.sort((a, b) => a.rank < b.rank ? -1 : 1);
+    ranking.sort((a, b) => a.rank - b.rank);
 
     // update the table
     this.table.innerHTML = '';
