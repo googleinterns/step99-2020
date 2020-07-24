@@ -11,11 +11,10 @@ window.onload = function() {
 async function fetchResponse() {
   const param = document.getElementById('searchbar').value;
   try {
-    // see caching.js for this function
     const response = await getData(`/api/analysis?name=${param}`);
     populationHandler(response);
-  } catch (error) {
-    console.log(error);
+  } catch (e) {
+    console.error(e);
   }
 }
 

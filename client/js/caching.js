@@ -11,11 +11,8 @@ async function getData(url) {
   let cachedData = await getCachedData(cacheName, url);
 
   if (cachedData) {
-    console.log('Retrieved cached data');
     return cachedData;
   }
-
-  console.log('Fetching fresh data');
 
   const cacheStorage = await caches.open(cacheName);
   await cacheStorage.add(url);
@@ -37,7 +34,7 @@ async function getCachedData(cacheName, url) {
   const cachedResponse = await cacheStorage.match(url);
 
   if (!cachedResponse || !cachedResponse.ok) {
-    return false;
+    return null;
   }
 
   return await cachedResponse.json();
@@ -53,7 +50,7 @@ async function deleteOldCaches(currentCache) {
   const keys = await caches.keys();
 
   for (const key of keys) {
-    const correctCache = 'analysisCache-' === key.substr(0, 14);
+    const correctCache = key.startsWith('analysisCache-');
     if (currentCache === key || !correctCache) {
       continue;
     }
