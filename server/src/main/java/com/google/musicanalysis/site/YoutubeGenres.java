@@ -54,7 +54,6 @@ public class YoutubeGenres {
             topic = topic.replaceAll("\"", "");
             topic = topic.replaceAll("_", " ");
 
-            System.out.println(topic + ": " + this.getMusicCategory(topic));
             switch (this.getMusicCategory(topic)) {
               case MUSIC_ONLY:
                 isMusic = true;
