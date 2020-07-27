@@ -90,6 +90,7 @@ export async function showPicker() {
               );
 
               download.blob().then(resolve);
+              break;
             }
           }
         })
