@@ -65,8 +65,6 @@ export async function showPicker() {
       .setDeveloperKey(apiKey)
       .setOAuthToken(accessToken)
       .setCallback(async (res) => {
-        console.log(res);
-
         if (res.action !== google.picker.Action.PICKED) {
           return;
         }
