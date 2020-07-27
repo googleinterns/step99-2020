@@ -54,6 +54,7 @@ public class YoutubeGenres {
             topic = topic.replaceAll("\"", "");
             topic = topic.replaceAll("_", " ");
 
+            System.out.println(topic + ": " + this.getMusicCategory(topic));
             switch (this.getMusicCategory(topic)) {
               case MUSIC_ONLY:
                 isMusic = true;
@@ -100,6 +101,7 @@ public class YoutubeGenres {
   private void updateGenre(String topic) {
     int count = this.genreData.containsKey(topic) ? this.genreData.get(topic) : 0;
     this.genreData.put(topic, count + 1);
+    maxGenreCount = Math.max(count + 1, maxGenreCount);
     
   }
 }
