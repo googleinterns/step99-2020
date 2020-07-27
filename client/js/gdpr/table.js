@@ -9,20 +9,12 @@ export class GdprTable extends HTMLElement {
     this.histories = new Map();
     this.dates = [];
 
-    this.table = document.createElement('table');
+    this.table = document.createElement('div');
     this.table.classList.add('gdpr-table');
 
-    const thead = document.createElement('thead');
-    thead.innerHTML =
-      '<th class="gdpr-table-header gdpr-table-header-rank">Rank</th>' +
-      '<th class="gdpr-table-header gdpr-table-header-track">Track</th>';
-
-    const tbody = document.createElement('tbody');
-    tbody.classList.add('gdpr-table-body');
-
-    this.table.append(thead, tbody);
-
-    this.tbody = tbody;
+    this.table.innerHTML =
+      '<div class="gdpr-table-header gdpr-table-header-rank">Rank</div>' +
+      '<div class="gdpr-table-header gdpr-table-header-track">Track</div>';
 
     const stylesheet = document.createElement('link');
     stylesheet.rel = 'stylesheet';
@@ -71,27 +63,24 @@ export class GdprTable extends HTMLElement {
     // sort by rank ascending
     ranking.sort((a, b) => a.rank - b.rank);
 
-    // update the table
-    this.tbody.innerHTML = '';
+    // clear the table
+    for (const cell of this.table.querySelectorAll('.gdpr-table-cell')) {
+      cell.remove();
+    }
 
     for (const {key, rank, selected} of ranking) {
-      const row = document.createElement('tr');
+      const rankCell = document.createElement('div');
+      const keyCell = document.createElement('div');
 
-      row.classList.add('gdpr-table-track');
-      row.classList.toggle('gdpr-table-track-selected', selected);
-
-      const rankCell = document.createElement('td');
-      const keyCell = document.createElement('td');
-
-      rankCell.classList.add('gdpr-table-track-rank');
-      keyCell.classList.add('gdpr-table-track-track');
+      rankCell.classList.add('gdpr-table-cell', 'gdpr-table-track-rank');
+      keyCell.classList.add('gdpr-table-cell', 'gdpr-table-track-track');
+      rankCell.classList.toggle('gdpr-table-track-selected', selected);
+      keyCell.classList.toggle('gdpr-table-track-selected', selected);
 
       rankCell.innerText = `#${rank}`;
       keyCell.innerText = key;
 
-      row.append(rankCell, keyCell);
-
-      this.tbody.append(row);
+      this.table.append(rankCell, keyCell);
     }
   }
 }

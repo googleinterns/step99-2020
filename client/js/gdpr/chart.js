@@ -158,7 +158,7 @@ export class GdprChart extends HTMLElement {
         'viewBox',
         // shift down so that lines are vertically centered
         `0 ${RUN_SCALE_Y * 0.5} ` +
-        `${this.dates.length * RUN_SCALE_X} ${(NUM_POSITIONS + 0.5) * RUN_SCALE_Y}`,
+        `${this.dates.length * RUN_SCALE_X} ${NUM_POSITIONS * RUN_SCALE_Y}`,
     );
     svg.append(this.createDefs());
     svg.append(this.createGrid());
@@ -344,8 +344,14 @@ export class GdprChart extends HTMLElement {
 
       verticalLine.setAttribute('x1', RUN_SCALE_X * i + 'px');
       verticalLine.setAttribute('x2', RUN_SCALE_X * i + 'px');
-      verticalLine.setAttribute('y1', '0px');
-      verticalLine.setAttribute('y2', RUN_SCALE_Y * NUM_POSITIONS + 'px');
+      verticalLine.setAttribute(
+          'y1',
+          RUN_SCALE_Y * 0.5 + 'px',
+      );
+      verticalLine.setAttribute(
+          'y2',
+          RUN_SCALE_Y * (NUM_POSITIONS + 0.5) + 'px',
+      );
 
       grid.append(verticalLine);
     }
