@@ -33,13 +33,14 @@ public class YoutubeServlet extends HttpServlet {
      * @throws ServletException
      * @throws IOException
      */
-    protected String getYoutubeRes(String apiKey, String accessToken) 
+    protected String getYoutubeRes(String apiKey, String accessToken, String pageToken) 
         throws ServletException, IOException {
         // make http request to youtube API
         URLEncodedBuilder youtubeParam = new URLEncodedBuilder()
             .add("part", "topicDetails")
             .add("myRating", "like")
-            .add("key", apiKey);
+            .add("key", apiKey)
+            .add("pageToken", pageToken);
         URI youtubeUri = URI.create("https://www.googleapis.com/youtube/v3/videos?" + youtubeParam.build());
 
         var httpClient = HttpClient.newHttpClient();
@@ -64,6 +65,15 @@ public class YoutubeServlet extends HttpServlet {
         return totalResults.getAsInt();
     }
 
+    /**
+     * @param likedVideoRes json obj of youtube response body 
+     * @return next page token json primitive
+     */
+    protected JsonPrimitive getNextPageToken(JsonObject likedVideoRes) {
+        JsonPrimitive nextPageToken = likedVideoRes.getAsJsonPrimitive("nextPageToken");
+        return nextPageToken;
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException {
@@ -76,12 +86,28 @@ public class YoutubeServlet extends HttpServlet {
             return;
         }
 
-        String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString());
+        // added next page token (REMOVE LATER)
+        String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString(), "");
         JsonObject likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
+
 
         int totalLiked = getTotalResults(likedVideoRes);
         JsonArray videos = likedVideoRes.getAsJsonArray("items");
         YoutubeGenres genreAnalysis = new YoutubeGenres(totalLiked, videos);
+        JsonPrimitive nextPageToken = getNextPageToken(likedVideoRes);
+
+        System.out.println(nextPageToken);
+        while (nextPageToken != null) {
+            youtubeResBody = getYoutubeRes(API_KEY, 
+                                            accessToken.toString(), 
+                                            nextPageToken.getAsString());
+            System.out.println(youtubeResBody);
+            likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
+            videos = likedVideoRes.getAsJsonArray("items");
+            genreAnalysis.calculateMusicCount(videos);
+            nextPageToken = getNextPageToken(likedVideoRes);
+            System.out.println(nextPageToken);
+        }
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
