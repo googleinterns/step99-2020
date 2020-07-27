@@ -106,8 +106,8 @@ function populateComments(json) {
   const stopIndex = array.length < 5 ? array.length : 5;
   for (let i = 0; i < stopIndex; i++) {
     setTimeout(() => {
-      // removes all linebreaks
-      addListElement(array[i].replace('\n', ''));
+      // replace newlines with dashes
+      addListElement(array[i].comment.replace(/\n/g, ' -- '));
     }, (i+1) * 1500);
   }
   // so that the overall knows when to come in

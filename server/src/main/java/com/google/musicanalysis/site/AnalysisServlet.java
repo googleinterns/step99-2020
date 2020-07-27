@@ -33,6 +33,7 @@ public class AnalysisServlet extends HttpServlet {
     String videoId = input; // assume user enters id
 
     commentArgs.put("part", "snippet");
+    commentArgs.put("order", "relevance");
     commentArgs.put("videoId", input);
     String commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
 
@@ -47,7 +48,7 @@ public class AnalysisServlet extends HttpServlet {
       commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
     }
 
-    ArrayList<String> commentArray = retrieveComments(commentsJson);
+    ArrayList<CommentLikes> commentArray = retrieveComments(commentsJson);
     String cumulativeComments = convertToString(commentArray);
 
     nameArgs.put("part", "snippet");
@@ -183,8 +184,8 @@ public class AnalysisServlet extends HttpServlet {
    * @param response The JSON string to be parsed.
    * @return An ArrayList with each comment
    */
-  private ArrayList<String> retrieveComments(String response) {
-    ArrayList<String> commentList = new ArrayList<>();
+  private ArrayList<CommentLikes> retrieveComments(String response) {
+    ArrayList<CommentLikes> commentList = new ArrayList<>();
 
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
@@ -199,8 +200,17 @@ public class AnalysisServlet extends HttpServlet {
               .get("textOriginal")
               .toString();
 
-      // Remove all non-ASCII characters
-      commentList.add(topComment.replaceAll("[^\\x00-\\x7F]", ""));
+      Integer likes =
+          el.getAsJsonObject()
+              .getAsJsonObject("snippet")
+              .getAsJsonObject("topLevelComment")
+              .getAsJsonObject("snippet")
+              .get("likeCount")
+              .getAsInt();
+
+      String filteredComment = filterComment(topComment);
+      CommentLikes commentAndLikes = new CommentLikes(filteredComment, likes);
+      commentList.add(commentAndLikes);
     }
 
     return commentList;
@@ -213,10 +223,12 @@ public class AnalysisServlet extends HttpServlet {
    * @param comments The array to be condensed.
    * @return A properly formatted String
    */
-  private String convertToString(ArrayList<String> comments) {
+  private String convertToString(ArrayList<CommentLikes> comments) {
     StringBuilder res = new StringBuilder();
 
-    for (String comment : comments) {
+    for (CommentLikes commentAndLikes : comments) {
+      String comment = commentAndLikes.comment;
+
       comment = comment.replace("\"", "");
       // Make sure each comment is treated as its own sentence
       // Not sure char datatype works with regex so used String
@@ -230,5 +242,25 @@ public class AnalysisServlet extends HttpServlet {
     }
 
     return res.toString();
+  }
+
+  /**
+   * Filters out a comment string so that it's readable and doesn't break the frontend.
+   *
+   * @param comment The comment to be filtered.
+   * @return A properly formatted comment
+   */
+  private String filterComment(String comment) {
+    String filteredComment = comment;
+
+    // Handles non-ASCII characters, newlines,
+    // trimmed quotes, embedded escaped quotes.
+    // Order matters.
+    filteredComment = filteredComment.replaceAll("[^\\x00-\\x7F]", "");
+    filteredComment = String.join("\n", filteredComment.split("\\\\n"));
+    filteredComment = filteredComment.substring(1, filteredComment.length() - 1);
+    filteredComment = filteredComment.replace("\\\"", "");
+
+    return filteredComment;
   }
 }
