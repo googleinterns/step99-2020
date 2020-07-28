@@ -6,10 +6,22 @@ export class GdprTable {
    * @param {Date[]} dates The date of each history entry.
    */
   constructor(chart, histories, dates) {
-    this.table = document.createElement('table');
     this.chart = chart;
     this.histories = histories;
     this.dates = dates;
+    this.table = document.createElement('table');
+    this.table.classList.add('gdpr-table');
+
+    const thead = document.createElement('thead');
+    thead.innerHTML = 
+      '<th class="gdpr-table-header gdpr-table-header-rank">Rank</th>' +
+      '<th class="gdpr-table-header gdpr-table-header-track">Track</th>';
+
+    this.tbody = document.createElement('tbody');
+    this.tbody.classList.add('gdpr-table-body');
+
+    this.table.append(thead, this.tbody);
+
     this.setup();
   }
 
@@ -49,22 +61,26 @@ export class GdprTable {
     ranking.sort((a, b) => a.rank - b.rank);
 
     // update the table
-    this.table.innerHTML = '';
+    this.tbody.innerHTML = '';
 
     for (const {key, rank, selected} of ranking) {
       const row = document.createElement('tr');
+
+      row.classList.add('gdpr-table-track');
+      row.classList.toggle('gdpr-table-track-selected', selected);
+
       const rankCell = document.createElement('td');
       const keyCell = document.createElement('td');
 
-      row.classList.add('gdpr-track');
-      row.classList.toggle('gdpr-track-selected', selected);
+      rankCell.classList.add('gdpr-table-track-rank');
+      keyCell.classList.add('gdpr-table-track-track');
 
       rankCell.innerText = `#${rank}`;
       keyCell.innerText = key;
 
       row.append(rankCell, keyCell);
 
-      this.table.append(row);
+      this.tbody.append(row);
     }
   }
 
