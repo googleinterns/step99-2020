@@ -21,8 +21,11 @@ export class GdprChart extends HTMLElement {
 
     this.hoverState = {seriesIndex: null, x: null, y: null};
 
+    this.mainContainer = document.createElement('div');
+    this.mainContainer.id = 'main-container';
+
     this.scrollContainer = document.createElement('div');
-    this.scrollContainer.classList.add('chart-scroll-container');
+    this.scrollContainer.id = 'scroll-container';
     this.scrollContainer.addEventListener('scroll', this.onScroll.bind(this));
 
     this.tooltip = this.createTooltip();
@@ -31,9 +34,10 @@ export class GdprChart extends HTMLElement {
     stylesheet.rel = 'stylesheet';
     stylesheet.href = '/css/spotify-gdpr-chart.css';
 
-    this.shadowRoot.append(stylesheet);
-    this.shadowRoot.append(this.scrollContainer);
-    this.shadowRoot.append(this.tooltip);
+    this.mainContainer.append(this.scrollContainer);
+    this.mainContainer.append(this.tooltip);
+
+    this.shadowRoot.append(stylesheet, this.mainContainer);
   }
 
   /**
@@ -123,6 +127,7 @@ export class GdprChart extends HTMLElement {
             key,
           },
           bubbles: true,
+          composed: true,
         }),
     );
 
@@ -137,7 +142,7 @@ export class GdprChart extends HTMLElement {
     if (seriesIndex !== null) {
       const seriesEl = this.svg.querySelectorAll('.series')[seriesIndex];
       seriesEl.dispatchEvent(
-          new CustomEvent('series-clear', {bubbles: true}),
+          new CustomEvent('series-clear', {bubbles: true, composed: true}),
       );
     }
 

@@ -49,7 +49,7 @@ btnUpload.addEventListener('click', async () => {
   chart.load(rankings.history, rankings.dates);
 
   const table = new GdprTable(
-      document.getElementById('chart-container'),
+      chart,
       rankings.history,
       rankings.dates,
   );
