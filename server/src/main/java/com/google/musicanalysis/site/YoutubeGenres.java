@@ -27,8 +27,6 @@ public class YoutubeGenres {
 
   }
 
-
-
 /**
  * parses through youtube liked videos json array,
  * updates hash map to contain frequency count of each music genre

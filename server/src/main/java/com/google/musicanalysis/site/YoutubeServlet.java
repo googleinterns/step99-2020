@@ -91,6 +91,7 @@ public class YoutubeServlet extends HttpServlet {
         JsonArray videos;
         YoutubeGenres genreAnalysis = new YoutubeGenres();
 
+        // next Page Token should be an empty string for first call
         JsonPrimitive nextPageToken = new JsonPrimitive("");
         int round = 0;
         while (nextPageToken != null) {
@@ -100,6 +101,7 @@ public class YoutubeServlet extends HttpServlet {
             likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
             if (round  == 0) {
+                // only one JSON response needed to determine totalLiked
                 int totalLiked = getTotalResults(likedVideoRes);
                 genreAnalysis.totalLiked = totalLiked;
             }
