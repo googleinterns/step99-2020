@@ -101,7 +101,7 @@ public class YoutubeServlet extends HttpServlet {
             likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
             if (round  == 0) {
-                // only one JSON response needed to determine totalLiked
+                // only need one JSON response to get totalLiked
                 int totalLiked = getTotalResults(likedVideoRes);
                 genreAnalysis.totalLiked = totalLiked;
             }
