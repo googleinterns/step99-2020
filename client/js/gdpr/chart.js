@@ -10,6 +10,8 @@ export class GdprChart extends HTMLElement {
 
     this.attachShadow({mode: 'open'});
 
+    this.zoom = 1;
+
     /** @type {Map<string, number[]>} */
     this.histories = new Map();
 
@@ -165,9 +167,6 @@ export class GdprChart extends HTMLElement {
 
     const seriesContainer = document.createElementNS(SVG_NS, 'g');
 
-    /** @type {SVGGElement[]} */
-    const seriesElements = [];
-
     let index = 0;
 
     for (const history of this.histories.values()) {
@@ -176,7 +175,6 @@ export class GdprChart extends HTMLElement {
       const series = this.createSeries(history, color);
 
       seriesContainer.append(series);
-      seriesElements.push(series);
       index++;
     }
 
@@ -206,7 +204,7 @@ export class GdprChart extends HTMLElement {
     // find segments of history that don't contain null and create a 'run' for
     // each one
     while (end < history.length) {
-    // go until we find a non-null point, which is the beginning of a run
+      // go until we find a non-null point, which is the beginning of a run
       if (history[start] === null) {
         start++;
         end = start;
@@ -220,7 +218,7 @@ export class GdprChart extends HTMLElement {
       }
 
       if (end > start) {
-      // all of the points between start and end are non-null, create run
+        // all of the points between start and end are non-null, create run
         series.append(this.createRun(history, start, end));
         start = end;
       }
@@ -263,6 +261,8 @@ export class GdprChart extends HTMLElement {
    */
   createRun(history, start, end) {
     const runContainer = document.createElementNS(SVG_NS, 'g');
+    runContainer.setAttribute('data-run-start', start.toString());
+    runContainer.setAttribute('data-run-end', end.toString());
 
     const points = history
         .slice(start, end)
@@ -272,7 +272,7 @@ export class GdprChart extends HTMLElement {
         }));
 
     const pointsStr = points
-        .map(({x, y}) => `${x}, ${y}`)
+        .map(({x, y}) => `${x * this.zoom}, ${y}`)
         .join(' ');
 
     // line that is displayed
@@ -287,10 +287,10 @@ export class GdprChart extends HTMLElement {
     endCap.setAttribute('class', 'series-run-cap');
 
     startCap.setAttribute('r', '5');
-    startCap.setAttribute('cx', points[0].x + 'px');
+    startCap.setAttribute('cx', points[0].x * this.zoom + 'px');
     startCap.setAttribute('cy', points[0].y + 'px');
     endCap.setAttribute('r', '5');
-    endCap.setAttribute('cx', points[points.length - 1].x + 'px');
+    endCap.setAttribute('cx', points[points.length - 1].x * this.zoom + 'px');
     endCap.setAttribute('cy', points[points.length - 1].y + 'px');
 
     runContainer.append(startCap, line, endCap);
@@ -342,8 +342,8 @@ export class GdprChart extends HTMLElement {
       const verticalLine = document.createElementNS(SVG_NS, 'line');
       verticalLine.classList.add('date-line');
 
-      verticalLine.setAttribute('x1', RUN_SCALE_X * i + 'px');
-      verticalLine.setAttribute('x2', RUN_SCALE_X * i + 'px');
+      verticalLine.setAttribute('x1', RUN_SCALE_X * this.zoom * i + 'px');
+      verticalLine.setAttribute('x2', RUN_SCALE_X * this.zoom * i + 'px');
       verticalLine.setAttribute(
           'y1',
           RUN_SCALE_Y * 0.5 + 'px',
@@ -412,6 +412,91 @@ export class GdprChart extends HTMLElement {
     });
 
     return tooltip;
+  }
+
+  /**
+   * Updates the chart. Should be called after visual attributes (such as the
+   * zoom) are changed.
+   *
+   * @private
+   */
+  updateChart() {
+    const seriesElements =
+      Array.from(this.svg.getElementsByClassName('series'));
+
+    let index = 0;
+
+    for (const history of this.histories.values()) {
+      const seriesElement = seriesElements[index];
+      this.updateSeries(seriesElement, history);
+      index++;
+    }
+
+    this.updateGrid();
+  }
+
+  /**
+   * Updates a series in the chart.
+   *
+   * @param {Element} seriesContainer The element corresponding to this series.
+   * @param {number[]} history The historical positions of this track on the
+   * leaderboard.
+   * @private
+   */
+  updateSeries(seriesContainer, history) {
+    for (const runContainer of seriesContainer.children) {
+      const start = parseInt(runContainer.getAttribute('data-run-start'));
+      const end = parseInt(runContainer.getAttribute('data-run-end'));
+
+      this.updateRun(runContainer, history, start, end);
+    }
+  }
+
+  /**
+   * Updates a run in the chart.
+   *
+   * @param {Element} runContainer The element corresponding to this run.
+   * @param {number[]} history The historical positions of this track on the
+   * leaderboard.
+   * @param {number} start The index of the first entry in this run.
+   * @param {number} end The index of the last entry in this run.
+   * @private
+   */
+  updateRun(runContainer, history, start, end) {
+    const points = history
+        .slice(start, end)
+        .map((val, idx) => ({
+          x: (idx + start) * RUN_SCALE_X,
+          y: val * RUN_SCALE_Y,
+        }));
+
+    const pointsStr = points
+        .map(({x, y}) => `${x * this.zoom}, ${y}`)
+        .join(' ');
+
+    const [startCap, line, endCap] = runContainer.children;
+
+    line.setAttribute('points', pointsStr);
+
+    startCap.setAttribute('cx', points[0].x * this.zoom + 'px');
+    endCap.setAttribute('cx', points[points.length - 1].x * this.zoom + 'px');
+  }
+
+  /**
+   * Updates the gridlines created by createGrid.
+   *
+   * @private
+   */
+  updateGrid() {
+    const grid = this.svg.querySelector('.grid');
+    const verticalLines = Array.from(grid.children);
+
+    for (let i = 0; i < this.dates.length; i++) {
+      const verticalLine = verticalLines[i];
+
+      verticalLine.setAttribute('x1', RUN_SCALE_X * this.zoom * i + 'px');
+      verticalLine.setAttribute('x2', RUN_SCALE_X * this.zoom * i + 'px');
+    }
   }
 }
 
