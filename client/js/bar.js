@@ -19,10 +19,6 @@ const CHART_CATEGORIES = [
 const GRAPH_HEIGHT = 100;
 const BAR_CONTAINER_HEIGHT = GRAPH_HEIGHT / CHART_VALUES.length;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> e9b8fa3f571f62779b634fee0908cb7886ff92ce
 // bar container contains a bar. It is composed of bar padding and fill
 const BAR_PERCENT_FILL = 0.7;
 const BAR_PERCENT_PADDING = 1 - BAR_PERCENT_FILL;
@@ -39,7 +35,7 @@ const barTextContainer = document.getElementById('bar-text');
 /**
  * creates SVG bar chart given chart values and categories
  *
- * @param {int[]} values bar values/lengths
+ * @param {int[]} values bar length/values
  * @param {string[]} categories bar categories
  */
 function createBarChart(values, categories) {
