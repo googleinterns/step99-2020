@@ -21,22 +21,21 @@
   filter: url('#filter-highlight');
 }
 
-.chart .series-run {
+.chart .series-run-line {
   fill: none;
   stroke-width: 2px;
 
   stroke: var(--run-color);
 }
 
-.chart .series-run-touch-target {
-  fill: none;
-  stroke-width: 16px;
+.chart .series-marker {
+  visibility: hidden;
 
-  stroke: transparent;
+  fill: var(--run-color);
 }
 
-.chart .series-marker {
-  fill: var(--run-color);
+.chart .series-active .series-marker {
+  visibility: visible;
 }
 
 .chart .series-run-cap {

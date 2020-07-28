@@ -28,7 +28,8 @@ export class GdprChart extends HTMLElement {
 
     this.scrollContainer = document.createElement('div');
     this.scrollContainer.id = 'scroll-container';
-    this.scrollContainer.addEventListener('scroll', this.onScroll.bind(this));
+    this.scrollContainer
+        .addEventListener('wheel', this.onMouseWheel.bind(this));
 
     this.tooltip = this.createTooltip();
 
@@ -86,7 +87,7 @@ export class GdprChart extends HTMLElement {
     );
 
     // index in history
-    const x = Math.round(chartPos.x / RUN_SCALE_X);
+    const x = Math.round(chartPos.x / RUN_SCALE_X / this.zoom);
     // value in history
     const y = Math.round(chartPos.y / RUN_SCALE_Y);
 
@@ -113,8 +114,29 @@ export class GdprChart extends HTMLElement {
     this.clearHover();
   }
 
-  onScroll() {
-    this.clearHover();
+  onMouseWheel(ev) {
+    if (ev.ctrlKey) {
+      const {min, max, pow} = Math;
+      const scale = pow(10, ev.deltaY / 100);
+
+      const finalZoom = min(max(this.zoom * scale, 0.1), 3);
+      const finalScale = finalZoom / this.zoom;
+
+      // point under user's cursor should not move on scroll
+      const offset =
+        (ev.clientX - this.scrollContainer.clientLeft) * (finalScale - 1);
+
+      this.zoom = finalZoom;
+      this.updateChart();
+
+      // scroll so that the center of the chart stays in view
+      this.scrollContainer
+          .scrollTo(this.scrollContainer.scrollLeft * finalScale + offset, 0);
+
+      ev.preventDefault();
+    } else {
+      this.clearHover();
+    }
   }
 
   setHover(x, y, seriesIndex) {
@@ -158,9 +180,11 @@ export class GdprChart extends HTMLElement {
     svg.setAttribute('class', 'chart');
     svg.setAttribute(
         'viewBox',
+        '0 ' +
         // shift down so that lines are vertically centered
-        `0 ${RUN_SCALE_Y * 0.5} ` +
-        `${this.dates.length * RUN_SCALE_X} ${NUM_POSITIONS * RUN_SCALE_Y}`,
+        RUN_SCALE_Y * 0.5 + ' ' +
+        this.dates.length * RUN_SCALE_X * this.zoom + ' ' +
+        NUM_POSITIONS * RUN_SCALE_Y,
     );
     svg.append(this.createDefs());
     svg.append(this.createGrid());
@@ -232,18 +256,19 @@ export class GdprChart extends HTMLElement {
     const marker = document.createElementNS(SVG_NS, 'circle');
     marker.classList.add('series-marker');
     marker.setAttribute('r', '6');
+    series.append(marker);
 
     series.addEventListener('series-hit', (ev) => {
       const {x, y} = ev.detail;
-      series.append(marker);
       series.classList.add('series-active');
-      marker.setAttribute('cx', x * RUN_SCALE_X + 'px');
+      marker.setAttribute('data-marker-x', x.toString());
+      marker.setAttribute('data-marker-y', y.toString());
+      marker.setAttribute('cx', x * RUN_SCALE_X * this.zoom + 'px');
       marker.setAttribute('cy', y * RUN_SCALE_Y + 'px');
     });
 
     series.addEventListener('series-clear', () => {
       series.classList.remove('series-active');
-      marker.remove();
     });
 
     return series;
@@ -261,6 +286,7 @@ export class GdprChart extends HTMLElement {
    */
   createRun(history, start, end) {
     const runContainer = document.createElementNS(SVG_NS, 'g');
+    runContainer.setAttribute('class', 'series-run');
     runContainer.setAttribute('data-run-start', start.toString());
     runContainer.setAttribute('data-run-end', end.toString());
 
@@ -277,7 +303,7 @@ export class GdprChart extends HTMLElement {
 
     // line that is displayed
     const line = document.createElementNS(SVG_NS, 'polyline');
-    line.setAttribute('class', 'series-run');
+    line.setAttribute('class', 'series-run-line');
     line.setAttribute('points', pointsStr);
 
     const startCap = document.createElementNS(SVG_NS, 'circle');
@@ -421,6 +447,15 @@ export class GdprChart extends HTMLElement {
    * @private
    */
   updateChart() {
+    this.svg.setAttribute(
+        'viewBox',
+        '0 ' +
+      // shift down so that lines are vertically centered
+      RUN_SCALE_Y * 0.5 + ' ' +
+      this.dates.length * RUN_SCALE_X * this.zoom + ' ' +
+      NUM_POSITIONS * RUN_SCALE_Y,
+    );
+
     const seriesElements =
       Array.from(this.svg.getElementsByClassName('series'));
 
@@ -444,11 +479,19 @@ export class GdprChart extends HTMLElement {
    * @private
    */
   updateSeries(seriesContainer, history) {
-    for (const runContainer of seriesContainer.children) {
+    for (const runContainer of seriesContainer.getElementsByClassName('series-run')) {
       const start = parseInt(runContainer.getAttribute('data-run-start'));
       const end = parseInt(runContainer.getAttribute('data-run-end'));
 
       this.updateRun(runContainer, history, start, end);
+    }
+
+    if (seriesContainer.classList.contains('series-active')) {
+      const marker = seriesContainer.getElementsByClassName('series-marker')[0];
+      const x = parseInt(marker.getAttribute('data-marker-x'));
+      const y = parseInt(marker.getAttribute('data-marker-y'));
+      marker.setAttribute('cx', x * RUN_SCALE_X * this.zoom + 'px');
+      marker.setAttribute('cy', y * RUN_SCALE_Y + 'px');
     }
   }
 
