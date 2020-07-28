@@ -130,9 +130,9 @@ function determineOverall(json, time) {
     isClear = 'CLEARLY ';
   }
 
-  if (score < -0.2) {
+  if (score < -0.35) {
     tone = 'NEGATIVE';
-  } else if (score > 0.2) {
+  } else if (score > 0.35) {
     tone = 'POSITIVE';
   } else {
     tone = 'MIXED';

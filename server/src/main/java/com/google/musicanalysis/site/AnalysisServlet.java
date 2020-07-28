@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -22,7 +23,7 @@ public class AnalysisServlet extends HttpServlet {
       throws ServletException, IOException {
 
     String input = req.getParameter("name");
-
+   
     assert input == null : "Something went wrong with sending to backend.";
 
     // Use like this: {url_parameter, value}
@@ -57,11 +58,16 @@ public class AnalysisServlet extends HttpServlet {
     NameAndChannel videoInfo = getNameAndChannel(nameJson);
 
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
-    NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
+    
+    HashMap<Integer, NLPResult> unweightedNLPMap = new HashMap<>();
+    for (CommentLikes commentAndLikes: commentArray) {
+        unweightedNLPMap.put(commentAndLikes.likes, analyzeWithNLP(commentAndLikes.comment));
+    }
+    NLPResult weightedSentiment = createWeightedSentiment(unweightedNLPMap);
 
     String json =
         convertToJsonUsingGson(
-            new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
+            new AnalysisGroup(perspectiveMap, weightedSentiment, commentArray, videoId, videoInfo));
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
@@ -93,6 +99,32 @@ public class AnalysisServlet extends HttpServlet {
             Double.valueOf(sentimentObject.get("score").toString()));
 
     return nlpResults;
+  }
+
+  /**
+   * Takes the given map of sentiments and creates a common weighted 
+   * sentiment according to the number of likes each comment receives
+   * out of the sum of the likes of the comments
+   *
+   * @param unweightedNLPMap the unweighted map of <like, nlp> pairs
+   * @return A weighted NLPResult object
+   */
+  private NLPResult createWeightedSentiment(HashMap<Integer, NLPResult> unweightedNLPMap) {
+      double totalLikes = 0;
+
+      for (Map.Entry<Integer, NLPResult> likesAndNLPResult : unweightedNLPMap.entrySet()) {
+          totalLikes += (double) likesAndNLPResult.getKey();
+      }
+
+      double weightedMagnitude = 0;
+      double weightedScore = 0;
+
+      for (Map.Entry<Integer, NLPResult> likesAndNLPResult : unweightedNLPMap.entrySet()) {
+          weightedMagnitude += (likesAndNLPResult.getKey()/totalLikes)*likesAndNLPResult.getValue().magnitude;
+          weightedScore += (likesAndNLPResult.getKey()/totalLikes)*likesAndNLPResult.getValue().score;
+      }
+
+      return new NLPResult(weightedMagnitude, weightedScore);
   }
 
   /**
