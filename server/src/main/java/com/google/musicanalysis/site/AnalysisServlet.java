@@ -6,6 +6,7 @@ import com.google.musicanalysis.api.perspective.*;
 import com.google.musicanalysis.api.youtube.*;
 import com.google.musicanalysis.types.*;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,41 +24,32 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    String input = req.getParameter("name");
+    String userInput = req.getParameter("name");
 
     // Use like this: {url_parameter, value}
     HashMap<String, String> videoArgs = new HashMap<>();
     HashMap<String, String> commentArgs = new HashMap<>();
     HashMap<String, String> nameArgs = new HashMap<>();
 
-    String videoId = input; // assume user enters id
+    String videoId = userInput; // assume user enters id
 
     commentArgs.put("part", "snippet");
-    commentArgs.put("videoId", input);
+    commentArgs.put("videoId", userInput);
     String commentsJson;
     
-    // if the input doesn't look like a standard id
-    if (thereIsWhiteSpace(input) || input.length() > 11) {
-      // It must be a video name so we search for it   
-      videoArgs.put("q", input);
-      videoArgs.put("type", "video");
-      String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
-      videoId = getVideoId(videoIdJson);
-
-      commentArgs.replace("videoId", videoId);
-      commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
-    } else {  
+    // Test if its a youtube id from the beginning
+    if (userInput.length() == 11 && !thereIsWhiteSpace(userInput)) {
         try {
             commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
         } catch (IOException err) {
-            videoArgs.put("q", input);
-            videoArgs.put("type", "video");
-            String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
-            videoId = getVideoId(videoIdJson);
-
+            videoId = getFirstVideoFromSearch(userInput);
             commentArgs.replace("videoId", videoId);
             commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
         }
+    } else {
+        videoId = getFirstVideoFromSearch(userInput);
+        commentArgs.replace("videoId", videoId);
+        commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
     }
 
     ArrayList<String> commentArray = retrieveComments(commentsJson);
@@ -83,6 +75,20 @@ public class AnalysisServlet extends HttpServlet {
     Gson gson = new Gson();
     String json = gson.toJson(group);
     return json;
+  }
+
+  /**
+   * Helper function that gets the first video from Youtube search request
+   *
+   * @param videoParam the video parameter to put in the url
+   * @return the video id as string
+   */
+  private String getFirstVideoFromSearch(String videoParam) throws MalformedURLException, IOException {
+      HashMap<String, String> videoArgs = new HashMap<>();
+      videoArgs.put("q", videoParam);
+      videoArgs.put("type", "video");
+      String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
+      return getVideoId(videoIdJson);
   }
 
   /**
@@ -231,11 +237,8 @@ public class AnalysisServlet extends HttpServlet {
 
     for (String comment : comments) {
       comment = comment.replace("\"", "");
-      // This does makes sure of two things:
-      // 1. commment.substring(comment.length() - 1)
-      //    doesn't throw an error, which ruins the loop
-      // 2. One letter comments should not be considered as sentences since
-      //    they bring no value to the analysis. 
+      // One letter comments should not be considered as sentences since
+      // they bring no value to the analysis. 
       if (comment.length() <= 1){
           continue;
       }
@@ -260,8 +263,8 @@ public class AnalysisServlet extends HttpServlet {
    * @return whether or not there's any whitespace
    */
   private boolean thereIsWhiteSpace(String string) {
-    Pattern pattern = Patter.compile("\\s");
-    Matcher matcher = pattern.matcher(string):
+    Pattern pattern = Pattern.compile("\\s");
+    Matcher matcher = pattern.matcher(string);
     return matcher.find();
   }
 }
