@@ -2,6 +2,9 @@
 
 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 svg.setAttribute('viewBox', '0 0 100 100');
+svg.setAttribute('class', 'svg');
+svg.setAttribute('preserveAspectRatio', 'none');
+
 
 // hard coded data for bar chart for now
 const CHART_VALUES = [1, 3, 1, 2];
@@ -31,11 +34,11 @@ const GRAPH_LEFT_PADDING = 2.5;
 document.getElementById('graph').appendChild(svg);
 // textBlock should align vertically with bar chart
 const barTextContainer = document.getElementById('bar-text');
-barTextContainer.setAttribute('height', svg.getBoundingClientRect().height);
+// barTextContainer.setAttribute('height', svg.getBoundingClientRect().height);
 
 // height of each category div must equal bar thickness
 const CATEGORY_HEIGHT =
-  BAR_CONTAINER_HEIGHT / 100 * barTextContainer.getAttribute('height');
+  BAR_CONTAINER_HEIGHT / 100 + '%';
   
 /**
  * creates SVG bar chart given chart values and categories
@@ -57,7 +60,7 @@ function createBarChart(values, categories) {
     const category = document.createElement('div');
     barTextContainer.appendChild(category);
     category.setAttribute('class', 'category');
-    category.style.height = CATEGORY_HEIGHT + 'px';
+    // category.style.height = CATEGORY_HEIGHT + 'px';
     category.textContent = categories[i];
   }
 }

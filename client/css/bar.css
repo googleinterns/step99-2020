@@ -6,6 +6,11 @@
   height: 100vh;
 }
 
+.svg {
+  height: 100%;
+  width: 100%;
+}
+
 #vis {
   width: 50vh;
 
@@ -13,6 +18,8 @@
   margin-left: 0;
 
   background-color: #222425;
+  display: flex;
+  align-items: stretch;
 }
 
 #graph {
@@ -33,11 +40,14 @@
 }
 
 #bar-text {
-  display: inline-block;
+  display: flex;
+  flex-flow: column nowrap;
   width: 25%;
 
   text-align: right;
   vertical-align: top;
+  height: 100%;
+  background-color: pink;
 }
 
 .category {
@@ -46,4 +56,6 @@
   justify-content: center;
 
   text-align: right;
+  flex-grow: 1; /* take as much space as possible, same priority */
+  flex-basis: 0; /* flex basis makes all have same size - equal priority*/
 }
