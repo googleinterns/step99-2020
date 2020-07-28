@@ -35,8 +35,8 @@ const barTextContainer = document.getElementById('bar-text');
 /**
  * creates SVG bar chart given chart values and categories
  *
- * @param {int[]} values
- * @param {string[]} categories
+ * @param {int[]} values bar values/lengths
+ * @param {string[]} categories bar categories
  */
 function createBarChart(values, categories) {
   for (let i = 0; i < values.length; i++) {
