@@ -264,3 +264,11 @@ function createSVGElement(el) {
   return document.createElementNS('http://www.w3.org/2000/svg', el);
 }
 
+/**
+ * Toggles the block class for an the lightbox
+ *
+ */
+function toggleDisplay() {
+    const target = document.getElementById("info");
+    target.classList.toggle("display");
+}
