@@ -7,9 +7,10 @@
 /** @typedef {import('./analysis.js').CollatedGDPRRecords} CollatedGDPRRecords */
 
 import {
-  collateStreamingData, getStreamingData, getStreamingHistory
+  collateStreamingData, getStreamingData, getStreamingHistory,
 } from './analysis.js';
 import {createChart} from './chart.js';
+import {GdprTable} from './table.js';
 
 const {zip} = window;
 
@@ -49,4 +50,12 @@ btnUpload.addEventListener('click', async () => {
       rankings.history,
       rankings.dates,
   );
+
+  const table = new GdprTable(
+      document.getElementById('chart-container'),
+      rankings.history,
+      rankings.dates,
+  );
+
+  table.mount(document.getElementById('table-container'));
 });
