@@ -17,15 +17,14 @@ enum MusicTopic {
 /** contains final object that YoutubeServlet.java sends to frontend */
 public class YoutubeGenres {
   private HashMap<String, Integer> genreData = new HashMap<String, Integer>();
-  private final int totalLiked;
+  protected int totalLiked;
   private int totalMusic = 0;
   private boolean isMusic;
   private int maxGenreCount = 0;
   private JsonArray videos;
 
-  public YoutubeGenres(int totalLiked, JsonArray videos) {
-    this.totalLiked = totalLiked;
-    this.calculateMusicCount(videos);
+  public YoutubeGenres() {
+
   }
 
 /**
@@ -33,7 +32,7 @@ public class YoutubeGenres {
  * updates hash map to contain frequency count of each music genre
  * @param videos json array of youtube liked videos
  */
-  private void calculateMusicCount(JsonArray videos) {
+  protected void calculateMusicCount(JsonArray videos) {
     for (int i = 0; i < videos.size(); i++) {
         JsonObject video = videos.get(i).getAsJsonObject();
         JsonObject topicDetails = video.getAsJsonObject("topicDetails");
@@ -101,6 +100,5 @@ public class YoutubeGenres {
     int count = this.genreData.containsKey(topic) ? this.genreData.get(topic) : 0;
     this.genreData.put(topic, count + 1);
     maxGenreCount = Math.max(count + 1, maxGenreCount);
-    
   }
 }

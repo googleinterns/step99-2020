@@ -24,26 +24,23 @@ import javax.servlet.annotation.WebServlet;
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
 
-    static final int DEFAULT_NUM_VIDS = 10;
-
     /**
      * makes http request of youtube api to retrieve topics of liked videos, 
      *  gets json string of youtube response
      * @param apiKey youtube api key
      * @param accessToken youtube access token from login
-     * @param numVideos max number of liked videos to retrieve 
      * @return JSON string of youtube response of liked video topics
      * @throws ServletException
      * @throws IOException
      */
-    protected String getYoutubeRes(String apiKey, String accessToken, int numVideos) 
+    protected String getYoutubeRes(String apiKey, String accessToken, String pageToken) 
         throws ServletException, IOException {
         // make http request to youtube API
         URLEncodedBuilder youtubeParam = new URLEncodedBuilder()
             .add("part", "topicDetails")
             .add("myRating", "like")
             .add("key", apiKey)
-            .add("maxResults", Integer.toString(numVideos));
+            .add("pageToken", pageToken);
         URI youtubeUri = URI.create("https://www.googleapis.com/youtube/v3/videos?" + youtubeParam.build());
 
         var httpClient = HttpClient.newHttpClient();
@@ -68,6 +65,15 @@ public class YoutubeServlet extends HttpServlet {
         return totalResults.getAsInt();
     }
 
+    /**
+     * @param likedVideoRes json obj of youtube response body 
+     * @return next page token json primitive
+     */
+    protected JsonPrimitive getNextPageToken(JsonObject likedVideoRes) {
+        JsonPrimitive nextPageToken = likedVideoRes.getAsJsonPrimitive("nextPageToken");
+        return nextPageToken;
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException {
@@ -80,18 +86,32 @@ public class YoutubeServlet extends HttpServlet {
             return;
         }
 
-        String numVideosParam = req.getParameter("num_videos");
-        int numVideos = DEFAULT_NUM_VIDS;
-        if (numVideosParam != null) {
-            numVideos = Integer.parseInt(numVideosParam);
+        String youtubeResBody; 
+        JsonObject likedVideoRes;
+        JsonArray videos;
+        YoutubeGenres genreAnalysis = new YoutubeGenres();
+
+        // next Page Token should be an empty string for first call
+        JsonPrimitive nextPageToken = new JsonPrimitive("");
+        int round = 0;
+        while (nextPageToken != null) {
+            youtubeResBody = getYoutubeRes(API_KEY, 
+                                            accessToken.toString(), 
+                                            nextPageToken.getAsString());            
+            likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
+
+            if (round  == 0) {
+                // only need one JSON response to get totalLiked
+                int totalLiked = getTotalResults(likedVideoRes);
+                genreAnalysis.totalLiked = totalLiked;
+            }
+
+            videos = likedVideoRes.getAsJsonArray("items");
+            genreAnalysis.calculateMusicCount(videos);
+
+            nextPageToken = getNextPageToken(likedVideoRes);
+            round++;
         }
-
-        String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString(), numVideos);
-        JsonObject likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
-
-        int totalLiked = getTotalResults(likedVideoRes);
-        JsonArray videos = likedVideoRes.getAsJsonArray("items");
-        YoutubeGenres genreAnalysis = new YoutubeGenres(totalLiked, videos);
 
         Gson gson = new Gson();
         res.setContentType("application/json"); 
