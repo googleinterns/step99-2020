@@ -12,9 +12,11 @@ async function fetchResponse() {
   const param = document.getElementById('searchbar').value;
   try {
     const response = await getData(`/api/analysis?name=${param}`);
-    populationHandler(response);
   } catch (e) {
     console.error(e);
+  }
+  if (response) {
+    populationHandler(response);
   }
 }
 
