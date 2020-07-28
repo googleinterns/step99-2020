@@ -21,15 +21,23 @@ const BAR_UNIT_LENGTH = 100 / MAX_CHART_VALUES;
 const GRAPH_TOP_PADDING = (BAR_PERCENT_PADDING / 2) * BAR_CONTAINER_HEIGHT;
 const GRAPH_LEFT_PADDING = 2.5;
 
-for (let i = 0; i < CHART_VALUES.length; i++) {
-  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  svg.appendChild(g);
-  g.setAttribute('class', 'bar');
+/**
+ * creates SVG bar chart given chart values
+ * @param {int[]} CHART_VALUES
+ */
+function createBarChart(CHART_VALUES) {
+  for (let i = 0; i < CHART_VALUES.length; i++) {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    svg.appendChild(g);
+    g.setAttribute('class', 'bar');
 
-  const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-  g.appendChild(bar);
-  bar.setAttribute('width', BAR_UNIT_LENGTH * CHART_VALUES[i]);
-  bar.setAttribute('height', BAR_THICKNESS);
-  bar.setAttribute('x', GRAPH_LEFT_PADDING);
-  bar.setAttribute('y', GRAPH_TOP_PADDING + BAR_CONTAINER_HEIGHT * i);
+    const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    g.appendChild(bar);
+    bar.setAttribute('width', BAR_UNIT_LENGTH * CHART_VALUES[i]);
+    bar.setAttribute('height', BAR_THICKNESS);
+    bar.setAttribute('x', GRAPH_LEFT_PADDING);
+    bar.setAttribute('y', GRAPH_TOP_PADDING + BAR_CONTAINER_HEIGHT * i);
+  }
 }
+
+createBarChart(CHART_VALUES);
