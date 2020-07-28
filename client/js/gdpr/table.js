@@ -6,6 +6,9 @@ export class GdprTable {
    * @param {Date[]} dates The date of each history entry.
    */
   constructor(chart, histories, dates) {
+    this.chart = chart;
+    this.histories = histories;
+    this.dates = dates;
     this.table = document.createElement('table');
     this.table.classList.add('gdpr-table');
 
@@ -14,15 +17,11 @@ export class GdprTable {
       '<th class="gdpr-table-header gdpr-table-header-rank">Rank</th>' +
       '<th class="gdpr-table-header gdpr-table-header-track">Track</th>';
 
-    const tbody = document.createElement('tbody');
-    tbody.classList.add('gdpr-table-body');
+    this.tbody = document.createElement('tbody');
+    this.tbody.classList.add('gdpr-table-body');
 
-    this.table.append(thead, tbody);
+    this.table.append(thead, this.tbody);
 
-    this.tbody = tbody;
-    this.chart = chart;
-    this.histories = histories;
-    this.dates = dates;
     this.setup();
   }
 
