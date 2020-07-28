@@ -86,27 +86,29 @@ public class YoutubeServlet extends HttpServlet {
             return;
         }
 
-        // added next page token (REMOVE LATER)
-        String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString(), "");
-        JsonObject likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
+        String youtubeResBody; 
+        JsonObject likedVideoRes;
+        JsonArray videos;
+        YoutubeGenres genreAnalysis = new YoutubeGenres();
 
-
-        int totalLiked = getTotalResults(likedVideoRes);
-        JsonArray videos = likedVideoRes.getAsJsonArray("items");
-        YoutubeGenres genreAnalysis = new YoutubeGenres(totalLiked, videos);
-        JsonPrimitive nextPageToken = getNextPageToken(likedVideoRes);
-
-        System.out.println(nextPageToken);
+        JsonPrimitive nextPageToken = new JsonPrimitive("");
+        int round = 0;
         while (nextPageToken != null) {
             youtubeResBody = getYoutubeRes(API_KEY, 
                                             accessToken.toString(), 
-                                            nextPageToken.getAsString());
-            System.out.println(youtubeResBody);
+                                            nextPageToken.getAsString());            
             likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
+
+            if (round  == 0) {
+                int totalLiked = getTotalResults(likedVideoRes);
+                genreAnalysis.totalLiked = totalLiked;
+            }
+
             videos = likedVideoRes.getAsJsonArray("items");
             genreAnalysis.calculateMusicCount(videos);
+
             nextPageToken = getNextPageToken(likedVideoRes);
-            System.out.println(nextPageToken);
+            round++;
         }
 
         Gson gson = new Gson();
