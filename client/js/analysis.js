@@ -265,7 +265,7 @@ function createSVGElement(el) {
 }
 
 /**
- * Toggles the block class for an the lightbox
+ * Toggles the display class for the lightbox
  *
  */
 function toggleDisplay() {
