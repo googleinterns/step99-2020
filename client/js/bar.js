@@ -1,8 +1,7 @@
 /* constructs bar graph from scratch */
 
 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-svg.setAttribute('viewBox', '0 0 100 100'); // change height in css
-document.getElementById('graph').appendChild(svg);
+svg.setAttribute('viewBox', '0 0 100 100');
 
 // hard coded data for bar chart for now
 const CHART_VALUES = [1, 3, 1, 2];
@@ -20,6 +19,8 @@ const BAR_UNIT_LENGTH = 100 / MAX_CHART_VALUES;
 // top graph padding depends on bar padding
 const GRAPH_TOP_PADDING = (BAR_PERCENT_PADDING / 2) * BAR_CONTAINER_HEIGHT;
 const GRAPH_LEFT_PADDING = 2.5;
+
+document.getElementById('graph').appendChild(svg);
 
 /**
  * creates SVG bar chart given chart values
