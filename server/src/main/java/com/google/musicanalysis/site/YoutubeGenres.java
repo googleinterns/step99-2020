@@ -19,7 +19,6 @@ public class YoutubeGenres {
   private HashMap<String, Integer> genreData = new HashMap<String, Integer>();
   protected int totalLiked;
   private int totalMusic = 0;
-  private boolean isMusic;
   private int maxGenreCount = 0;
   private JsonArray videos;
 
