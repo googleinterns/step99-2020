@@ -69,9 +69,15 @@ public class YoutubeServlet extends HttpServlet {
      * @param likedVideoRes json obj of youtube response body 
      * @return next page token json primitive
      */
-    protected JsonPrimitive getNextPageToken(JsonObject likedVideoRes) {
+    protected String getNextPageToken(JsonObject likedVideoRes) {
         JsonPrimitive nextPageToken = likedVideoRes.getAsJsonPrimitive("nextPageToken");
-        return nextPageToken;
+        
+        // null condition will be checked to see if no more http calls
+        String tokenStr = null;
+        if (nextPageToken != null) {
+            tokenStr = nextPageToken.getAsString();
+        }
+        return tokenStr;
     }
 
     @Override
@@ -91,26 +97,23 @@ public class YoutubeServlet extends HttpServlet {
         JsonArray videos;
         YoutubeGenres genreAnalysis = new YoutubeGenres();
 
-        // next Page Token should be an empty string for first call
-        JsonPrimitive nextPageToken = new JsonPrimitive("");
-        int round = 0;
+        // next Page Token must be an empty string for first http call
+        String nextPageToken = "";
         while (nextPageToken != null) {
             youtubeResBody = getYoutubeRes(API_KEY, 
                                             accessToken.toString(), 
-                                            nextPageToken.getAsString());            
+                                            nextPageToken);            
             likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
 
-            if (round  == 0) {
+            if (nextPageToken == "") {
                 // only need one JSON response to get totalLiked
-                int totalLiked = getTotalResults(likedVideoRes);
-                genreAnalysis.totalLiked = totalLiked;
+                genreAnalysis.totalLiked = getTotalResults(likedVideoRes);
             }
 
             videos = likedVideoRes.getAsJsonArray("items");
             genreAnalysis.calculateMusicCount(videos);
 
             nextPageToken = getNextPageToken(likedVideoRes);
-            round++;
         }
 
         Gson gson = new Gson();
