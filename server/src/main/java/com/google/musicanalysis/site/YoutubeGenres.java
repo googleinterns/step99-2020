@@ -17,12 +17,11 @@ enum MusicTopic {
 /** contains final object that YoutubeServlet.java sends to frontend */
 public class YoutubeGenres {  
   // totalLiked is parsed outside from youtube json response 
-  protected int totalLiked;
+  public int totalLiked;
 
-  private HashMap<String, Integer> genreData = new HashMap<String, Integer>();
-  private int totalMusic = 0;
-  private int maxGenreCount = 0;
-  private JsonArray videos;
+  public HashMap<String, Integer> genreData = new HashMap<String, Integer>();
+  public int totalMusic = 0;
+  public int maxGenreCount = 0;
 
   public YoutubeGenres() {
 
