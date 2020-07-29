@@ -1,7 +1,6 @@
 class HeatRow {
   /**
    *
-   * @param {string} name The day of the first element in the row
    * @param {int[]} data The array of 0s and 1s for heat row colors
    */
   constructor(data) {
@@ -9,35 +8,31 @@ class HeatRow {
   }
 }
 
-const DEFAULT_DATA = [0, 0, 1, 1, 1];
-const DEFAULT_NAME = 'Metric';
-const TOTAL_LIKED = 50;
-const DEFAULT_NUM_ROWS = 10; // do square root
+const TOTAL_LIKED = 36;
+const RANDOM_DATA =
+  [...Array(TOTAL_LIKED)].map((x) => (Math.random() > 0.5) ? 0 : 1);
+console.log(RANDOM_DATA);
 
-// [{id: 'ererjeirjei', order: 4}]
-// {
-//   genreData: {PopMusic: 2, OtherMusic: 3},
-//   totalLiked: 10,
-//   totalMusic: 5,
-//   maxGenreCount: 3,
-//   likedMusicHistory: [{id: 'ererjeirjei', order: 4}],
-// }
-const row = new HeatRow(DEFAULT_DATA);
-console.log(row);
+const NUM_ROWS = Math.floor(Math.sqrt(TOTAL_LIKED)); // do square root
+
 const HeatMapValues = [];
-for (let i = 0; i < DEFAULT_NUM_ROWS; i++) {
+let row;
+for (let i = 0; i < NUM_ROWS; i++) {
+  row = new HeatRow(RANDOM_DATA.slice(i, i + NUM_ROWS));
   HeatMapValues.push(row);
 }
-console.log(HeatMapValues);
 
 const options = {
   series: HeatMapValues,
   chart: {
     height: '100%',
-    width: '100%', // doesnt fit
+    width: '100%',
     type: 'heatmap',
     foreColor: 'white',
     redrawOnParentResize: true,
+    toolbar: {
+      show: false,
+    },
   },
   tooltip: {
     enabled: false,
@@ -46,6 +41,14 @@ const options = {
     enabled: false,
   },
   colors: ['#5bc0eb'],
+  yaxis: {
+    show: false,
+  },
+  xaxis: {
+    labels: {
+      show: false,
+    },
+  },
 };
 
 const chart = new ApexCharts(document.querySelector('#heat-map'), options);
