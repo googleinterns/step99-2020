@@ -267,8 +267,33 @@ function createSVGElement(el) {
 /**
  * Toggles the display class for the lightbox
  *
+ * @param {boolean} isLightboxClosed determines whether or not the lightbox is open
  */
-function toggleDisplay() {
-    const target = document.getElementById("info");
-    target.classList.toggle("display");
+function toggleLightboxVisibility(isLightboxClosed) {
+  if (isLightboxClosed === true) {
+    showLightbox();
+  } else if (isLightboxClosed === false) {
+    hideLightbox();
+  } else {
+    alert('Invalid parameter for toggleLightboxVisibility');
+  }
 }
+
+/**
+ * Hides the lightbox
+ *
+ */
+function hideLightbox() {
+  const target = document.getElementById('info');
+  target.classList.add('hide-lightbox');
+}
+
+/**
+ * Shows the lightbox
+ *
+ */
+function showLightbox() {
+  const target = document.getElementById('info');
+  target.classList.remove('hide-lightbox');
+}
+

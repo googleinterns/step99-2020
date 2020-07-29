@@ -257,7 +257,7 @@ svg {
 }
 
 /* Lightbox */
-.display {
+.hide-lightbox {
     display: none;
 }
 
