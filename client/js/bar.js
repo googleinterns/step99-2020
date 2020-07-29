@@ -1,10 +1,13 @@
-/* constructs bar graph from scratch */
+
+/**
+ * @file constructs bar graph from scratch
+ */
 
 // hard coded data for bar chart for now
 const CHART_VALUES = [1, 3, 1, 2];
 
 const GRAPH_HEIGHT = 100;
-// bar container contains a bar. It is composed of bar padding and fill
+// each bar container is composed of bar padding and fill
 const BAR_PERCENT_FILL = 0.7;
 const BAR_PERCENT_PADDING = 1 - BAR_PERCENT_FILL;
 
@@ -13,9 +16,6 @@ const BAR_PERCENT_PADDING = 1 - BAR_PERCENT_FILL;
  * @param {int[]} chartValues
  */
 function createBarChart(chartValues) {
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('viewBox', '0 0 100 100');
-
   const maxChartValues = Math.max(...chartValues);
   const barContainerHeight = GRAPH_HEIGHT / chartValues.length;
 
@@ -25,6 +25,10 @@ function createBarChart(chartValues) {
   // top graph padding depends on bar padding
   const GRAPH_TOP_PADDING = (BAR_PERCENT_PADDING / 2) * barContainerHeight;
   const GRAPH_LEFT_PADDING = 2.5;
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  document.getElementById('graph').appendChild(svg);
 
   for (let i = 0; i < chartValues.length; i++) {
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -38,7 +42,6 @@ function createBarChart(chartValues) {
     bar.setAttribute('x', GRAPH_LEFT_PADDING);
     bar.setAttribute('y', GRAPH_TOP_PADDING + barContainerHeight * i);
   }
-  document.getElementById('graph').appendChild(svg);
 }
 
 createBarChart(CHART_VALUES);
