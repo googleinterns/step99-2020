@@ -1,57 +1,82 @@
 class HeatRow {
   /**
    *
-   * @param {int[]} data The array of 0s and 1s for heat row colors
+   * @param {int[]} data The array of 0s and 1s for a row in a heat map
    */
   constructor(data) {
     this.data = data;
   }
 }
 
-const TOTAL_LIKED = 36;
-const RANDOM_DATA =
-  [...Array(TOTAL_LIKED)].map((x) => (Math.random() > 0.5) ? 0 : 1);
-console.log(RANDOM_DATA);
+// data will be from backend next time
+const TOTAL_LIKED = 13;
+// element value of x means xth latest video is music
+const LIKED_MUSIC_HIST = [1, 4, 7];
 
-const NUM_ROWS = Math.floor(Math.sqrt(TOTAL_LIKED)); // do square root
-
-const HeatMapValues = [];
-let row;
-for (let i = 0; i < NUM_ROWS; i++) {
-  row = new HeatRow(RANDOM_DATA.slice(i, i + NUM_ROWS));
-  HeatMapValues.push(row);
+// ith value of 1 means ith latest video is music
+const likedMusicBinaryHist = [...Array(TOTAL_LIKED)].fill(0);
+for (let i = 0; i < LIKED_MUSIC_HIST.length; i++) {
+  const el = LIKED_MUSIC_HIST[i];
+  likedMusicBinaryHist[el] = 1;
 }
 
-const options = {
-  series: HeatMapValues,
-  chart: {
-    height: '100%',
-    width: '100%',
-    type: 'heatmap',
-    foreColor: 'white',
-    redrawOnParentResize: true,
-    toolbar: {
+
+/**
+ * turns array of data into heat map
+ * @param {int[]} data array of all 0s/1s heat map data
+ * @param {int} dataLength size of data array
+ * @returns {HeatRow[]} square matrix of HeatMapValues for HeatMap
+ */
+function createHeatMapValues(data, dataLength) {
+  // heat map should have equal length and width
+  const numRows = Math.ceil(Math.sqrt(dataLength));
+
+  const HeatMapValues = [];
+  let row;
+  for (let i = 0; i < dataLength; i = i + numRows) {
+    row = new HeatRow(data.slice(i, i + numRows));
+    HeatMapValues.push(row);
+  }
+  return HeatMapValues.reverse();
+}
+
+/**
+ * renders heat map onto html
+ * @param {int[]} data array of all 0s/1s heat map data
+ * @param {int} dataLength size of data array
+ */
+function createHeatMap(data, dataLength) {
+  const options = {
+    series: createHeatMapValues(data, dataLength),
+    chart: {
+      height: '100%',
+      width: '100%',
+      type: 'heatmap',
+      foreColor: 'white',
+      redrawOnParentResize: true,
+      toolbar: {
+        show: false,
+      },
+    },
+    tooltip: {
+      enabled: false,
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    colors: ['#5bc0eb'],
+    yaxis: {
       show: false,
     },
-  },
-  tooltip: {
-    enabled: false,
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  colors: ['#5bc0eb'],
-  yaxis: {
-    show: false,
-  },
-  xaxis: {
-    labels: {
-      show: false,
+    xaxis: {
+      labels: {
+        show: false,
+      },
     },
-  },
-};
+  };
 
-const chart = new ApexCharts(document.querySelector('#heat-map'), options);
-chart.render();
+  const chart = new ApexCharts(document.querySelector('#heat-map'), options);
+  chart.render();
+}
 
-console.log(typeof options);
+createHeatMap(likedMusicBinaryHist, TOTAL_LIKED);
