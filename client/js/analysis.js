@@ -13,6 +13,10 @@ window.onload = function() {
  *
  */
 async function fetchResponse() {
+  const param = document.getElementById('searchbar').value;
+  if (param == null) {
+      return;
+  }
   const videoQuery = document.getElementById('searchbar').value;
   const response = await fetch(`/api/analysis?name=${videoQuery}`);
   const responseJson = await response.json();
@@ -40,6 +44,7 @@ function renderingHandler(videoAnalysis) {
       videoAnalysis.magnitudeAndScore.score);
   setTimeout(() => {
     addFeedbackResult(sentiment);
+    createCard(videoAnalysis.videoId, videoAnalysis.videoInfo.name, videoAnalysis.videoInfo.channel);
   }, commentsRenderTime + FEEDBACK_APPEARANCE_TIME);
 }
 
