@@ -1,0 +1,184 @@
+h2 {
+  padding: 15px;
+}
+
+ol {
+  list-style: none;
+
+  counter-reset: item;
+}
+
+li {
+  margin-bottom: 5%;
+
+  font-size: 20px;
+  font-family: 'Helvetica', sans-serif;
+
+  animation: fade-in 1s;
+
+  counter-increment: item;
+}
+
+li:before {
+  display: inline-block;
+  width: 1.2em;
+  margin-right: 10px;
+  padding: 5px;
+
+  color: white;
+  text-align: center;
+
+  background-color: #9f86c0;
+  border-radius: 100%;
+
+  animation: pulse .7s ease-in;
+
+  content: counter(item);
+}
+
+input:focus, button:focus {
+  outline: none;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(0 0 0 / 0.7);
+  }
+
+  100% {
+    box-shadow: 0 0 0 10px rgb(0 0 0 / 0);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 100;
+  }
+}
+
+.fade {
+  animation: fade-in .5s;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.flex-column {
+  display: flex;
+  flex: 1;
+  flex-basis: 100%;
+  flex-direction: column;  
+}
+
+.center {
+  justify-content: center;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  padding: 10px;
+}
+
+#content {
+  width: 90%;
+  max-width: 1500px;
+  margin: 10vh auto;
+}
+
+#header-wrapper {
+  width: 100%;
+}
+
+#search-wrapper {
+  width: 100%;
+}
+
+#searchbar {
+  width: 40%;
+  padding: 5px;
+
+  color: black;
+  font-size: 30px; /*light-gray*/
+
+  background-color: #d3d3d3;
+  border: none;
+  border-radius: 5px;
+}
+
+#sendbutton {
+  padding: 5px 10px;
+
+  color: white;
+  font-weight: 600;
+  font-size: 30px;
+  text-align: center;
+
+  background-color: #9f86c0;
+  border: none;
+  border-radius: 5px;
+}
+
+#overall {
+  width: 80%;
+  margin-top: 10%;
+  padding: 10px;
+
+  background-color: #ff1493;
+  border-radius: 5px;
+}
+
+/* DONUT CHARTS */
+.a-chart {
+  --percent: 8;
+}
+
+.item {
+  display: block;
+}
+
+.item h2 {
+  width: 100%;
+
+  text-align: center;
+}
+
+svg {
+  display: block;
+
+  /* svg is auto display-inline*/
+  margin: auto;
+  overflow: visible;
+
+  -webkit-transform: rotate(-90deg);
+  transform: rotate(-90deg); 
+}
+
+.circle-animation {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+}
+
+.donut .circle-animation {
+  -webkit-animation: donut 1.3s ease-in-out forwards;
+  animation: donut 1.3s ease-in-out forwards;
+}
+
+@-webkit-keyframes donut {
+  to {
+    stroke-dashoffset: var(--percent);
+  }
+}
+
+@keyframes donut {
+  to {
+    stroke-dashoffset: var(--percent);
+  }
+}

@@ -4,20 +4,40 @@
   <head>
     <meta charset="utf-8">
     <meta name="description" content="STEP Capstone">
+    <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/analysis.css">
     <title>Song Analysis</title>
   </head>
 
   <body>
-    <h1>Enter a song name and artist name</h1>
+    <div id="content">
+        <div class="flex-row center">
+            <div id="header-wrapper">
+                <h1>Enter video name below:</h1>
+            </div>
+        </div>
 
-    <label for="video-name">Insert Video name</label>
-    <input type="text" placeholder="Video name" name="video-name"/>
+        <div class="flex-row center">
+            <div id="search-wrapper">
+                <input type="text" id="searchbar" />
+                <button id="sendbutton">Send</button>
+            </div>
+        </div>
 
-    <input type="submit" value="Submit" id="formSubmit" />
+        <div class="flex-row center">
+            <p></p>
+        </div>
 
-    <h1>Response</h1>
-    <div id="response"></div>
+        <div class="flex-row" id="middle-content">
+            <div class="flex-column">
+                <h2>Featured comments:</h2>
+                <ol id="list"></ol>
+            </div>
+            <div class="flex-column">
+                <div class="grid-container" id="charts"></div>
+            </div>
+        </div>
+    </div>
   </body>
   <script src="js/analysis.js"></script>
 </html>
