@@ -8,14 +8,14 @@ import java.io.Serializable;
  * Groups together analysis data for easy sending/reading from the 
  * backend to the front end
  */
-public class AnalysisGroup implements Serializable {
+public class VideoAnalysis implements Serializable {
   public final HashMap<String, String> perspectiveMap;
   public final NLPResult magnitudeAndScore;
   public final ArrayList<String> commentArray;
   public final String videoId;
   public final NameAndChannel videoInfo;
 
-  public AnalysisGroup(
+  public VideoAnalysis(
       HashMap<String, String> perspectiveMap,
       NLPResult magnitudeAndScore,
       ArrayList<String> commentArray,
