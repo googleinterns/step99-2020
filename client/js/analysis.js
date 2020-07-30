@@ -28,11 +28,12 @@ async function fetchResponse() {
 function renderingHandler(videoAnalysis) {
   const charts = document.getElementById('charts');
   const list = document.getElementById('list');
+  const card = document.getElementById('videocard-wrapper');
 
   removeAllChildNodes(charts);
   removeAllChildNodes(list);
+  removeAllChildNodes(card);
   renderDonutCharts(videoAnalysis.perspectiveMap);
- 
   const totalComments = renderComments(videoAnalysis.commentArray);
   const commentsRenderTime = totalComments * COMMENT_APPEARANCE_TIME;
   const sentiment = determineSentiment(videoAnalysis.magnitudeAndScore.magnitude,
@@ -53,6 +54,45 @@ function renderDonutCharts(map) {
       addDonutChart(key, map[key]);
     }
   }
+}
+
+/**
+ * Creates the card that displays on a result match
+ *
+ * @param {String} id the id of the wanted video
+ * @param {String} name the name of the wanted video
+ * @param {String} channel the name of the wanted channel
+ */
+function createCard(id, name, channel) {
+  const el = document.getElementById('videocard-wrapper');
+
+  const card = document.createElement('div');
+  card.setAttribute('id', 'videocard');
+
+  const img = document.createElement('img');
+  img.classList = 'card-image';
+  img.setAttribute('src', `https://img.youtube.com/vi/${id}/sddefault.jpg`);
+  card.appendChild(img);
+
+  const link = document.createElement('a');
+  link.setAttribute('href', `https://www.youtube.com/watch?v=${id}`);
+  link.setAttribute('target', '_blank');
+
+  const title = document.createElement('h3');
+  title.setAttribute('id', 'card-title');
+  title.innerText = name;
+  link.appendChild(title);
+
+  const videoInfo = document.createElement('div');
+  videoInfo.appendChild(link);
+
+  const author = document.createElement('p');
+  author.setAttribute('id', 'card-author');
+  author.innerText = channel;
+  videoInfo.appendChild(author);
+
+  card.appendChild(videoInfo);
+  el.appendChild(card);
 }
 
 /**
@@ -95,7 +135,7 @@ function determineSentiment(magnitude, score) {
   } else {
     tone = 'MIXED';
   }
-
+  
   return isClear + tone;
 }
 
@@ -108,6 +148,16 @@ function removeAllChildNodes(parent) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild);
   }
+}
+
+/**
+ * Toggles the comment header
+ *
+ */
+function showCommentHeader() {
+  const el = document.getElementById('commentHeader');
+  el.classList.toggle('hidden', false);
+  el.classList.toggle('fade', true);
 }
 
 /**

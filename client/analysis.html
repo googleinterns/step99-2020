@@ -11,7 +11,21 @@
 
   <body>
     <div id="content">
-        <div class="flex-row center">
+
+        <div id="opening" class="center">
+            <div id="opening-wrapper">
+                <h1>Youtube Comment Analysis.</h1>
+                <ul>
+                   <li>Enter a video name to see what people think!</li>
+                    <li>Click <a href="#">here</a> to learn how I analyze the comments.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="flex-row center" id="upper-content">
+        </div>
+        
+        <div class = "flex-row center">
             <div id="header-wrapper">
                 <h1>Enter video name below:</h1>
             </div>
@@ -24,14 +38,12 @@
             </div>
         </div>
 
-        <div class="flex-row center">
-            <p></p>
-        </div>
-
         <div class="flex-row" id="middle-content">
             <div class="flex-column">
-                <h2>Featured comments:</h2>
+                <h2 class="hidden" id="commentHeader">Featured comments:</h2>
                 <ol id="list"></ol>
+                <div id="videocard-wrapper">
+                </div>
             </div>
             <div class="flex-column">
                 <div class="grid-container" id="charts"></div>
