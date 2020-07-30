@@ -1,3 +1,7 @@
+const COMMENT_APPEARANCE_TIME = 1500;
+const COMMENT_TO_STOP_AT = 5;
+const FEEDBACK_APPEARANCE_TIME = 1500;
+
 window.onload = function() {
   // Listen for submission click
   const formSubmit = document.getElementById('sendbutton');
@@ -10,21 +14,27 @@ window.onload = function() {
  */
 async function fetchResponse() {
   const param = document.getElementById('searchbar').value;
+  if (param == null) {
+    return;
+  }
+
   try {
-    // see caching.js for this function
     const response = await getData(`/api/analysis?name=${param}`);
-    populationHandler(response);
-  } catch (error) {
-    console.log(error);
+  } catch (e) {
+    console.error(e);
+  }
+  if (response) {
+    renderingHandler(response);
   }
 }
 
 /**
  * Handles populating all elements on the screen
  *
- * @param {object} json the json object from backend
+ * @param {object} videoAnalysis the object returned from the HTTP request
+ * which contains all of the data.
  */
-function populationHandler(json) {
+function renderingHandler(videoAnalysis) {
   const charts = document.getElementById('charts');
   const list = document.getElementById('list');
   const card = document.getElementById('videocard-wrapper');
@@ -32,23 +42,26 @@ function populationHandler(json) {
   removeAllChildNodes(charts);
   removeAllChildNodes(list);
   removeAllChildNodes(card);
-  populateDonutCharts(json);
-  showCommentHeader();
-  const time = populateComments(json);
-  determineOverall(json, time*1500);
+  renderDonutCharts(videoAnalysis.perspectiveMap);
+  const totalComments = renderComments(videoAnalysis.commentArray);
+  const commentsRenderTime = totalComments * COMMENT_APPEARANCE_TIME;
+  const sentiment = determineSentiment(videoAnalysis.magnitudeAndScore.magnitude,
+      videoAnalysis.magnitudeAndScore.score);
+  setTimeout(() => {
+    addFeedbackResult(sentiment);
+    createCard(videoAnalysis.videoId, videoAnalysis.videoInfo.name, videoAnalysis.videoInfo.channel);
+  }, commentsRenderTime + FEEDBACK_APPEARANCE_TIME);
 }
 
 /**
  * Puts the charts on the screen
  *
- * @param {object} json the json object from backend
+ * @param {Map<string, number>} map the map from the videoAnalysis object
  */
-function populateDonutCharts(json) {
-  const map = json.perspectiveMap;
+function renderDonutCharts(map) {
   for (const key in map) {
     if (Object.prototype.hasOwnProperty.call(map, key)) {
-      // Convert to string for type compatibility
-      addDonutChart(key, (100 - map[key]*100).toString());
+      addDonutChart(key, map[key]);
     }
   }
 }
@@ -56,13 +69,11 @@ function populateDonutCharts(json) {
 /**
  * Creates the card that displays on a result match
  *
- * @param {object} json the json object from backend
+ * @param {String} id the id of the wanted video
+ * @param {String} name the name of the wanted video
+ * @param {String} channel the name of the wanted channel
  */
-function createCard(json) {
-  const id = json.videoId;
-  const name = json.videoInfo.name;
-  const channel = json.videoInfo.channel;
-
+function createCard(id, name, channel) {
   const el = document.getElementById('videocard-wrapper');
 
   const card = document.createElement('div');
@@ -73,8 +84,6 @@ function createCard(json) {
   img.setAttribute('src', `https://img.youtube.com/vi/${id}/sddefault.jpg`);
   card.appendChild(img);
 
-  const videoInfo = document.createElement('div');
-
   const link = document.createElement('a');
   link.setAttribute('href', `https://www.youtube.com/watch?v=${id}`);
   link.setAttribute('target', '_blank');
@@ -82,8 +91,9 @@ function createCard(json) {
   const title = document.createElement('h3');
   title.setAttribute('id', 'card-title');
   title.innerText = name;
-
   link.appendChild(title);
+
+  const videoInfo = document.createElement('div');
   videoInfo.appendChild(link);
 
   const author = document.createElement('p');
@@ -98,31 +108,29 @@ function createCard(json) {
 /**
  * Puts the comments on the screen
  *
- * @param {object} json the json object from backend
- * @returns {number} the stop index so that overall knows when to come in
+ * @param {Array} array the comment array from the json response
+ * @returns {number} the total number of comments rendered
  */
-function populateComments(json) {
-  const array = json.commentArray;
-  const stopIndex = array.length < 5 ? array.length : 5;
-  for (let i = 0; i < stopIndex; i++) {
+function renderComments(array) {
+  const totalComments = Math.min(COMMENT_TO_STOP_AT, array.length);
+  for (let i = 0; i < totalComments; i++) {
+    const filteredValue = array[i].replace('\n', '');
     setTimeout(() => {
-      // removes all linebreaks
-      addListElement(array[i].replace('\n', ''));
-    }, (i+1) * 1500);
+      addListElement(filteredValue);
+    }, (i+1) * COMMENT_APPEARANCE_TIME);
   }
-  // so that the overall knows when to come in
-  return stopIndex+1;
+
+  return totalComments;
 }
 
 /**
  * Determines the overall sentiment and adds it to the screen
  *
- * @param {object} json the json object from backend
- * @param {number} time the time for the text to come in
+ * @param {number} magnitude the magnitude returned by Perspective API
+ * @param {number} score the score returned by Perspective API
+ * @returns {string} a string describing the magnitude and score in words
  */
-function determineOverall(json, time) {
-  const magnitude = json.magnitudeAndScore.magnitude;
-  const score = json.magnitudeAndScore.score;
+function determineSentiment(magnitude, score) {
   let isClear = '';
   let tone = '';
 
@@ -137,11 +145,8 @@ function determineOverall(json, time) {
   } else {
     tone = 'MIXED';
   }
-
-  setTimeout(() => {
-    addFeedbackResult(isClear + tone);
-    createCard(json);
-  }, time);
+  
+  return isClear + tone;
 }
 
 /**
@@ -161,8 +166,8 @@ function removeAllChildNodes(parent) {
  */
 function showCommentHeader() {
   const el = document.getElementById('commentHeader');
-  el.classList.toggle('hidden');
-  el.classList.toggle('fade');
+  el.classList.toggle('hidden', false);
+  el.classList.toggle('fade', true);
 }
 
 /**
@@ -197,18 +202,23 @@ function addFeedbackResult(result) {
  * Adds a donut chart
  *
  * @param {string} str the header string of the circle
- * @param {string} percent the amount the circle will be filled
+ * @param {number} percentFull the amount the circle will be filled
  */
-function addDonutChart(str, percent) {
+function addDonutChart(str, percentFull) {
   const div = document.createElement('div');
+
+  // Conversion math for CSS
+  const percentRemaining = 100 - percentFull*100;
 
   div.setAttribute('id', 'a-chart');
   div.className = 'item donut';
-  div.style.setProperty('--percent', percent);
+  div.style.setProperty('--percent', percentRemaining.toString());
 
-  const percentString = (100 - parseInt(percent)).toString();
+  // Convert back to actual percentage
+  const percentString = (percentFull*100).toString();
+
   const header = document.createElement('h2');
-  header.innerText = str + ': ' + percentString.substring(0, 2) + '%';
+  header.innerText = `${str}: ${percentString.substring(0, 2)}%`;
   div.appendChild(header);
 
   const svg = createSVGElement('svg');
@@ -225,6 +235,8 @@ function addDonutChart(str, percent) {
 
 /**
  * builds the circle parts of the donut charts
+ *
+ * @returns {SVGElement} the circle element
  */
 function buildCircle() {
   const g = createSVGElement('g');
@@ -240,12 +252,12 @@ function buildCircle() {
 
   const outsideCircle = createSVGElement('circle');
 
-  outsideCircle.setAttribute('class', 'circle_animation');
+  outsideCircle.setAttribute('class', 'circle-animation');
   outsideCircle.setAttribute('r', '70');
   outsideCircle.setAttribute('cx', '50%');
   outsideCircle.setAttribute('cy', '50%');
   outsideCircle.setAttribute('stroke-width', '25');
-  outsideCircle.setAttribute('stroke', '#ff1493'); // ff073a is good too
+  outsideCircle.setAttribute('stroke', '#ff1493');
   outsideCircle.setAttribute('fill', 'none');
   outsideCircle.setAttribute('pathLength', '100');
 
@@ -258,9 +270,45 @@ function buildCircle() {
 /**
  * Helper function that creates an SVG element
  *
+ * @returns {SVGElement} the wanted SVG element
+ *
  * @param {string} el the string for the svg element
+ * @returns {SVGElement} the svg element
  */
 function createSVGElement(el) {
   return document.createElementNS('http://www.w3.org/2000/svg', el);
+}
+
+/**
+ * Toggles the display class for the lightbox
+ *
+ * @param {boolean} isLightboxClosed determines whether or not the lightbox is open
+ */
+function toggleLightboxVisibility(isLightboxClosed) {
+  if (isLightboxClosed === true) {
+    showLightbox();
+  } else if (isLightboxClosed === false) {
+    hideLightbox();
+  } else {
+    alert('Invalid parameter for toggleLightboxVisibility');
+  }
+}
+
+/**
+ * Hides the lightbox
+ *
+ */
+function hideLightbox() {
+  const target = document.getElementById('info');
+  target.classList.add('hide-lightbox');
+}
+
+/**
+ * Shows the lightbox
+ *
+ */
+function showLightbox() {
+  const target = document.getElementById('info');
+  target.classList.remove('hide-lightbox');
 }
 

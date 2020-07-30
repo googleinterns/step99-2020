@@ -41,8 +41,8 @@ public class YoutubeRequest {
 
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     int response = con.getResponseCode();
-    if (response > 400) {
-      return "unreadable";
+    if (response != 200) {
+      throw new IOException("not a video id");
     }
 
     BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
