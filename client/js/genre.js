@@ -21,4 +21,3 @@ async function displayMusicGenre() {
   const genreCount = await response.text();
   genreBlock.innerHTML = genreCount;
 }
-
