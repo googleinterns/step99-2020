@@ -11,20 +11,21 @@ const GRAPH_HEIGHT = 100;
 const BAR_PERCENT_FILL = 0.7;
 const BAR_PERCENT_PADDING = 1 - BAR_PERCENT_FILL;
 
+const GRAPH_LEFT_PADDING = 2.5;
+
 /**
  * creates SVG bar chart given chart values
- * @param {int[]} chartValues
+ * @param {number[]} chartValues
  */
 function createBarChart(chartValues) {
   const maxChartValues = Math.max(...chartValues);
   const barContainerHeight = GRAPH_HEIGHT / chartValues.length;
 
   const barThickness = BAR_PERCENT_FILL * barContainerHeight;
-  const BAR_UNIT_LENGTH = 100 / maxChartValues;
+  const barUnitLength = 100 / maxChartValues;
 
   // top graph padding depends on bar padding
-  const GRAPH_TOP_PADDING = (BAR_PERCENT_PADDING / 2) * barContainerHeight;
-  const GRAPH_LEFT_PADDING = 2.5;
+  const graphTopPadding = (BAR_PERCENT_PADDING / 2) * barContainerHeight;
 
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 100 100');
@@ -37,10 +38,10 @@ function createBarChart(chartValues) {
 
     const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     g.appendChild(bar);
-    bar.setAttribute('width', BAR_UNIT_LENGTH * chartValues[i]);
+    bar.setAttribute('width', barUnitLength * chartValues[i]);
     bar.setAttribute('height', barThickness);
     bar.setAttribute('x', GRAPH_LEFT_PADDING);
-    bar.setAttribute('y', GRAPH_TOP_PADDING + barContainerHeight * i);
+    bar.setAttribute('y', graphTopPadding + barContainerHeight * i);
   }
 }
 
