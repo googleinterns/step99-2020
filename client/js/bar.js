@@ -3,6 +3,11 @@
  */
 
 import {SVG_NS} from '/js/util.js';
+import {GENRE_ANALYSIS} from '/js/genre.js';
+
+console.log(GENRE_ANALYSIS);
+// const GENRE_DATA = await import('/js/genre.js');
+
 
 // hard coded data for bar chart for now
 const CHART_VALUES = [1, 3, 1, 2];

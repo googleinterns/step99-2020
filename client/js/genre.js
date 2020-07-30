@@ -21,3 +21,4 @@ async function fetchMusicGenre() {
   return JSON.parse(genreCount);
 }
 
+export const GENRE_ANALYSIS = fetchMusicGenre();
