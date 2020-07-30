@@ -92,7 +92,7 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
     res.setContentType("text/html");
     res.getWriter().printf("<h1>the access token for %s is %s</h1>", getServiceName(), accessToken);
     
-    // store access token in a session as youtube_access_token or spotify_access_token
+    // store access token in a session as youtube-access-token
     HttpSession session = req.getSession();
     session.setAttribute(getSessionTokenKey(), accessToken.toString());
   }
