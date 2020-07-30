@@ -7,14 +7,9 @@ import com.google.musicanalysis.api.youtube.*;
 import com.google.musicanalysis.cache.*;
 import com.google.musicanalysis.types.*;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -28,7 +23,7 @@ public class AnalysisServlet extends HttpServlet {
       throws ServletException, IOException {
 
     String input = req.getParameter("name");
-    
+
     assert input == null : "Something went wrong with sending to backend.";
 
     // Use like this: {url_parameter, value}
@@ -64,24 +59,11 @@ public class AnalysisServlet extends HttpServlet {
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
 
-    try {
-      AnalysisCache cache = new AnalysisCache();
-      cache.open();
-      cache.add(
-          "example key",
-          new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
-      cache.close();
-    } catch (InvalidKeyException
-        | IllegalBlockSizeException
-        | BadPaddingException
-        | NoSuchAlgorithmException
-        | NoSuchPaddingException e) {
-      e.printStackTrace();
-    }
+    AnalysisGroup servletResults =
+        new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo);
+    AnalysisCache.add(input, servletResults);
 
-    String json =
-        convertToJsonUsingGson(
-            new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
+    String json = convertToJsonUsingGson(servletResults);
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
