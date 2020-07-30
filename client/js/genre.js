@@ -5,6 +5,7 @@
 
 /**
  * fetches and returns genre analysis object from /api/youtube
+ *
  * @returns {JSON object} of youtube genreData and stats
  */
 async function fetchMusicGenre() {

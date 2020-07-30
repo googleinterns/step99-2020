@@ -5,18 +5,12 @@
 import {SVG_NS} from '/js/util.js';
 import {GENRE_ANALYSIS} from '/js/genre.js';
 
-console.log(GENRE_ANALYSIS);
-GENRE_ANALYSIS
-  .then((DATA) => createBarChart(Object.values(DATA.genreData), Object.keys(DATA.genreData)));
-
-// // hard coded data for bar chart for now
-// const CHART_VALUES = [1, 3, 1, 2];
-// const CHART_CATEGORIES = [
-//   'Pop Music',
-//   'Other Music',
-//   'Electronic Music',
-//   'Music of Latin America',
-// ];
+GENRE_ANALYSIS.then((DATA) => {
+  createBarChart(
+      Object.values(DATA.genreData),
+      Object.keys(DATA.genreData),
+      DATA.maxGenreCount);
+});
 
 const GRAPH_HEIGHT = 100;
 // each bar container is composed of bar padding and fill
@@ -27,15 +21,17 @@ const GRAPH_LEFT_PADDING = 2.5;
 
 /**
  * creates SVG bar chart given chart values and categories
+ *
  * @param {number[]} chartValues array of bar values/lengths
  * @param {string[]} chartCategories array of bar categories/labels
+ * @param {number} maxCharVal largest value of chartValues
+ * @param maxChartVal
  */
-function createBarChart(chartValues, chartCategories) {
-  const maxChartValues = Math.max(...chartValues);
+function createBarChart(chartValues, chartCategories, maxChartVal) {
   const barContainerHeight = GRAPH_HEIGHT / chartValues.length;
 
   const barThickness = BAR_PERCENT_FILL * barContainerHeight;
-  const barUnitLength = 100 / maxChartValues;
+  const barUnitLength = 100 / maxChartVal;
 
   // top graph padding depends on bar padding
   const graphTopPadding = (BAR_PERCENT_PADDING / 2) * barContainerHeight;
