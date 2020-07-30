@@ -31,13 +31,13 @@ function createHeatMapValues(data, dataLength) {
   // heat map should have equal length and width
   const numRows = Math.ceil(Math.sqrt(dataLength));
 
-  const HeatMapValues = [];
+  const heatMapValues = [];
   let row;
   for (let i = 0; i < dataLength; i += numRows) {
     row = new HeatRow(data.slice(i, i + numRows));
-    HeatMapValues.push(row);
+    heatMapValues.push(row);
   }
-  return HeatMapValues.reverse();
+  return heatMapValues.reverse();
 }
 
 /**
