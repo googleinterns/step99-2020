@@ -2,7 +2,7 @@
  * @file constructs bar graph from scratch
  */
 
-import {SVG_NS} from '../util.js';
+import {SVG_NS} from '/js/util.js';
 
 // hard coded data for bar chart for now
 const CHART_VALUES = [1, 3, 1, 2];
