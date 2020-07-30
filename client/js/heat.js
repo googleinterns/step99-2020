@@ -1,7 +1,7 @@
 class HeatRow {
   /**
    *
-   * @param {int[]} data The array of 0s and 1s for a row in a heat map
+   * @param {number[]} data The array of 0s and 1s for a row in a heat map
    */
   constructor(data) {
     this.data = data;
@@ -23,8 +23,8 @@ for (let i = 0; i < LIKED_MUSIC_HIST.length; i++) {
 
 /**
  * turns array of data into heat map
- * @param {int[]} data array of all 0s/1s heat map data
- * @param {int} dataLength size of data array
+ * @param {number[]} data array of all 0s/1s heat map data
+ * @param {number} dataLength size of data array
  * @returns {HeatRow[]} square matrix of HeatMapValues for HeatMap
  */
 function createHeatMapValues(data, dataLength) {
@@ -42,8 +42,8 @@ function createHeatMapValues(data, dataLength) {
 
 /**
  * renders heat map onto html
- * @param {int[]} data array of all 0s/1s heat map data
- * @param {int} dataLength size of data array
+ * @param {number[]} data array of all 0s/1s heat map data
+ * @param {number} dataLength size of data array
  */
 function createHeatMap(data, dataLength) {
   const options = {
