@@ -33,7 +33,7 @@ function createHeatMapValues(data, dataLength) {
 
   const HeatMapValues = [];
   let row;
-  for (let i = 0; i < dataLength; i = i + numRows) {
+  for (let i = 0; i < dataLength; i += numRows) {
     row = new HeatRow(data.slice(i, i + numRows));
     HeatMapValues.push(row);
   }
