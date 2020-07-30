@@ -58,20 +58,20 @@ public class AnalysisServlet extends HttpServlet {
     nameArgs.put("part", "snippet");
     nameArgs.put("id", videoId);
     String nameJson = new YoutubeRequest("videos", nameArgs).getResult();
-    NameAndChannel videoInfo = getNameAndChannel(nameJson);
+    VideoInfo videoInfo = getVideoInfo(nameJson);
 
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
 
     String json =
         convertToJsonUsingGson(
-            new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
+            new VideoAnalysis(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
 
   /** @param arr the array that will be converted to json */
-  private String convertToJsonUsingGson(AnalysisGroup group) {
+  private String convertToJsonUsingGson(VideoAnalysis group) {
     Gson gson = new Gson();
     String json = gson.toJson(group);
     return json;
@@ -155,21 +155,21 @@ public class AnalysisServlet extends HttpServlet {
     return perspectiveResults;
   }
 
-  private NameAndChannel getNameAndChannel(String response) {
+  private VideoInfo getVideoInfo(String response) {
 
     // Accessing the items JSON Array
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
     JsonArray itemsArray = jObject.getAsJsonArray("items");
-    JsonElement el = itemsArray.get(0);
+    JsonElement firstVideo = itemsArray.get(0);
 
     // Grabbing the name and channel
-    JsonObject object = el.getAsJsonObject();
-    JsonObject data = object.getAsJsonObject("snippet");
-    JsonElement videoName = data.get("title");
-    JsonElement channelName = data.get("channelTitle");
+    JsonObject object = firstVideo.getAsJsonObject();
+    JsonObject videoData = object.getAsJsonObject("snippet");
+    JsonElement videoName = videoData.get("title");
+    JsonElement channelName = videoData.get("channelTitle");
 
-    return new NameAndChannel(
+    return new VideoInfo(
         videoName.toString().replace("\"", ""), channelName.toString().replace("\"", ""));
   }
 
@@ -184,8 +184,8 @@ public class AnalysisServlet extends HttpServlet {
     for (JsonElement el : itemsArray) {
       // Grabbing each item and adding to a result array
       JsonObject object = el.getAsJsonObject();
-      JsonObject data = object.getAsJsonObject("id");
-      JsonElement videoId = data.get("videoId");
+      JsonObject idObject = object.getAsJsonObject("id");
+      JsonElement videoId = idObject.get("videoId");
 
       if (videoId != null) {
         searchResults.add(videoId.toString().replace("\"", ""));
