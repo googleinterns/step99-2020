@@ -6,17 +6,17 @@ import {SVG_NS} from '/js/util.js';
 import {GENRE_ANALYSIS} from '/js/genre.js';
 
 console.log(GENRE_ANALYSIS);
-// const GENRE_DATA = await import('/js/genre.js');
+GENRE_ANALYSIS
+  .then((DATA) => createBarChart(Object.values(DATA.genreData), Object.keys(DATA.genreData)));
 
-
-// hard coded data for bar chart for now
-const CHART_VALUES = [1, 3, 1, 2];
-const CHART_CATEGORIES = [
-  'Pop Music',
-  'Other Music',
-  'Electronic Music',
-  'Music of Latin America',
-];
+// // hard coded data for bar chart for now
+// const CHART_VALUES = [1, 3, 1, 2];
+// const CHART_CATEGORIES = [
+//   'Pop Music',
+//   'Other Music',
+//   'Electronic Music',
+//   'Music of Latin America',
+// ];
 
 const GRAPH_HEIGHT = 100;
 // each bar container is composed of bar padding and fill
@@ -65,5 +65,3 @@ function createBarChart(chartValues, chartCategories) {
     category.textContent = chartCategories[i];
   }
 }
-
-createBarChart(CHART_VALUES, CHART_CATEGORIES);
