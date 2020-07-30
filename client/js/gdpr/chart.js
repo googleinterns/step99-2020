@@ -62,6 +62,7 @@ export class GdprChart extends HTMLElement {
 
     for (const history of histories.values()) {
       for (let row = 0; row < dates.length; row++) {
+        // +1 b/c first row is header row
         this.rows[row + 1].push(history[row] || null);
       }
     }
@@ -171,6 +172,8 @@ export class GdprChart extends HTMLElement {
     let index = 0;
 
     for (const history of this.histories.values()) {
+      // each track is given one of 24 colours, which are spaced 15 degrees
+      // apart in hue
       const hue = index * 15 % 360;
       const color = `hsl(${hue},50%,33%)`;
       const series = this.createSeries(history, color);
@@ -206,7 +209,7 @@ export class GdprChart extends HTMLElement {
     // find segments of history that don't contain null and create a 'run' for
     // each one
     while (end < history.length) {
-    // go until we find a non-null point, which is the beginning of a run
+      // go until we find a non-null point, which is the beginning of a run
       if (history[start] === null) {
         start++;
         end = start;
@@ -220,7 +223,7 @@ export class GdprChart extends HTMLElement {
       }
 
       if (end > start) {
-      // all of the points between start and end are non-null, create run
+        // all of the points between start and end are non-null, create run
         series.append(this.createRun(history, start, end));
         start = end;
       }
