@@ -15,12 +15,17 @@ window.onload = function() {
 async function fetchResponse() {
   const param = document.getElementById('searchbar').value;
   if (param == null) {
-      return;
+    return;
   }
-  const videoQuery = document.getElementById('searchbar').value;
-  const response = await fetch(`/api/analysis?name=${videoQuery}`);
-  const responseJson = await response.json();
-  renderingHandler(responseJson);
+
+  try {
+    const response = await getData(`/api/analysis?name=${param}`);
+  } catch (e) {
+    console.error(e);
+  }
+  if (response) {
+    renderingHandler(response);
+  }
 }
 
 /**
