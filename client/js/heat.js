@@ -1,4 +1,4 @@
-class HeatRow {
+class HeatMapRow {
   /**
    *
    * @param {number[]} data The array of 0s and 1s for a row in a heat map
@@ -25,7 +25,7 @@ for (let i = 0; i < LIKED_MUSIC_HIST.length; i++) {
  * turns array of data into heat map
  * @param {number[]} data array of all 0s/1s heat map data
  * @param {number} dataLength size of data array
- * @returns {HeatRow[]} square matrix of HeatMapValues for HeatMap
+ * @returns {HeatMapRow[]} square matrix of HeatMapValues for HeatMap
  */
 function createHeatMapValues(data, dataLength) {
   // heat map should have equal length and width
@@ -34,7 +34,7 @@ function createHeatMapValues(data, dataLength) {
   const heatMapValues = [];
   let row;
   for (let i = 0; i < dataLength; i += numRows) {
-    row = new HeatRow(data.slice(i, i + numRows));
+    row = new HeatMapRow(data.slice(i, i + numRows));
     heatMapValues.push(row);
   }
   return heatMapValues.reverse();
