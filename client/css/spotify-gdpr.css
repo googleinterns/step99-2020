@@ -4,6 +4,11 @@ body {
   background-size: 24rem;
 }
 
-#get-started {
-  padding: 1rem 0;
+#btn-get-started, #btn-data-upload {
+  display: block;
+  margin: 1rem 0;
+}
+
+#input-data-upload {
+  display: none;
 }
