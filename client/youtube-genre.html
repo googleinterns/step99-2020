@@ -7,14 +7,13 @@
     <link rel="stylesheet" href="css/bar.css">
 
   </head>
-  <body>
-    <div id="content">
-      <h1>What music do you listen to on youtube?</h1>
-      <div id="numVideoForm">
-        <p>
-          <input type="submit" onclick="displayMusicGenre()"/>
-        </p>
-      </div>
+  <body onload='displayMusicGenre()'>
+    <div class="title hero" id="banner"> 
+      <h1>What music do you listen to on YouTube? </h1>
+      <p>
+        <button type="submit" onclick="displayMusicGenre()" class="btn"/>Find Out!</button>
+      </p>
+      <div id="genres"></div>  
     </div>
     <main>
       <div class='hero'>
