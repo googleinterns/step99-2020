@@ -96,6 +96,7 @@ public class YoutubeServlet extends HttpServlet {
         JsonObject likedVideoRes;
         JsonArray videos;
         YoutubeGenres genreAnalysis = new YoutubeGenres();
+        // needed to keep track of likedMusicHistory for heat map
         int videosRetrieved = 0;
 
         // next Page Token must be an empty string for first http call
@@ -112,8 +113,8 @@ public class YoutubeServlet extends HttpServlet {
             }
 
             videos = likedVideoRes.getAsJsonArray("items");
-            videosRetrieved = 
-                genreAnalysis.calculateMusicCount(videosRetrieved, videos);
+            videosRetrieved = genreAnalysis
+                                .calculateMusicCount(videosRetrieved, videos);
 
             nextPageToken = getNextPageToken(likedVideoRes);
         }

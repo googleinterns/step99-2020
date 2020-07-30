@@ -23,6 +23,8 @@ public class YoutubeGenres {
   public HashMap<String, Integer> genreData = new HashMap<String, Integer>();
   public int totalMusic = 0;
   public int maxGenreCount = 0;
+  // element of value x means xth latest video is music
+  // needed for heat map
   public ArrayList<Integer> likedMusicHistory = new ArrayList<Integer>();
 
   public YoutubeGenres() {
@@ -32,7 +34,9 @@ public class YoutubeGenres {
 /**
  * parses through youtube liked videos json array,
  * updates hash map to contain frequency count of each music genre
+ * @param firstVideoCount the number of videos retrieved before this http call
  * @param videos json array of youtube liked videos
+ * @return number of videos retrieved so far
  */
   protected int calculateMusicCount(int firstVideoCount, JsonArray videos) {
     for (int i = 0; i < videos.size(); i++) {
@@ -69,8 +73,9 @@ public class YoutubeGenres {
                 continue;
             }
         }
+
         if (isMusic) {
-          // likedMusicHistory records what video is music
+          // likedMusicHistory records video numbers that are music
           likedMusicHistory.add(firstVideoCount + i);
 
           if (totalSubgenres == 0) {
@@ -78,7 +83,6 @@ public class YoutubeGenres {
             this.updateGenre("Other music");            
           }
         }
-
     }
     return firstVideoCount + videos.size();
   }
