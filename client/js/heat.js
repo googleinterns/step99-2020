@@ -14,12 +14,24 @@ const TOTAL_LIKED = 13;
 const LIKED_MUSIC_HIST = [1, 4, 7];
 
 // ith value of 1 means ith latest video is music
-const likedMusicBinaryHist = [...Array(TOTAL_LIKED)].fill(0);
-for (let i = 0; i < LIKED_MUSIC_HIST.length; i++) {
-  const el = LIKED_MUSIC_HIST[i];
-  likedMusicBinaryHist[el] = 1;
-}
+const likedMusicBinaryHist = makeBinaryArr(LIKED_MUSIC_HIST, TOTAL_LIKED);
 
+/**
+ * converts an array to binary arr
+ * @param {number[]} arr values will be indices that hold 1 in output arr
+ * @param {number[]} total size of output arr
+ * @returns binary arr of size total where ith value 1
+ * corresponds to value i in input arr
+ */
+function makeBinaryArr(arr, total) {
+  // first fill with 0s then 1s
+  const binaryArr = [...Array(total)].fill(0);
+  for (let i = 0; i < arr.length; i++) {
+    const el = arr[i];
+    binaryArr[el] = 1;
+  }
+  return binaryArr;
+}
 
 /**
  * turns array of data into heat map
