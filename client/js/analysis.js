@@ -192,12 +192,12 @@ function buildCircle() {
 
   const outsideCircle = createSVGElement('circle');
 
-  outsideCircle.setAttribute('class', 'circle_animation');
+  outsideCircle.setAttribute('class', 'circle-animation');
   outsideCircle.setAttribute('r', '70');
   outsideCircle.setAttribute('cx', '50%');
   outsideCircle.setAttribute('cy', '50%');
   outsideCircle.setAttribute('stroke-width', '25');
-  outsideCircle.setAttribute('stroke', '#ff1493'); // ff073a is good too
+  outsideCircle.setAttribute('stroke', '#ff1493');
   outsideCircle.setAttribute('fill', 'none');
   outsideCircle.setAttribute('pathLength', '100');
 
@@ -209,6 +209,8 @@ function buildCircle() {
 
 /**
  * Helper function that creates an SVG element
+ *
+ * @returns {SVGElement} the wanted SVG element
  *
  * @param {string} el the string for the svg element
  * @returns {SVGElement} the svg element

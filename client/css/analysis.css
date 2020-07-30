@@ -106,8 +106,6 @@ input:focus, button:focus {
   padding: 5px;
 
   color: black;
-
-  
   font-size: 30px; /*light-gray*/
 
   background-color: #d3d3d3;
@@ -138,7 +136,7 @@ input:focus, button:focus {
 }
 
 /* DONUT CHARTS */
-#a-chart {
+.a-chart {
   --percent: 8;
 }
 
@@ -163,12 +161,12 @@ svg {
   transform: rotate(-90deg); 
 }
 
-.circle_animation {
+.circle-animation {
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
 }
 
-.donut .circle_animation {
+.donut .circle-animation {
   -webkit-animation: donut 1.3s ease-in-out forwards;
   animation: donut 1.3s ease-in-out forwards;
 }
