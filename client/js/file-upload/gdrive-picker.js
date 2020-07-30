@@ -1,3 +1,4 @@
+// Drive API is free to use, no need to hide API key
 const apiKey = 'AIzaSyC3wEaP6u8f6yKjraSz_V0rnVYKqc5BvG4';
 // eslint-disable-next-line max-len
 const clientId = '343396465743-1hhob86pkvernjn21l5ui38sl92461cd.apps.googleusercontent.com';
