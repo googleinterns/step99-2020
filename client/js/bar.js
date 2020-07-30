@@ -5,19 +5,12 @@
 import {SVG_NS} from '/js/util.js';
 import {GENRE_ANALYSIS} from '/js/genre.js';
 
-GENRE_ANALYSIS.then((DATA) => {
-  createBarChart(
-      Object.values(DATA.genreData),
-      Object.keys(DATA.genreData),
-      DATA.maxGenreCount);
-});
-
 const GRAPH_HEIGHT = 100;
+const GRAPH_LEFT_PADDING = 2.5;
+
 // each bar container is composed of bar padding and fill
 const BAR_PERCENT_FILL = 0.7;
 const BAR_PERCENT_PADDING = 1 - BAR_PERCENT_FILL;
-
-const GRAPH_LEFT_PADDING = 2.5;
 
 /**
  * creates SVG bar chart given chart values and categories
@@ -61,3 +54,10 @@ function createBarChart(chartValues, chartCategories, maxChartVal) {
     category.textContent = chartCategories[i];
   }
 }
+
+GENRE_ANALYSIS.then((DATA) => {
+  createBarChart(
+      Object.values(DATA.genreData),
+      Object.keys(DATA.genreData),
+      DATA.maxGenreCount);
+});

@@ -1,7 +1,9 @@
 /**
- * fetches youtube api calls from YoutubeServlet.java
+ * @file fetches youtube api calls from YoutubeServlet.java
  * and displays on youtube-genre.html
  */
+
+document.body.onload = fetchMusicGenre();
 
 /**
  * fetches and returns genre analysis object from /api/youtube
