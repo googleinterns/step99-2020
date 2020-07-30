@@ -9,9 +9,9 @@
  */
 async function fetchMusicGenre() {
   // keep track of num_videos in URL w/o reload
-  history.pushState('', '', `youtube-genre.html`);
+  history.pushState('', '', 'youtube-genre.html');
 
-  const response = await fetch(`/api/youtube`);
+  const response = await fetch('/api/youtube');
   if (response.status == 401) {
     // no oauth login so redirect to new page
     window.open('/api/oauth/login/youtube');
