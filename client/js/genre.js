@@ -3,12 +3,11 @@
  * and displays on youtube-genre.html
  */
 
-const genreBlock = document.getElementById('genres');
-
 /**
- * fetches genre count hashmap from /api/youtube and updates html
+ * fetches and returns genre analysis object from /api/youtube
+ * @returns {JSON object} of youtube genreData and stats
  */
-async function displayMusicGenre() {
+async function fetchMusicGenre() {
   // keep track of num_videos in URL w/o reload
   history.pushState('', '', `youtube-genre.html`);
 
@@ -19,6 +18,6 @@ async function displayMusicGenre() {
   }
 
   const genreCount = await response.text();
-  genreBlock.innerHTML = genreCount;
+  return JSON.parse(genreCount);
 }
 
