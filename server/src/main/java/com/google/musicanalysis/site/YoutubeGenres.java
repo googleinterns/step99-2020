@@ -22,6 +22,7 @@ public class YoutubeGenres {
   public HashMap<String, Integer> genreData = new HashMap<String, Integer>();
   public int totalMusic = 0;
   public int maxGenreCount = 0;
+  public int[] likedMusicHistory;
 
   public YoutubeGenres() {
 
