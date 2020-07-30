@@ -16,9 +16,11 @@ const GRAPH_HEIGHT = 100;
 const BAR_PERCENT_FILL = 0.7;
 const BAR_PERCENT_PADDING = 1 - BAR_PERCENT_FILL;
 
+const GRAPH_LEFT_PADDING = 2.5;
+
 /**
  * creates SVG bar chart given chart values and categories
- * @param {int[]} chartValues array of bar values/lengths
+ * @param {number[]} chartValues array of bar values/lengths
  * @param {string[]} chartCategories array of bar categories/labels
  */
 function createBarChart(chartValues, chartCategories) {
@@ -26,11 +28,10 @@ function createBarChart(chartValues, chartCategories) {
   const barContainerHeight = GRAPH_HEIGHT / chartValues.length;
 
   const barThickness = BAR_PERCENT_FILL * barContainerHeight;
-  const BAR_UNIT_LENGTH = 100 / maxChartValues;
+  const barUnitLength = 100 / maxChartValues;
 
   // top graph padding depends on bar padding
-  const GRAPH_TOP_PADDING = (BAR_PERCENT_PADDING / 2) * barContainerHeight;
-  const GRAPH_LEFT_PADDING = 2.5;
+  const graphTopPadding = (BAR_PERCENT_PADDING / 2) * barContainerHeight;
 
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', '0 0 100 100');
@@ -45,10 +46,10 @@ function createBarChart(chartValues, chartCategories) {
 
     const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     g.appendChild(bar);
-    bar.setAttribute('width', BAR_UNIT_LENGTH * chartValues[i]);
+    bar.setAttribute('width', barUnitLength * chartValues[i]);
     bar.setAttribute('height', barThickness);
     bar.setAttribute('x', GRAPH_LEFT_PADDING);
-    bar.setAttribute('y', GRAPH_TOP_PADDING + barContainerHeight * i);
+    bar.setAttribute('y', graphTopPadding + barContainerHeight * i);
 
     const barTextContainer = document.getElementById('bar-text');
     const category = document.createElement('div');
@@ -56,7 +57,6 @@ function createBarChart(chartValues, chartCategories) {
     category.setAttribute('class', 'category');
     category.textContent = chartCategories[i];
   }
-  document.getElementById('graph').appendChild(svg);
 }
 
 createBarChart(CHART_VALUES, CHART_CATEGORIES);
