@@ -118,7 +118,7 @@ public class AnalysisCache {
     return FileStatus.SUCCESS;
   }
 
-  private static SecretKeySpec generateKey() {
+  private static SecretKeySpec generateKey() throws IOException {
     String key = Secrets.getSecretString("CACHE_ENCRYPTION_KEY");
     byte[] keyData = key.getBytes();
     SecretKeySpec keySpec = new SecretKeySpec(keyData, "Blowfish");
