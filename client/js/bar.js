@@ -2,6 +2,8 @@
  * @file constructs bar graph from scratch
  */
 
+import {SVG_NS} from '../util.js';
+
 // hard coded data for bar chart for now
 const CHART_VALUES = [1, 3, 1, 2];
 const CHART_CATEGORIES = [
@@ -33,18 +35,18 @@ function createBarChart(chartValues, chartCategories) {
   // top graph padding depends on bar padding
   const graphTopPadding = (BAR_PERCENT_PADDING / 2) * barContainerHeight;
 
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('viewBox', '0 0 100 100');
   svg.setAttribute('preserveAspectRatio', 'none');
   svg.setAttribute('class', 'svg');
   document.getElementById('graph').appendChild(svg);
 
   for (let i = 0; i < chartValues.length; i++) {
-    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const g = document.createElementNS(SVG_NS, 'g');
     svg.appendChild(g);
     g.setAttribute('class', 'bar');
 
-    const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    const bar = document.createElementNS(SVG_NS, 'rect');
     g.appendChild(bar);
     bar.setAttribute('width', barUnitLength * chartValues[i]);
     bar.setAttribute('height', barThickness);

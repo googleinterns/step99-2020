@@ -7,7 +7,7 @@
  * fetches and returns genre analysis object from /api/youtube
  * @returns {JSON object} of youtube genreData and stats
  */
-async function fetchMusicGenre() {
+export async function fetchMusicGenre() {
   // keep track of num_videos in URL w/o reload
   history.pushState('', '', 'youtube-genre.html');
 
