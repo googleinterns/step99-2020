@@ -17,8 +17,7 @@ const BAR_PERCENT_PADDING = 1 - BAR_PERCENT_FILL;
  *
  * @param {number[]} chartValues array of bar values/lengths
  * @param {string[]} chartCategories array of bar categories/labels
- * @param {number} maxCharVal largest value of chartValues
- * @param maxChartVal
+ * @param {number} maxChartVal largest value of chartValues
  */
 function createBarChart(chartValues, chartCategories, maxChartVal) {
   const barContainerHeight = GRAPH_HEIGHT / chartValues.length;
