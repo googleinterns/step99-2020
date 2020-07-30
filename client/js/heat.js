@@ -1,6 +1,6 @@
 class HeatMapRow {
   /**
-   *
+   * format for a row for heat map values obj
    * @param {number[]} data The array of 0s and 1s for a row in a heat map
    */
   constructor(data) {
