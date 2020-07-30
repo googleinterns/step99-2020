@@ -96,6 +96,7 @@ public class YoutubeServlet extends HttpServlet {
         JsonObject likedVideoRes;
         JsonArray videos;
         YoutubeGenres genreAnalysis = new YoutubeGenres();
+        int videosRetrieved = 0;
 
         // next Page Token must be an empty string for first http call
         String nextPageToken = "";
@@ -111,7 +112,8 @@ public class YoutubeServlet extends HttpServlet {
             }
 
             videos = likedVideoRes.getAsJsonArray("items");
-            genreAnalysis.calculateMusicCount(videos);
+            videosRetrieved = 
+                genreAnalysis.calculateMusicCount(videosRetrieved, videos);
 
             nextPageToken = getNextPageToken(likedVideoRes);
         }
