@@ -1,6 +1,7 @@
 package com.google.musicanalysis.api.perspective;
 
 import com.google.gson.JsonObject;
+import com.google.musicanalysis.util.Secrets;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,7 +33,11 @@ public class PerspectiveRequest {
   public String getResponse() throws MalformedURLException, IOException {
 
     String jsonString = buildJson(this.text, this.attributes);
-    URL url = new URL("https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=");
+    String URL_STRING =
+        String.format(
+            "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=%s",
+            Secrets.getSecretString("NL_PERSP_KEY"));
+    URL url = new URL(URL_STRING);
 
     // Open up the connection
     HttpURLConnection con = (HttpURLConnection) url.openConnection();

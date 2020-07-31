@@ -1,5 +1,7 @@
 package com.google.musicanalysis.api.naturallanguage;
 
+import com.google.gson.JsonObject;
+import com.google.musicanalysis.util.Secrets;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,7 +9,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import com.google.gson.JsonObject;
 
 /** Handles all NLP API requests. Takes text string and returns a JSON response as string. */
 public class SentimentRequest {
@@ -24,7 +25,11 @@ public class SentimentRequest {
    * @return the JSON response as string
    */
   public String getResponse() throws MalformedURLException, IOException {
-    URL url = new URL("https://language.googleapis.com/v1/documents:analyzeSentiment?key=");
+    String URL_STRING =
+        String.format(
+            "https://language.googleapis.com/v1/documents:analyzeSentiment?key=%s",
+            Secrets.getSecretString("NL_PERSP_KEY"));
+    URL url = new URL(URL_STRING);
 
     // Open up the connection
     HttpURLConnection con = (HttpURLConnection) url.openConnection();

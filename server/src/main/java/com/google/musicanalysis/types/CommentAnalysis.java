@@ -2,25 +2,18 @@ package com.google.musicanalysis.types;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.io.Serializable;
 
-public class AnalysisGroup implements Serializable {
+public class CommentAnalysis {
   public final HashMap<String, String> perspectiveMap;
   public final NLPResult magnitudeAndScore;
   public final ArrayList<String> commentArray;
-  public final String videoId;
-  public final NameAndChannel videoInfo;
 
-  public AnalysisGroup(
+  public CommentAnalysis(
       HashMap<String, String> perspectiveMap,
       NLPResult magnitudeAndScore,
-      ArrayList<String> commentArray,
-      String videoId,
-      NameAndChannel videoInfo) {
+      ArrayList<String> commentArray) {
     this.perspectiveMap = perspectiveMap;
     this.magnitudeAndScore = magnitudeAndScore;
     this.commentArray = commentArray;
-    this.videoId = videoId;
-    this.videoInfo = videoInfo;
   }
 }

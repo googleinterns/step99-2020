@@ -5,6 +5,8 @@ import com.google.musicanalysis.util.URLEncodedBuilder;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -17,10 +19,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.annotation.WebServlet;
-import java.util.HashMap;
 
+/** Servlet handles youtube api call to get genres of liked videos */
 @WebServlet("/api/youtube")
 public class YoutubeServlet extends HttpServlet {
+
     /**
      * makes http request of youtube api to retrieve topics of liked videos, 
      *  gets json string of youtube response
@@ -30,13 +33,14 @@ public class YoutubeServlet extends HttpServlet {
      * @throws ServletException
      * @throws IOException
      */
-    protected String getYoutubeRes(String apiKey, String accessToken) 
+    protected String getYoutubeRes(String apiKey, String accessToken, String pageToken) 
         throws ServletException, IOException {
         // make http request to youtube API
         URLEncodedBuilder youtubeParam = new URLEncodedBuilder()
             .add("part", "topicDetails")
             .add("myRating", "like")
-            .add("key", apiKey);
+            .add("key", apiKey)
+            .add("pageToken", pageToken);
         URI youtubeUri = URI.create("https://www.googleapis.com/youtube/v3/videos?" + youtubeParam.build());
 
         var httpClient = HttpClient.newHttpClient();
@@ -52,53 +56,28 @@ public class YoutubeServlet extends HttpServlet {
     }
 
     /**
-     * checks whether topic is categorized as music
-     * by checking if the last word is "music" or "Music"
-     * @param topic identifies youtube video category e.g. Knowledge or Pop music
-     * @return whether topic is categorized as music
+     * @param likedVideoRes json obj of youtube response body 
+     * @return number of total results from json response
      */
-    protected Boolean isMusic(String topic) {
-        String lastWord = topic.substring(topic.lastIndexOf(" ") + 1);
-        return lastWord.equalsIgnoreCase("music");
+    protected int getTotalResults(JsonObject likedVideoRes) {
+        JsonObject pageInfo = likedVideoRes.getAsJsonObject("pageInfo");
+        JsonPrimitive totalResults = pageInfo.getAsJsonPrimitive("totalResults");
+        return totalResults.getAsInt();
     }
 
     /**
-     * parses through youtube liked videos json string,
-     * updates hash map to contain frequency count of each music genre
-     * @param youtubeResBody json response of youtube liked videos
-     * @param genreCount hash map of frequency count of each music genre
+     * @param likedVideoRes json obj of youtube response body 
+     * @return next page token json primitive
      */
-    protected void updateMusicCount(String youtubeResBody, HashMap<String, Integer> genreCount) {
-        JsonObject jObject = JsonParser.parseString(youtubeResBody).getAsJsonObject();
-        JsonArray videos = jObject.getAsJsonArray("items");
-
-        for (int i = 0; i < videos.size(); i++) {
-            JsonObject video = videos.get(i).getAsJsonObject();
-            JsonObject topicDetails = video.getAsJsonObject("topicDetails");
-
-            if (topicDetails == null) {
-                // Video has no topics so it can't have a music topic
-                continue;
-            }
-
-            JsonArray topicCategories = topicDetails.getAsJsonArray("topicCategories");
-
-            for (int j = 0; j < topicCategories.size(); j++) {
-                // extract music genre out of wikipedia links of topic categories
-                String link = topicCategories.get(j).toString();
-                String topic = link.substring(link.lastIndexOf('/') + 1);
-                topic = topic.replaceAll("\"", "");
-                topic = topic.replaceAll("_", " ");
-
-                if (!isMusic(topic)) {
-                    break;
-                }
-
-                int count = genreCount.containsKey(topic) ? genreCount.get(topic) : 0;
-                genreCount.put(topic, count + 1);
-            }
+    protected String getNextPageToken(JsonObject likedVideoRes) {
+        JsonPrimitive nextPageToken = likedVideoRes.getAsJsonPrimitive("nextPageToken");
+        
+        // null condition will be checked to see if no more http calls
+        String tokenStr = null;
+        if (nextPageToken != null) {
+            tokenStr = nextPageToken.getAsString();
         }
-        return;
+        return tokenStr;
     }
 
     @Override
@@ -113,9 +92,32 @@ public class YoutubeServlet extends HttpServlet {
             return;
         }
 
-        String youtubeResBody = getYoutubeRes(API_KEY, accessToken.toString());
-        var genreCount = new HashMap<String, Integer>();
-        updateMusicCount(youtubeResBody, genreCount);
-        res.getWriter().write(genreCount.toString());
+        String youtubeResBody; 
+        JsonObject likedVideoRes;
+        JsonArray videos;
+        YoutubeGenres genreAnalysis = new YoutubeGenres();
+
+        // next Page Token must be an empty string for first http call
+        String nextPageToken = "";
+        while (nextPageToken != null) {
+            youtubeResBody = getYoutubeRes(API_KEY, 
+                                            accessToken.toString(), 
+                                            nextPageToken);            
+            likedVideoRes = JsonParser.parseString(youtubeResBody).getAsJsonObject();
+
+            if (nextPageToken == "") {
+                // only need one JSON response to get totalLiked
+                genreAnalysis.totalLiked = getTotalResults(likedVideoRes);
+            }
+
+            videos = likedVideoRes.getAsJsonArray("items");
+            genreAnalysis.calculateMusicCount(videos);
+
+            nextPageToken = getNextPageToken(likedVideoRes);
+        }
+
+        Gson gson = new Gson();
+        res.setContentType("application/json"); 
+        res.getWriter().println(gson.toJson(genreAnalysis));
     }
 }

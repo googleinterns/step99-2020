@@ -7,19 +7,17 @@ import com.google.musicanalysis.api.youtube.*;
 import com.google.musicanalysis.cache.*;
 import com.google.musicanalysis.types.*;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.regex.Matcher; 
+import java.util.regex.Pattern; 
 
 @WebServlet("/api/analysis")
 public class AnalysisServlet extends HttpServlet {
@@ -27,30 +25,32 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    String input = req.getParameter("name");
-    
-    assert input == null : "Something went wrong with sending to backend.";
+    String userInput = req.getParameter("name");
 
     // Use like this: {url_parameter, value}
     HashMap<String, String> videoArgs = new HashMap<>();
     HashMap<String, String> commentArgs = new HashMap<>();
     HashMap<String, String> nameArgs = new HashMap<>();
 
-    String videoId = input;
+    String videoId = userInput; // assume user enters id
 
     commentArgs.put("part", "snippet");
-    commentArgs.put("videoId", input);
-    String commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
-
-    if (commentsJson.equals("unreadable")) {
-      // We need to search for the id and get the comments again
-      videoArgs.put("q", input);
-      videoArgs.put("type", "video");
-      String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
-      videoId = getVideoId(videoIdJson);
-
-      commentArgs.replace("videoId", videoId);
-      commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+    commentArgs.put("videoId", userInput);
+    String commentsJson;
+    
+    // Test if its a youtube id from the beginning
+    if (userInput.length() == 11 && !thereIsWhiteSpace(userInput)) {
+        try {
+            commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+        } catch (IOException err) {
+            videoId = getFirstVideoFromSearch(userInput);
+            commentArgs.replace("videoId", videoId);
+            commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+        }
+    } else {
+        videoId = getFirstVideoFromSearch(userInput);
+        commentArgs.replace("videoId", videoId);
+        commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
     }
 
     ArrayList<String> commentArray = retrieveComments(commentsJson);
@@ -59,38 +59,39 @@ public class AnalysisServlet extends HttpServlet {
     nameArgs.put("part", "snippet");
     nameArgs.put("id", videoId);
     String nameJson = new YoutubeRequest("videos", nameArgs).getResult();
-    NameAndChannel videoInfo = getNameAndChannel(nameJson);
+    VideoInfo videoInfo = getVideoInfo(nameJson);
 
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
 
-    try {
-      AnalysisCache cache = new AnalysisCache();
-      cache.open();
-      cache.add(
-          "example key",
-          new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
-      cache.close();
-    } catch (InvalidKeyException
-        | IllegalBlockSizeException
-        | BadPaddingException
-        | NoSuchAlgorithmException
-        | NoSuchPaddingException e) {
-      e.printStackTrace();
-    }
+    AnalysisGroup servletResults =
+        new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo);
+    AnalysisCache.add(input, servletResults);
 
-    String json =
-        convertToJsonUsingGson(
-            new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
+    String json = convertToJsonUsingGson(servletResults);
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
 
   /** @param arr the array that will be converted to json */
-  private String convertToJsonUsingGson(AnalysisGroup group) {
+  private String convertToJsonUsingGson(VideoAnalysis group) {
     Gson gson = new Gson();
     String json = gson.toJson(group);
     return json;
+  }
+
+  /**
+   * Helper function that gets the first video from Youtube search request
+   *
+   * @param videoParam the video parameter to put in the url
+   * @return the video id as string
+   */
+  private String getFirstVideoFromSearch(String videoParam) throws MalformedURLException, IOException {
+      HashMap<String, String> videoArgs = new HashMap<>();
+      videoArgs.put("q", videoParam);
+      videoArgs.put("type", "video");
+      String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
+      return getVideoId(videoIdJson);
   }
 
   /**
@@ -157,21 +158,21 @@ public class AnalysisServlet extends HttpServlet {
     return perspectiveResults;
   }
 
-  private NameAndChannel getNameAndChannel(String response) {
+  private VideoInfo getVideoInfo(String response) {
 
     // Accessing the items JSON Array
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
     JsonArray itemsArray = jObject.getAsJsonArray("items");
-    JsonElement el = itemsArray.get(0);
+    JsonElement firstVideo = itemsArray.get(0);
 
     // Grabbing the name and channel
-    JsonObject object = el.getAsJsonObject();
-    JsonObject data = object.getAsJsonObject("snippet");
-    JsonElement videoName = data.get("title");
-    JsonElement channelName = data.get("channelTitle");
+    JsonObject object = firstVideo.getAsJsonObject();
+    JsonObject videoData = object.getAsJsonObject("snippet");
+    JsonElement videoName = videoData.get("title");
+    JsonElement channelName = videoData.get("channelTitle");
 
-    return new NameAndChannel(
+    return new VideoInfo(
         videoName.toString().replace("\"", ""), channelName.toString().replace("\"", ""));
   }
 
@@ -186,8 +187,8 @@ public class AnalysisServlet extends HttpServlet {
     for (JsonElement el : itemsArray) {
       // Grabbing each item and adding to a result array
       JsonObject object = el.getAsJsonObject();
-      JsonObject data = object.getAsJsonObject("id");
-      JsonElement videoId = data.get("videoId");
+      JsonObject idObject = object.getAsJsonObject("id");
+      JsonElement videoId = idObject.get("videoId");
 
       if (videoId != null) {
         searchResults.add(videoId.toString().replace("\"", ""));
@@ -239,6 +240,11 @@ public class AnalysisServlet extends HttpServlet {
 
     for (String comment : comments) {
       comment = comment.replace("\"", "");
+      // One letter comments should not be considered as sentences since
+      // they bring no value to the analysis. 
+      if (comment.length() <= 1){
+          continue;
+      }
       // Make sure each comment is treated as its own sentence
       // Not sure char datatype works with regex so used String
       String lastCharacter = comment.substring(comment.length() - 1);
@@ -251,5 +257,17 @@ public class AnalysisServlet extends HttpServlet {
     }
 
     return res.toString();
+  }
+
+  /**
+   * Generic function to check for whitespace in a string
+   * 
+   * @param string The string to be searched
+   * @return whether or not there's any whitespace
+   */
+  private boolean thereIsWhiteSpace(String string) {
+    Pattern pattern = Pattern.compile("\\s");
+    Matcher matcher = pattern.matcher(string);
+    return matcher.find();
   }
 }
