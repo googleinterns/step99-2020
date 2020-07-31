@@ -7,6 +7,8 @@
     <base target="_blank">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/spotify-gdpr.css">
+    <link rel="stylesheet" href="css/spotify-gdpr-chart.css">
+    <link rel="stylesheet" href="css/spotify-gdpr-table.css">
   </head>
   <body>
     <main>
@@ -17,9 +19,17 @@
 
       <h2 class="header">Get started</h2>
       <div id="get-started">
-        <button id="btn-get-started" class="btn btn-big" type="button">
-          Sign in with Spotify
+        <button id="btn-data-upload" class="btn btn-big" type="button">
+          Upload your data
         </button>
+
+        <input id="input-data-upload" type="file" accept=".zip,application/zip" />
+      </div>
+
+      <div id="chart-container">
+      </div>
+
+      <div id="table-container">
       </div>
 
       <h2 class="header">How it works</h2>
@@ -48,5 +58,10 @@
         this permission</a> in order to search for songs.
       </p>
     </main>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script src="js/zip/zip.js"></script>
+    <script src="js/gdpr/index.js" type="module"></script>
   </body>
 </html>
