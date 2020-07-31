@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.google.musicanalysis.api.naturallanguage.*;
 import com.google.musicanalysis.api.perspective.*;
 import com.google.musicanalysis.api.youtube.*;
+import com.google.musicanalysis.cache.*;
 import com.google.musicanalysis.types.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -63,9 +64,11 @@ public class AnalysisServlet extends HttpServlet {
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
 
-    String json =
-        convertToJsonUsingGson(
-            new VideoAnalysis(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo));
+    AnalysisGroup servletResults =
+        new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo);
+    AnalysisCache.add(input, servletResults);
+
+    String json = convertToJsonUsingGson(servletResults);
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
