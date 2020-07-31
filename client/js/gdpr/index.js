@@ -9,17 +9,25 @@
 import {
   collateStreamingData, getStreamingData, getStreamingHistory,
 } from './analysis.js';
+import {showPicker} from '../file-upload/gdrive-picker.js';
 import './chart.js';
 import './table.js';
 
 const {zip} = window;
 
 zip.workerScriptsPath = '/js/zip/';
-const btnUpload =
+
+/** @type {import('./chart.js').GdprChart} */
+const chart = document.getElementById('gdpr-chart');
+
+/** @type {import('./table.js').GdprTable} */
+const table = document.getElementById('gdpr-table');
+
+const btnUploadFile =
   /** @type {HTMLButtonElement} */
   (document.getElementById('btn-data-upload'));
 
-btnUpload.addEventListener('click', async () => {
+btnUploadFile.addEventListener('click', async () => {
   const inputUpload =
       /** @type {HTMLInputElement} */
       (document.getElementById('input-data-upload'));
@@ -45,11 +53,23 @@ btnUpload.addEventListener('click', async () => {
 
   const rankings = getStreamingHistory(collatedRecords);
 
-  /** @type {import('./chart.js').GdprChart} */
-  const chart = document.getElementById('gdpr-chart');
   chart.load(rankings.history, rankings.dates);
+  table.load(rankings.history, rankings.dates);
+});
 
-  /** @type {import('./table.js').GdprTable} */
-  const table = document.getElementById('gdpr-table');
+const btnPickFile =
+  /** @type {HTMLButtonElement} */
+  (document.getElementById('btn-data-pick'));
+
+btnPickFile.addEventListener('click', async () => {
+  const fileUpload = await showPicker();
+
+  const records = await getStreamingData(fileUpload);
+
+  const collatedRecords = collateStreamingData(records);
+
+  const rankings = getStreamingHistory(collatedRecords);
+
+  chart.load(rankings.history, rankings.dates);
   table.load(rankings.history, rankings.dates);
 });
