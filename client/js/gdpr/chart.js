@@ -64,6 +64,7 @@ export class GdprChart extends HTMLElement {
 
     for (const history of histories.values()) {
       for (let row = 0; row < dates.length; row++) {
+        // +1 b/c first row is header row
         this.rows[row + 1].push(history[row] || null);
       }
     }
@@ -170,6 +171,8 @@ export class GdprChart extends HTMLElement {
     let index = 0;
 
     for (const history of this.histories.values()) {
+      // each track is given one of 24 colours, which are spaced 15 degrees
+      // apart in hue
       const hue = index * 15 % 360;
       const color = `hsl(${hue},50%,33%)`;
       const series = this.createSeries(history, color);

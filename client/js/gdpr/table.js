@@ -8,7 +8,7 @@ export class GdprTable extends HTMLElement {
     this.chart.addEventListener('series-hit', this.onSeriesHit.bind(this));
     this.histories = new Map();
     this.dates = [];
-
+    
     this.table = document.createElement('div');
     this.table.classList.add('gdpr-table');
 
@@ -19,7 +19,7 @@ export class GdprTable extends HTMLElement {
     const stylesheet = document.createElement('link');
     stylesheet.rel = 'stylesheet';
     stylesheet.href = '/css/spotify-gdpr-table.css';
-
+    
     this.shadowRoot.append(stylesheet, this.table);
   }
 
