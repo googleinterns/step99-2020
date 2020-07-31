@@ -17,10 +17,10 @@ export class GdprTable extends HTMLElement {
       '<th class="gdpr-table-header gdpr-table-header-rank">Rank</th>' +
       '<th class="gdpr-table-header gdpr-table-header-track">Track</th>';
 
-    const tbody = document.createElement('tbody');
-    tbody.classList.add('gdpr-table-body');
+    this.tbody = document.createElement('tbody');
+    this.tbody.classList.add('gdpr-table-body');
 
-    this.table.append(thead, tbody);
+    this.table.append(thead, this.tbody);
 
     this.tbody = tbody;
 
