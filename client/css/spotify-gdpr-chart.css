@@ -1,10 +1,10 @@
-#chart-container {
+#main-container {
   position: relative;
 
   height: 40rem;
 }
 
-.chart-scroll-container {
+#scroll-container {
   width: 100%;
   overflow-x: auto;
   overflow-y: visible;

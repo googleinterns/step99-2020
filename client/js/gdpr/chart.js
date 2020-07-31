@@ -4,73 +4,85 @@ const RUN_SCALE_X = 30;
 const RUN_SCALE_Y = 30;
 const NUM_POSITIONS = 15;
 
-/**
- * Creates an SVG chart inside of `container` with the given data.
- *
- * @param {HTMLElement} container The container element for this chart.
- * @param {Map<string, number[]>} histories The ranking history for each
- * track.
- * @param {Date[]} dates The date of each history entry.
- */
-export function createChart(container, histories, dates) {
-  const scrollContainer = document.createElement('div');
-  scrollContainer.classList.add('chart-scroll-container');
+export class GdprChart extends HTMLElement {
+  constructor() {
+    super();
 
-  const svg = document.createElementNS(SVG_NS, 'svg');
-  svg.setAttribute('class', 'chart');
-  svg.setAttribute(
-      'viewBox',
-      // shift down so that lines are vertically centered
-      `0 ${RUN_SCALE_Y * 0.5} ` +
-      `${dates.length * RUN_SCALE_X} ${(NUM_POSITIONS + 0.5) * RUN_SCALE_Y}`,
-  );
-  svg.append(createDefs());
-  svg.append(createGrid(dates));
+    this.attachShadow({mode: 'open'});
 
-  scrollContainer.append(svg);
+    /** @type {Map<string, number[]>} */
+    this.histories = new Map();
 
-  const seriesContainer = document.createElementNS(SVG_NS, 'g');
+    /** @type {Date[]} */
+    this.dates = [];
 
-  /** @type {SVGGElement[]} */
-  const seriesElements = [];
-  const historyEntries = [...histories];
+    /** @type {[string[], ...(Array<Array<number | null>>)]} */
+    this.rows = [[]];
 
-  // to organize data into rows to speed up hit-testing
-  const rows = [];
+    this.hoverState = {seriesIndex: null, x: null, y: null};
 
-  for (let row = 0; row < dates.length; row++) {
-    rows.push([]);
+    this.mainContainer = document.createElement('div');
+    this.mainContainer.id = 'main-container';
+
+    this.scrollContainer = document.createElement('div');
+    this.scrollContainer.id = 'scroll-container';
+    this.scrollContainer.addEventListener('scroll', this.onScroll.bind(this));
+
+    this.tooltip = this.createTooltip();
+
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = '/css/spotify-gdpr-chart.css';
+
+    this.mainContainer.append(this.scrollContainer);
+    this.mainContainer.append(this.tooltip);
+
+    this.shadowRoot.append(stylesheet, this.mainContainer);
   }
 
-  let index = 0;
+  /**
+   * Loads this GDPR chart with the given data.
+   *
+   * @param {Map<string, number[]>} histories The ranking history for each
+   * track.
+   * @param {Date[]} dates The date of each history entry.
+   * @public
+   */
+  load(histories, dates) {
+    this.histories = histories;
+    this.dates = dates;
 
-  for (const [, history] of historyEntries) {
-    // each track is given one of 24 colours, which are spaced 15 degrees apart
-    // in hue
-    const hue = index * 15 % 360;
-    const color = `hsl(${hue},50%,33%)`;
-    const series = createSeries(history, color);
+    // history + date info organized into rows for faster hit-testing
+    // first row is a header row containing keys
+    this.rows = [[...histories.keys()]];
 
     for (let row = 0; row < dates.length; row++) {
-      rows[row].push(history[row] || null);
+      this.rows.push([]);
     }
 
-    seriesContainer.append(series);
-    seriesElements.push(series);
-    index++;
+    for (const history of histories.values()) {
+      for (let row = 0; row < dates.length; row++) {
+        // +1 b/c first row is header row
+        this.rows[row + 1].push(history[row] || null);
+      }
+    }
+
+    this.svg = this.createChart();
+    this.svg.addEventListener('mousemove', this.onMouseMove.bind(this));
+    this.svg.addEventListener('mouseleave', this.onMouseLeave.bind(this));
+
+    this.scrollContainer.innerHTML = '';
+    this.scrollContainer.append(this.svg);
   }
 
-  seriesContainer.setAttribute('class', 'series-container');
-  svg.append(seriesContainer);
-
-  const hoverState = {series: null, x: null, y: null};
-
-  svg.addEventListener('mousemove', ({clientX, clientY}) => {
+  onMouseMove({clientX, clientY}) {
     // convert mouse coords to SVG coords
-    const mousePos = svg.createSVGPoint();
+    const mousePos = this.svg.createSVGPoint();
     mousePos.x = clientX;
     mousePos.y = clientY;
-    const chartPos = mousePos.matrixTransform(svg.getScreenCTM().inverse());
+    const chartPos = mousePos.matrixTransform(
+        this.svg.getScreenCTM().inverse(),
+    );
 
     // index in history
     const x = Math.round(chartPos.x / RUN_SCALE_X);
@@ -79,289 +91,326 @@ export function createChart(container, histories, dates) {
 
     // don't recalculate the hit if we're in the same place
     // as the last hit
-    if (hoverState.x === x && hoverState.y === y) return;
+    if (this.hoverState.x === x && this.hoverState.y === y) return;
 
-    const hit = rows[x].findIndex((rank) => rank === y);
+    // add 1 b/c first row is key
+    const hitIndex = this.rows[x + 1].findIndex((rank) => rank === y);
 
-    if (hoverState.series && hoverState.series !== hit) {
-      const seriesElement = seriesElements[hoverState.series];
-      seriesElement.dispatchEvent(
-          new CustomEvent('series-clear', {bubbles: true}),
+    if (
+      this.hoverState.seriesIndex !== null &&
+      this.hoverState.seriesIndex !== hitIndex
+    ) {
+      this.clearHover();
+    }
+
+    if (hitIndex >= 0) {
+      this.setHover(x, y, hitIndex);
+    }
+  }
+
+  onMouseLeave() {
+    this.clearHover();
+  }
+
+  onScroll() {
+    this.clearHover();
+  }
+
+  setHover(x, y, seriesIndex) {
+    const key = this.rows[0][seriesIndex];
+    const seriesEl = this.svg.querySelectorAll('.series')[seriesIndex];
+
+    seriesEl.dispatchEvent(
+        new CustomEvent('series-hit', {
+          detail: {
+            x,
+            y,
+            key,
+          },
+          bubbles: true,
+          composed: true,
+        }),
+    );
+
+    this.hoverState.seriesIndex = seriesIndex;
+    this.hoverState.x = x;
+    this.hoverState.y = y;
+  }
+
+  clearHover() {
+    const {seriesIndex} = this.hoverState;
+
+    if (seriesIndex !== null) {
+      const seriesEl = this.svg.querySelectorAll('.series')[seriesIndex];
+      seriesEl.dispatchEvent(
+          new CustomEvent('series-clear', {bubbles: true, composed: true}),
       );
     }
 
-    if (hit === null) {
-      hoverState.series = null;
-      hoverState.x = null;
-      hoverState.y = null;
-    } else {
-      const seriesEntry = historyEntries[hit];
-      const seriesElement = seriesElements[hit];
-      seriesElement.dispatchEvent(
-          new CustomEvent('series-hit', {
-            detail: {
-              x,
-              y,
-              key: seriesEntry[0],
-            },
-            bubbles: true,
-          }),
-      );
+    this.hoverState.seriesIndex = null;
+    this.hoverState.x = null;
+    this.hoverState.y = null;
+  }
 
-      hoverState.series = hit;
-      hoverState.x = x;
-      hoverState.y = y;
-    }
-  }, {passive: true, capture: true});
+  createChart() {
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'chart');
+    svg.setAttribute(
+        'viewBox',
+        // shift down so that lines are vertically centered
+        `0 ${RUN_SCALE_Y * 0.5} ` +
+        this.dates.length * RUN_SCALE_X + ' ' +
+        (NUM_POSITIONS + 0.5) * RUN_SCALE_Y,
+    );
+    svg.append(this.createDefs());
+    svg.append(this.createGrid());
 
-  const clearHover = () => {
-    if (hoverState.series !== null) {
-      const seriesElement = seriesElements[hoverState.series];
-      seriesElement.dispatchEvent(
-          new CustomEvent('series-clear', {bubbles: true}),
-      );
-    }
+    const seriesContainer = document.createElementNS(SVG_NS, 'g');
 
-    hoverState.series = null;
-    hoverState.x = null;
-    hoverState.y = null;
-  };
+    /** @type {SVGGElement[]} */
+    const seriesElements = [];
 
-  svg.addEventListener('mouseleave', () => clearHover());
-  scrollContainer.addEventListener('scroll', () => clearHover());
+    let index = 0;
 
-  const tooltip = createTooltip(container, svg, histories, dates);
+    for (const history of this.histories.values()) {
+      // each track is given one of 24 colours, which are spaced 15 degrees
+      // apart in hue
+      const hue = index * 15 % 360;
+      const color = `hsl(${hue},50%,33%)`;
+      const series = this.createSeries(history, color);
 
-  container.append(scrollContainer);
-  container.append(tooltip);
-}
-
-/**
- * Creates a new series (set of lines on the chart for a specific song).
- *
- * @param {number[]} history The historical positions of this track on the
- * leaderboard.
- * @param {string} color The color of this series.
- * @returns {SVGGElement} A group containing the series.
- */
-function createSeries(history, color) {
-  const series = document.createElementNS(SVG_NS, 'g');
-  series.setAttribute('class', 'series');
-  series.style.setProperty('--run-color', color);
-
-  let start = 0;
-  let end = 0;
-
-  // find segments of history that don't contain null and create a 'run' for
-  // each one
-  while (end < history.length) {
-    // go until we find a non-null point, which is the beginning of a run
-    if (history[start] === null) {
-      start++;
-      end = start;
-      continue;
+      seriesContainer.append(series);
+      seriesElements.push(series);
+      index++;
     }
 
-    // go until we find a null point, which is the end of a run
-    if (history[end] !== null) {
-      end++;
-      continue;
+    seriesContainer.setAttribute('class', 'series-container');
+    svg.append(seriesContainer);
+
+    return svg;
+  }
+
+  /**
+   * Creates a new series (set of lines on the chart for a specific song).
+   *
+   * @param {number[]} history The historical positions of this track on the
+   * leaderboard.
+   * @param {string} color The color of this series.
+   * @returns {SVGGElement} A group containing the series.
+   * @private
+   */
+  createSeries(history, color) {
+    const series = document.createElementNS(SVG_NS, 'g');
+    series.setAttribute('class', 'series');
+    series.style.setProperty('--run-color', color);
+
+    let start = 0;
+    let end = 0;
+
+    // find segments of history that don't contain null and create a 'run' for
+    // each one
+    while (end < history.length) {
+      // go until we find a non-null point, which is the beginning of a run
+      if (history[start] === null) {
+        start++;
+        end = start;
+        continue;
+      }
+
+      // go until we find a null point, which is the end of a run
+      if (history[end] !== null) {
+        end++;
+        continue;
+      }
+
+      if (end > start) {
+        // all of the points between start and end are non-null, create run
+        series.append(this.createRun(history, start, end));
+        start = end;
+      }
     }
 
     if (end > start) {
-      // all of the points between start and end are non-null, create run
-      series.append(createRun(history, start, end));
-      start = end;
+      series.append(this.createRun(history, start, end));
     }
+
+    // create marker for when the user mouses near a point
+    const marker = document.createElementNS(SVG_NS, 'circle');
+    marker.classList.add('series-marker');
+    marker.setAttribute('r', '6');
+
+    series.addEventListener('series-hit', (ev) => {
+      const {x, y} = ev.detail;
+      series.append(marker);
+      series.classList.add('series-active');
+      marker.setAttribute('cx', x * RUN_SCALE_X + 'px');
+      marker.setAttribute('cy', y * RUN_SCALE_Y + 'px');
+    });
+
+    series.addEventListener('series-clear', () => {
+      series.classList.remove('series-active');
+      marker.remove();
+    });
+
+    return series;
   }
 
-  if (end > start) {
-    series.append(createRun(history, start, end));
+  /**
+   * Creates a new run (continuous group of points within a series).
+   *
+   * @param {number[]} history The historical positions of this track on the
+   * leaderboard.
+   * @param {number} start The index of the first entry in this run.
+   * @param {number} end The index of the last entry in this run.
+   * @returns {SVGGElement} The elements that compose this run.
+   * @private
+   */
+  createRun(history, start, end) {
+    const runContainer = document.createElementNS(SVG_NS, 'g');
+
+    const points = history
+        .slice(start, end)
+        .map((val, idx) => ({
+          x: (idx + start) * RUN_SCALE_X,
+          y: val * RUN_SCALE_Y,
+        }));
+
+    const pointsStr = points
+        .map(({x, y}) => `${x}, ${y}`)
+        .join(' ');
+
+    // line that is displayed
+    const line = document.createElementNS(SVG_NS, 'polyline');
+    line.setAttribute('class', 'series-run');
+    line.setAttribute('points', pointsStr);
+
+    const startCap = document.createElementNS(SVG_NS, 'circle');
+    const endCap = document.createElementNS(SVG_NS, 'circle');
+
+    startCap.setAttribute('class', 'series-run-cap');
+    endCap.setAttribute('class', 'series-run-cap');
+
+    startCap.setAttribute('r', '5');
+    startCap.setAttribute('cx', points[0].x + 'px');
+    startCap.setAttribute('cy', points[0].y + 'px');
+    endCap.setAttribute('r', '5');
+    endCap.setAttribute('cx', points[points.length - 1].x + 'px');
+    endCap.setAttribute('cy', points[points.length - 1].y + 'px');
+
+    runContainer.append(startCap, line, endCap);
+    return runContainer;
   }
 
-  // create marker for when the user mouses near a point
-  const marker = document.createElementNS(SVG_NS, 'circle');
-  marker.classList.add('series-marker');
-  marker.setAttribute('r', '6');
+  /**
+   * Creates SVG <defs> to use for things such as filters.
+   *
+   * @returns {SVGDefsElement} Defs
+   * @private
+   */
+  createDefs() {
+    const defs = document.createElementNS(SVG_NS, 'defs');
 
-  series.addEventListener('series-hit', (ev) => {
-    const {x, y} = ev.detail;
-    series.append(marker);
-    series.classList.add('series-active');
-    marker.setAttribute('cx', x * RUN_SCALE_X + 'px');
-    marker.setAttribute('cy', y * RUN_SCALE_Y + 'px');
-  });
+    // need to create SVG brightness filter b/c CSS filters
+    // don't work on SVG elements in Chrome
+    const highlightFilter = document.createElementNS(SVG_NS, 'filter');
+    highlightFilter.id = 'filter-highlight';
+    highlightFilter.innerHTML = `
+      <feComponentTransfer in="SourceGraphic" result="boost">
+        <feFuncR type="linear" slope="3" />
+        <feFuncG type="linear" slope="3" />
+        <feFuncB type="linear" slope="3" />
+      </feComponentTransfer>
+      <feGaussianBlur in="boost" stdDeviation="2.5" result="glow"/>
+      <feMerge>
+          <feMergeNode in="glow"/>
+          <feMergeNode in="boost"/>
+      </feMerge>
+    `;
 
-  series.addEventListener('series-clear', () => {
-    series.classList.remove('series-active');
-    marker.remove();
-  });
+    defs.append(highlightFilter);
 
-  return series;
-}
-
-/**
- * Creates a new run (continuous group of points within a series).
- *
- * @param {number[]} history The historical positions of this track on the
- * leaderboard.
- * @param {number} start The index of the first entry in this run.
- * @param {number} end The index of the last entry in this run.
- * @returns {SVGGElement} The elements that compose this run.
- */
-function createRun(history, start, end) {
-  const runContainer = document.createElementNS(SVG_NS, 'g');
-
-  const points = history
-      .slice(start, end)
-      .map((val, idx) => ({
-        x: (idx + start) * RUN_SCALE_X,
-        y: val * RUN_SCALE_Y,
-      }));
-
-  const pointsStr = points
-      .map(({x, y}) => `${x}, ${y}`)
-      .join(' ');
-
-  // line that is displayed
-  const line = document.createElementNS(SVG_NS, 'polyline');
-  line.setAttribute('class', 'series-run');
-  line.setAttribute('points', pointsStr);
-
-  // secondary (wider) invisible line to make it easier to hit the line with the
-  // mouse
-  const touchTarget = document.createElementNS(SVG_NS, 'polyline');
-  touchTarget.setAttribute('class', 'series-run-touch-target');
-  touchTarget.setAttribute('points', pointsStr);
-
-  const startCap = document.createElementNS(SVG_NS, 'circle');
-  const endCap = document.createElementNS(SVG_NS, 'circle');
-
-  startCap.setAttribute('class', 'series-run-cap');
-  endCap.setAttribute('class', 'series-run-cap');
-
-  startCap.setAttribute('r', '5');
-  startCap.setAttribute('cx', points[0].x + 'px');
-  startCap.setAttribute('cy', points[0].y + 'px');
-  endCap.setAttribute('r', '5');
-  endCap.setAttribute('cx', points[points.length - 1].x + 'px');
-  endCap.setAttribute('cy', points[points.length - 1].y + 'px');
-
-  runContainer.append(startCap, line, touchTarget, endCap);
-  return runContainer;
-}
-
-/**
- * Creates SVG <defs> to use for things such as filters.
- *
- * @returns {SVGDefsElement} Defs
- */
-function createDefs() {
-  const defs = document.createElementNS(SVG_NS, 'defs');
-
-  // need to create SVG brightness filter b/c CSS filters
-  // don't work on SVG elements in Chrome
-  const highlightFilter = document.createElementNS(SVG_NS, 'filter');
-  highlightFilter.id = 'filter-highlight';
-  highlightFilter.innerHTML = `
-    <feComponentTransfer in="SourceGraphic" result="boost">
-      <feFuncR type="linear" slope="3" />
-      <feFuncG type="linear" slope="3" />
-      <feFuncB type="linear" slope="3" />
-    </feComponentTransfer>
-    <feGaussianBlur in="boost" stdDeviation="2.5" result="glow"/>
-    <feMerge>
-      <feMergeNode in="glow"/>
-      <feMergeNode in="boost"/>
-    </feMerge>
-  `;
-
-  defs.append(highlightFilter);
-
-  return defs;
-}
-
-/**
- * Creates gridlines that appear in the back of the chart.
- *
- * @param {Date[]} dates The dates that are covered by this chart
- * @returns {SVGGElement} An SVG group containing the grid.
- */
-function createGrid(dates) {
-  const grid = document.createElementNS(SVG_NS, 'g');
-  grid.classList.add('grid');
-
-  for (let i = 0; i < dates.length; i++) {
-    const verticalLine = document.createElementNS(SVG_NS, 'line');
-    verticalLine.classList.add('date-line');
-
-    verticalLine.setAttribute('x1', RUN_SCALE_X * i + 'px');
-    verticalLine.setAttribute('x2', RUN_SCALE_X * i + 'px');
-    verticalLine.setAttribute('y1', '0px');
-    verticalLine.setAttribute('y2', RUN_SCALE_Y * (NUM_POSITIONS + 0.5) + 'px');
-
-    grid.append(verticalLine);
+    return defs;
   }
 
-  return grid;
+  /**
+   * Creates gridlines that appear in the back of the chart.
+   *
+   * @returns {SVGGElement} An SVG group containing the grid.
+   * @private
+   */
+  createGrid() {
+    const grid = document.createElementNS(SVG_NS, 'g');
+    grid.classList.add('grid');
+
+    for (let i = 0; i < this.dates.length; i++) {
+      const verticalLine = document.createElementNS(SVG_NS, 'line');
+      verticalLine.classList.add('date-line');
+
+      verticalLine.setAttribute('x1', RUN_SCALE_X * i + 'px');
+      verticalLine.setAttribute('x2', RUN_SCALE_X * i + 'px');
+      verticalLine.setAttribute('y1', '0px');
+      verticalLine.setAttribute('y2', RUN_SCALE_Y * NUM_POSITIONS + 'px');
+
+      grid.append(verticalLine);
+    }
+
+    return grid;
+  }
+
+  /**
+   * Creates a tooltip that responds to the user pointing at things on the
+   * chart.
+   *
+   * @returns {HTMLDivElement} An element for the tooltip.
+   * @private
+   */
+  createTooltip() {
+    const tooltip = document.createElement('div');
+    tooltip.classList.add('chart-tooltip');
+
+    const rank = document.createElement('span');
+    rank.classList.add('chart-tooltip-rank');
+    tooltip.append(rank);
+
+    const title = document.createElement('span');
+    title.classList.add('chart-tooltip-title');
+    tooltip.append(title);
+
+    const date = document.createElement('span');
+    date.classList.add('chart-tooltip-date');
+    tooltip.append(date);
+
+    const format = new Intl.DateTimeFormat(
+        undefined,
+        {year: 'numeric', month: 'long', day: '2-digit'},
+    );
+
+    this.shadowRoot.addEventListener('series-hit', (ev) => {
+      const {key, x, y} = ev.detail;
+      const chartBounds = this.getBoundingClientRect();
+
+      // convert SVG coords to HTML coords
+      let pos = this.svg.createSVGPoint();
+      pos.x = x * RUN_SCALE_X;
+      pos.y = y * RUN_SCALE_Y;
+      pos = pos.matrixTransform(this.svg.getScreenCTM());
+      pos.x -= chartBounds.x;
+      pos.y -= chartBounds.y;
+
+      tooltip.classList.add('chart-tooltip-active');
+      tooltip.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+
+      title.innerText = key;
+      rank.innerText = y;
+      date.innerText = format.format(this.dates[x]);
+    });
+
+    this.shadowRoot.addEventListener('series-clear', () => {
+      tooltip.classList.remove('chart-tooltip-active');
+    });
+
+    return tooltip;
+  }
 }
 
-/**
- * Creates a tooltip that responds to the user pointing at things on the chart.
- *
- * @param {HTMLElement} container The element that contains the whole chart.
- * @param {SVGSVGElement} svg The SVG element for the chart.
- * @param {Map<string, number[]>} rankingHistories The ranking history for each
- * track.
- * @param {Date[]} rankingDates The dates corresponding to each entry in
- * rankingHistories.
- * @returns {HTMLDivElement} An element for the tooltip.
- */
-function createTooltip(container, svg, rankingHistories, rankingDates) {
-  const tooltip = document.createElement('div');
-  tooltip.classList.add('chart-tooltip');
-
-  const rank = document.createElement('span');
-  rank.classList.add('chart-tooltip-rank');
-  tooltip.append(rank);
-
-  const title = document.createElement('span');
-  title.classList.add('chart-tooltip-title');
-  tooltip.append(title);
-
-  const date = document.createElement('span');
-  date.classList.add('chart-tooltip-date');
-  tooltip.append(date);
-
-  const format = new Intl.DateTimeFormat(
-      undefined,
-      {year: 'numeric', month: 'long', day: '2-digit'},
-  );
-
-  svg.addEventListener('series-hit', (ev) => {
-    const {key, x, y} = ev.detail;
-    const chartBounds = container.getBoundingClientRect();
-
-    // convert SVG coords to HTML coords
-    let pos = svg.createSVGPoint();
-    pos.x = x * RUN_SCALE_X;
-    pos.y = y * RUN_SCALE_Y;
-    pos = pos.matrixTransform(svg.getScreenCTM());
-    // position of tooltip is relative to boundary of chart
-    pos.x -= chartBounds.x;
-    pos.y -= chartBounds.y;
-
-    tooltip.classList.add('chart-tooltip-active');
-    tooltip.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
-
-    title.innerText = key;
-    rank.innerText = y;
-    date.innerText = format.format(rankingDates[x]);
-  });
-
-  svg.addEventListener('series-clear', () => {
-    tooltip.classList.remove('chart-tooltip-active');
-  });
-
-  return tooltip;
-}
+customElements.define('gdpr-chart', GdprChart);
