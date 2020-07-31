@@ -46,17 +46,30 @@ function createBarChart(chartValues, chartCategories, maxChartVal) {
     bar.setAttribute('x', GRAPH_LEFT_PADDING);
     bar.setAttribute('y', graphTopPadding + barContainerHeight * i);
 
+    const value = document.createElementNS(SVG_NS, 'text');
+    g.append(value);
+    value.setAttribute('class', 'bar-value');
+    value.setAttribute('x', 3 * GRAPH_LEFT_PADDING);
+    value.setAttribute('y', barContainerHeight * i + barThickness);
+    value.setAttribute('text-anchor', 'middle');
+    value.fill = 'white';
+    value.textContent = chartValues[i];
+
     const barTextContainer = document.getElementById('bar-text');
     const category = document.createElement('div');
     barTextContainer.appendChild(category);
     category.setAttribute('class', 'category');
     category.textContent = chartCategories[i];
+
+
   }
 }
 
-GENRE_ANALYSIS.then((DATA) => {
-  createBarChart(
-      Object.values(DATA.genreData),
-      Object.keys(DATA.genreData),
-      DATA.maxGenreCount);
-});
+// GENRE_ANALYSIS.then((DATA) => {
+//   createBarChart(
+//       Object.values(DATA.genreData),
+//       Object.keys(DATA.genreData),
+//       DATA.maxGenreCount);
+// });
+
+createBarChart([2,1], ["hello", "bye"], 2)
