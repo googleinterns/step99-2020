@@ -1,0 +1,38 @@
+.hero {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  width: 100%; /* don't use 100vw, that will cause horizontal scrollbar */
+  height: 100vh;
+}
+
+#vis {
+  width: 50vh;
+
+  height: 60vh;
+  margin-left: 0;
+
+  background-color: #222425;
+}
+
+#graph {
+  display: inline-block;
+  width: 70%;
+}
+
+.bar {
+  cursor: pointer;
+
+  transition: fill .3s ease;
+
+  fill: var(--color-accent-primary-2);
+}
+
+.bar:hover, .bar:focus {
+  fill: var(--color-accent-special);
+}
+
+#bar-text {
+  display: inline-block;
+  width: 25%;
+}
