@@ -1,3 +1,5 @@
+import {GENRE_ANALYSIS} from '/js/genre.js';
+
 class HeatMapRow {
   /**
    * format for a row for heat map values obj
@@ -36,16 +38,15 @@ function makeBinaryArr(arr, total) {
 /**
  * turns array of data into heat map
  * @param {number[]} data array of all 0s/1s heat map data
- * @param {number} dataLength size of data array
  * @returns {HeatMapRow[]} square matrix of HeatMapValues for HeatMap
  */
-function createHeatMapValues(data, dataLength) {
+function createHeatMapValues(data) {
   // heat map should have equal length and width
-  const numRows = Math.ceil(Math.sqrt(dataLength));
+  const numRows = Math.ceil(Math.sqrt(data.length));
 
   const heatMapValues = [];
   let row;
-  for (let i = 0; i < dataLength; i += numRows) {
+  for (let i = 0; i < data.length; i += numRows) {
     row = new HeatMapRow(data.slice(i, i + numRows));
     heatMapValues.push(row);
   }
@@ -54,12 +55,11 @@ function createHeatMapValues(data, dataLength) {
 
 /**
  * renders heat map onto html
- * @param {number[]} data array of all 0s/1s heat map data
- * @param {number} dataLength size of data array
+ * @param {number[]} allBinaryData array of all 0s/1s heat map data
  */
-function createHeatMap(data, dataLength) {
+function createHeatMap(allBinaryData) {
   const options = {
-    series: createHeatMapValues(data, dataLength),
+    series: createHeatMapValues(allBinaryData),
     chart: {
       height: '100%',
       width: '100%',
@@ -91,4 +91,8 @@ function createHeatMap(data, dataLength) {
   chart.render();
 }
 
-createHeatMap(likedMusicBinaryHist, TOTAL_LIKED);
+GENRE_ANALYSIS.then((DATA) => {
+  const LIKED_MUSIC_BINARY_HIST = 
+    makeBinaryArr(DATA.likedMusicHistory, DATA.totalLiked);
+  createHeatMap(LIKED_MUSIC_BINARY_HIST);
+});
