@@ -56,21 +56,19 @@ public class AnalysisCache {
 
   public static void loadCache()
       throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
-
     try {
       cipher.init(Cipher.DECRYPT_MODE, generateKey());
       CipherInputStream inFile =
           new CipherInputStream(new BufferedInputStream(new FileInputStream(CACHE_FILE)), cipher);
       ObjectInputStream inData = new ObjectInputStream(inFile);
       SealedObject encodedResponse = (SealedObject) inData.readObject();
-      responseMap = (HashMap<String, AnalysisGroup>) encodedResponse.getObject(cipher);
+      cacheMap = (HashMap<String, CacheValue>) encodedResponse.getObject(cipher);
       inData.close();
       inFile.close();
     } catch (IOException e) {
       e.printStackTrace();
       return;
     } catch (ClassNotFoundException c) {
-      System.out.println("Analysis Group class not found");
       c.printStackTrace();
       return;
     }
