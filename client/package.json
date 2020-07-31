@@ -4,17 +4,21 @@
   "description": "2020 STEP Internship Capstone",
   "main": "index.html",
   "dependencies": {
-    "eslint-config-google": "^0.14.0",
     "eslint": "^7.2.0",
+    "eslint-config-google": "^0.14.0",
     "eslint-plugin-jsdoc": "^27.1.2",
     "stylelint": "^13.6.1",
-    "stylelint-config-recommended": "^3.0.0",
     "stylelint-config-rational-order": "^0.1.2",
+    "stylelint-config-recommended": "^3.0.0",
     "stylelint-order": "^4.1.0"
   },
   "devDependencies": {
     "@types/c3": "^0.7.4",
     "@types/d3": "^5.7.2",
+    "@types/gapi": "0.0.39",
+    "@types/gapi.auth2": "0.0.52",
+    "@types/gapi.client": "^1.0.3",
+    "@types/google.picker": "0.0.34",
     "@types/google.visualization": "0.0.53",
     "@types/zip.js": "^2.0.28",
     "live-server": "^1.2.1",

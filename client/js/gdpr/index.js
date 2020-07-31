@@ -9,10 +9,13 @@
 import {
   collateStreamingData, getStreamingData, getStreamingHistory,
 } from './analysis.js';
+import {showPicker} from '../file-upload/gdrive-picker.js';
 import './chart.js';
 import './table.js';
 
 const {zip} = window;
+
+showPicker();
 
 zip.workerScriptsPath = '/js/zip/';
 const btnUpload =
