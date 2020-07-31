@@ -65,11 +65,11 @@ function createBarChart(chartValues, chartCategories, maxChartVal) {
   }
 }
 
-// GENRE_ANALYSIS.then((DATA) => {
-//   createBarChart(
-//       Object.values(DATA.genreData),
-//       Object.keys(DATA.genreData),
-//       DATA.maxGenreCount);
-// });
+GENRE_ANALYSIS.then((DATA) => {
+  createBarChart(
+      Object.values(DATA.genreData),
+      Object.keys(DATA.genreData),
+      DATA.maxGenreCount);
+});
 
-createBarChart([2,1], ["hello", "bye"], 2)
+// createBarChart([2,1], ["hello", "bye"], 2)
