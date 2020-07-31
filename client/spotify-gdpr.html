@@ -7,8 +7,6 @@
     <base target="_blank">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/spotify-gdpr.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/c3@0.7.18/c3.min.css" integrity="sha256-6keM3+sDUFwuiB+tXRq/HV8tqQYlvarrsoWkx53dSgY=" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/spotify-gdpr-chart.css">
   </head>
   <body>
     <main>
@@ -20,18 +18,20 @@
       <h2 class="header">Get started</h2>
       <div id="get-started">
         <button id="btn-data-upload" class="btn btn-big" type="button">
-          Upload your data
+          Upload your data from your computer
         </button>
 
-        <input id="input-data-upload" type="file" />
+        <input id="input-data-upload" type="file" accept=".zip,application/zip" />
 
-        <button id="btn-get-started" class="btn btn-big" type="button">
-          Sign in with Spotify
+        <button id="btn-data-pick" class="btn btn-big" type="button">
+          Upload your data from Google Drive
         </button>
       </div>
 
-      <div id="chart">
-      </div>
+      <section id="gdpr-visualization">
+        <gdpr-chart id="gdpr-chart"></gdpr-chart>
+        <gdpr-table id="gdpr-table" chart="gdpr-chart"></gdpr-table>
+      </section>
 
       <h2 class="header">How it works</h2>
       <p>
@@ -60,9 +60,9 @@
       </p>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/d3@5.16.0/dist/d3.min.js" integrity="sha256-Xb6SSzhH3wEPC4Vy3W70Lqh9Y3Du/3KxPqI2JHQSpTw=" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/c3@0.7.18/c3.min.js" integrity="sha256-Cm4WCqNXIU+tJa5x6RWhn6MYIjZC9I9RKkZ2HfbFi7M=" crossorigin="anonymous"></script>
+    <script src="https://apis.google.com/js/api.js"></script> 
+    
     <script src="js/zip/zip.js"></script>
-    <script src="js/spotify-gdpr.js" type="module"></script>
+    <script src="js/gdpr/index.js" type="module"></script>
   </body>
 </html>

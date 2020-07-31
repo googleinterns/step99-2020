@@ -28,6 +28,7 @@ enum FileStatus {
   EXISTS
 }
 
+/** Implementation of server side cache that stores API requests to save time and API quota. */
 public class AnalysisCache {
   private static final String CACHE_FILE = "cachedData.txt";
   private static HashMap<String, AnalysisGroup> responseMap = new HashMap<String, AnalysisGroup>();

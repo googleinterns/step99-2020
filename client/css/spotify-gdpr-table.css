@@ -1,0 +1,52 @@
+#table-container {
+  position: relative;
+
+  width: 100%;
+
+  margin: 1rem 0;
+}
+
+.gdpr-table {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  width: 100%;
+}
+
+.gdpr-table-header {
+  padding: 1rem;
+
+  font-weight: 700;
+
+  font-size: 1.25em;
+  text-transform: uppercase;
+}
+
+.gdpr-table-header-rank {
+  text-align: end;
+}
+
+.gdpr-table-header-track {
+  text-align: start;
+}
+
+.gdpr-table-track-selected {
+  background: rgba(255 255 255 / 0.25);
+  border-top: none;
+  border-bottom: none;
+}
+
+.gdpr-table-cell {
+  padding: 0.5rem 1rem;
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  border-top: 1px dashed rgba(255 255 255 / 0.5);
+}
+
+.gdpr-table-track-rank {
+  font-weight: 700;
+  font-size: 1.25em;
+  text-align: end;
+}
