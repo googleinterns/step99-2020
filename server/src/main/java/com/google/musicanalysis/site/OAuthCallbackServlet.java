@@ -89,11 +89,10 @@ public abstract class OAuthCallbackServlet extends HttpServlet {
     var tokenResObj = JsonParser.parseString(tokenResBody).getAsJsonObject();
     var accessToken = tokenResObj.get("access_token");
 
-    res.setContentType("text/html");
-    res.getWriter().printf("<h1>the access token for %s is %s</h1>", getServiceName(), accessToken);
-    
     // store access token in a session as youtube-access-token
     HttpSession session = req.getSession();
     session.setAttribute(getSessionTokenKey(), accessToken.toString());
+
+    res.sendRedirect("/api/oauth/landing");
   }
 }
