@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="STEP Capstone">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/analysis.css">
+    <title>Comment Analysis</title>
+    <base target="_blank">
+  </head>
+
+  <body>
+    <div id="content">
+
+        <div id="opening" class="center">
+            <div id="opening-wrapper">
+                <h1>Youtube Comment Analysis.</h1>
+                <ul>
+                   <li>Enter a video name to see what people think!</li>
+                    <li>Click <a onclick="toggleLightboxVisibility(true)">here</a> to learn more.</li>
+                </ul>
+                <div class="lightbox hide-lightbox" id="info">
+                    <div id="info-box">
+                        <h1>Welcome to my project!</h1>
+                        <h3>Introduction</h3>
+                        <p>
+                           This is my portion of the 2020 Google STEP Capstone project.
+                           With this feature, you can enter in a Youtube video name or ID
+                           and get a solid estimate on how the video was received via
+                           comment analysis. 
+                        </p>
+
+                        <p>
+                           In order to achieve this, I took advantage of the 
+                            <a href="https://cloud.google.com/natural-language">Google Natural Language (NLP)</a> 
+                            and <a href="https://www.perspectiveapi.com/#/home">Google Perspective</a> APIs 
+                            to analyze comments returned to me from the
+                            <a href="https://developers.google.com/youtube/v3">Youtube Data API</a>.
+                        </p>
+                        <h3>Method</h3>
+                        <p>
+                            In order to ensure the most accurate analysis while handling the minimum amount
+                            of data, this tool takes 20 random comments from the Youtube API, aggregates them
+                            into a single string of sentences, and runs the chunk through both the NLP and
+                            Perspective APIs. Here is what each API is responsible for:
+                        </p>
+                        <!--Potentially, we will take the most popular comments.-->
+                        <p>
+                            NLP
+                            <p class="indent">    
+                                NLP returns a magnitude and score value which give us the Overall Response. 
+                                The score value contributes to the corresponding adjective:
+                                Positive, Negative, or Mixed. If a video is "Clearly" one
+                                of these values, NLP returned a high magnitude rating and thus is confident 
+                                that the given data supports its score. Click 
+                                <a href="https://cloud.google.com/natural-language/docs/basics#interpreting_sentiment_analysis_values">
+                                here</a> for the official documentation.
+                            </p>
+                        </p>
+                        <p>
+                            Perspective
+                            <p class="indent">   
+                                Perspective returns a series of probabilities which correspond to attributes such
+                                as Toxicity, Insult, Identity Attack, etc. These probabilities indicate how likely
+                                the text is to have these effects on the readers. It is important to note that all
+                                attributes except for Toxicity are in the experimental phase right now. Click 
+                                <a href="https://github.com/conversationai/perspectiveapi/blob/master/2-api/models.md#all-attribute-types">
+                                here</a> for further explanation. 
+                            </p>
+                        </p>
+                        <h3>Programming techniques</h3>
+                        <p>
+                            I've implemented techniques like caching, pattern-matching, 
+                            search, and string manipulation to provide the best possible experience
+                            and just to have some fun with this. 
+                            The code is all open source and can be found 
+                            <a href="https://github.com/googleinterns/step99-2020">
+                            here</a>.
+                        </p>
+                        <h3>Limitations</h3>
+                        <p>
+                            Unfortunately, there are some limitations on how the tool can work 
+                            since this technically is a Google product and I am under 
+                            the jurisdiction of the company. Here are the biggest ones:
+                            <ul>
+                                <li>
+                                    The API quota only allows for 94 search calls a day, 
+                                    assuming no visitors use the Youtube API on one of my podmates' pages.
+                                    Please use a video ID if you can!
+                                </li>
+                                <li>
+                                    I can only fetch and parse through so many comments with the small quota. 
+                                    The video matching and comment parsing algorithms I have are decent, but
+                                    they are constrained.
+                                </li>
+                            </ul>
+                        </p>
+                        <h3 id="right-header"> - Seun Omonije </h3>
+                        <h4><a onclick="toggleLightboxVisibility(false)"">Click here to close.</a></h4>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="flex-row center" id="upper-content">
+        </div>
+        
+        <div class = "flex-row center">
+            <div id="header-wrapper">
+                <h1>Enter video id or name below:</h1>
+            </div>
+        </div>
+
+        <div class="flex-row center">
+            <div id="search-wrapper">
+                <input type="text" id="searchbar" />
+                <button id="sendbutton">Send</button>
+            </div>
+        </div>
+
+        <div class="flex-row" id="middle-content">
+            <div class="flex-column">
+                <h2 class="hidden" id="commentHeader">Featured comments:</h2>
+                <ol id="list"></ol>
+                <div id="videocard-wrapper">
+                </div>
+            </div>
+            <div class="flex-column">
+                <div class="grid-container" id="charts"></div>
+            </div>
+        </div>
+    </div>
+  </body>
+  <script src="js/analysis.js"></script>
+  <script src="js/caching.js"></script>
+</html>
