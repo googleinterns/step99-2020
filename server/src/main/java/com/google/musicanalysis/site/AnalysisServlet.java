@@ -48,7 +48,7 @@ public class AnalysisServlet extends HttpServlet {
       commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
     }
 
-    ArrayList<CommentLikes> commentArray = retrieveComments(commentsJson);
+    ArrayList<Comment> commentArray = retrieveComments(commentsJson);
     String cumulativeComments = convertToString(commentArray);
 
     nameArgs.put("part", "snippet");
@@ -184,8 +184,8 @@ public class AnalysisServlet extends HttpServlet {
    * @param response The JSON string to be parsed.
    * @return An ArrayList with each comment
    */
-  private ArrayList<CommentLikes> retrieveComments(String response) {
-    ArrayList<CommentLikes> commentList = new ArrayList<>();
+  private ArrayList<Comment> retrieveComments(String response) {
+    ArrayList<Comment> commentList = new ArrayList<>();
 
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
@@ -209,7 +209,7 @@ public class AnalysisServlet extends HttpServlet {
               .getAsInt();
 
       String filteredComment = filterComment(topComment);
-      CommentLikes commentAndLikes = new CommentLikes(filteredComment, likes);
+      Comment commentAndLikes = new Comment(filteredComment, likes);
       commentList.add(commentAndLikes);
     }
 
@@ -223,11 +223,11 @@ public class AnalysisServlet extends HttpServlet {
    * @param comments The array to be condensed.
    * @return A properly formatted String
    */
-  private String convertToString(ArrayList<CommentLikes> comments) {
+  private String convertToString(ArrayList<Comment> comments) {
     StringBuilder res = new StringBuilder();
 
-    for (CommentLikes commentAndLikes : comments) {
-      String comment = commentAndLikes.comment;
+    for (Comment commentAndLikes : comments) {
+      String comment = commentAndLikes.text;
 
       comment = comment.replace("\"", "");
       // Make sure each comment is treated as its own sentence
@@ -256,7 +256,7 @@ public class AnalysisServlet extends HttpServlet {
     // Handles non-ASCII characters, newlines,
     // trimmed quotes, embedded escaped quotes.
     // Order matters.
-    filteredComment = filteredComment.replaceAll("[^\\x00-\\x7F]", "");
+    filteredComment = filteredComment.replaceAll("(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])", "");
     filteredComment = String.join("\n", filteredComment.split("\\\\n"));
     filteredComment = filteredComment.substring(1, filteredComment.length() - 1);
     filteredComment = filteredComment.replace("\\\"", "");
