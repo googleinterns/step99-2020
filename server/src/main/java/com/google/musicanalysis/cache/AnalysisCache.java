@@ -7,6 +7,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -31,13 +32,15 @@ enum FileStatus {
 /** Implementation of server side cache that stores API requests to save time and API quota. */
 public class AnalysisCache {
   private static final String CACHE_FILE = "cachedData.txt";
-  private static HashMap<String, AnalysisGroup> responseMap = new HashMap<String, AnalysisGroup>();
+  private static HashMap<String, CacheValue> cacheMap = new HashMap<String, CacheValue>();
   private static Cipher cipher;
+  private static FileStatus currentFileStatus;
 
   private static volatile AnalysisCache AnalysisCacheObject;
 
   private AnalysisCache() throws NoSuchAlgorithmException, NoSuchPaddingException {
     this.cipher = Cipher.getInstance("Blowfish");
+    currentFileStatus = createFile();
   }
 
   // Singleton paradigm ensures cache can only be loaded once
@@ -60,10 +63,17 @@ public class AnalysisCache {
       cipher.init(Cipher.DECRYPT_MODE, generateKey());
       CipherInputStream inFile =
           new CipherInputStream(new BufferedInputStream(new FileInputStream(CACHE_FILE)), cipher);
-      ObjectInputStream inData = new ObjectInputStream(inFile);
-      SealedObject encodedResponse = (SealedObject) inData.readObject();
-      cacheMap = (HashMap<String, CacheValue>) encodedResponse.getObject(cipher);
-      inData.close();
+      ObjectInputStream inData = null;
+      try {
+        //double wrapping to determine if there's data to read
+        inData = new ObjectInputStream(inFile);
+        SealedObject encodedResponse = (SealedObject) inData.readObject();
+        inData.close();
+        cacheMap = (HashMap<String, CacheValue>) encodedResponse.getObject(cipher);
+      } catch(EOFException err) {
+        inFile.close();
+        return;
+      }
       inFile.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -77,7 +87,7 @@ public class AnalysisCache {
   public static void saveCache() throws InvalidKeyException, IllegalBlockSizeException {
     try {
       cipher.init(Cipher.ENCRYPT_MODE, generateKey());
-      SealedObject sealedObject = new SealedObject(responseMap, cipher);
+      SealedObject sealedObject = new SealedObject(cacheMap, cipher);
       CipherOutputStream outFile =
           new CipherOutputStream(
               new BufferedOutputStream(new FileOutputStream(CACHE_FILE)), cipher);
@@ -90,17 +100,17 @@ public class AnalysisCache {
     }
   }
 
-  public static void add(String requestUrl, AnalysisGroup responseData) {
-    responseMap.put(requestUrl, responseData);
+  public static void add(String requestUrl, VideoAnalysis responseData) {
+    cacheMap.put(requestUrl, new CacheValue(responseData));
   }
 
-  public static AnalysisGroup search(String requestUrl) {
+  public static CacheValue search(String requestUrl) {
     // map.get() returns null if not match
-    return responseMap.get(requestUrl);
+    return cacheMap.get(requestUrl);
   }
 
   public static void delete(String requestUrl) {
-    responseMap.remove(requestUrl);
+    cacheMap.remove(requestUrl);
   }
 
   private static FileStatus createFile() {
