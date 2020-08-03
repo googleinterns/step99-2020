@@ -101,6 +101,7 @@ public class YoutubeServlet extends HttpServlet {
 
         // next Page Token must be an empty string for first http call
         String nextPageToken = "";
+        // make multiple calls to youtube API. A page token determines each call
         while (nextPageToken != null) {
             youtubeResBody = getYoutubeRes(API_KEY, 
                                             accessToken.toString(), 
@@ -113,8 +114,9 @@ public class YoutubeServlet extends HttpServlet {
             }
 
             videos = likedVideoRes.getAsJsonArray("items");
-            videosRetrieved = genreAnalysis
-                                .calculateMusicCount(videosRetrieved, videos);
+            // videosRetrieved keeps track of music video order in calculateMusicCount
+            videosRetrieved += genreAnalysis
+                                .calculateMusicCount(videos, videosRetrieved);
 
             nextPageToken = getNextPageToken(likedVideoRes);
         }

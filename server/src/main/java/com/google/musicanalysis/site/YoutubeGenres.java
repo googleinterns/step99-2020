@@ -34,12 +34,13 @@ public class YoutubeGenres {
 /**
  * parses through youtube liked videos json array,
  * updates hash map to contain frequency count of each music genre
- * @param firstVideoCount the number of videos retrieved before this http call
  * @param videos json array of youtube liked videos
- * @return number of videos retrieved so far
+ * @param firstVideoCount the number of videos retrieved before this http call
+ * @return number of videos retrieved in this call
  */
-  protected int calculateMusicCount(int firstVideoCount, JsonArray videos) {
-    for (int i = 0; i < videos.size(); i++) {
+  protected int calculateMusicCount(JsonArray videos, int firstVideoCount) {
+    int videosSize = videos.size();
+    for (int i = 0; i < videosSize; i++) {
         JsonObject video = videos.get(i).getAsJsonObject();
         JsonObject topicDetails = video.getAsJsonObject("topicDetails");
 
@@ -84,7 +85,7 @@ public class YoutubeGenres {
           }
         }
     }
-    return firstVideoCount + videos.size();
+    return videosSize;
   }
 
 /**
