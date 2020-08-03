@@ -115,7 +115,7 @@ public class YoutubeServlet extends HttpServlet {
             }
 
             videos = likedVideoRes.getAsJsonArray("items");
-            // videosRetrieved keeps track of music video order in calculateMusicCount
+            // videosRetrieved keeps track of music video order in genreAnalysis
             videosRetrieved += genreAnalysis
                                 .calculateMusicCount(videos, videosRetrieved);
 
