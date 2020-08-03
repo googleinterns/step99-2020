@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.regex.Matcher; 
 import java.util.regex.Pattern; 
+import java.time.Instant;
 
 @WebServlet("/api/analysis")
 public class AnalysisServlet extends HttpServlet {
@@ -25,6 +26,7 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
+    long ONE_DAY_IN_NANOSECONDS = (long)(8.64 * Math.pow(10, 13));
     String userInput = req.getParameter("name");
 
     // Use like this: {url_parameter, value}
@@ -38,6 +40,22 @@ public class AnalysisServlet extends HttpServlet {
     commentArgs.put("videoId", userInput);
     String commentsJson;
     
+    // Runs input through the cache first
+    CacheValue cachedData = AnalysisCache.retrieve(userInput);
+    if (cachedData != null) {
+      long thisInstant = Instant.now().getEpochSecond();
+      long whenEntryCreated = cachedData.timestamp.getEpochSecond();
+
+      if (thisInstant - whenEntryCreated >= ONE_DAY_IN_NANOSECONDS) {
+        AnalysisCache.delete(userInput);
+      } else {
+        String json = convertToJsonUsingGson(cachedData.responseData);
+        res.setContentType("application/json;");
+        res.getWriter().println(json);
+        return;
+      }
+    }
+
     // Test if its a youtube id from the beginning
     if (userInput.length() == 11 && !thereIsWhiteSpace(userInput)) {
         try {

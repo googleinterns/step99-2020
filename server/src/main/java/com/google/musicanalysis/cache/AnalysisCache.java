@@ -104,7 +104,7 @@ public class AnalysisCache {
     cacheMap.put(requestUrl, new CacheValue(responseData));
   }
 
-  public static CacheValue search(String requestUrl) {
+  public static CacheValue retrieve(String requestUrl) {
     // map.get() returns null if not match
     return cacheMap.get(requestUrl);
   }
