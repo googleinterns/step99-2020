@@ -120,8 +120,8 @@ public class AnalysisServlet extends HttpServlet {
       double weightedScore = 0;
 
       for (Map.Entry<Integer, NLPResult> likesAndNLPResult : unweightedNLPMap.entrySet()) {
-          weightedMagnitude += (likesAndNLPResult.getKey()/totalLikes)*likesAndNLPResult.getValue().magnitude;
-          weightedScore += (likesAndNLPResult.getKey()/totalLikes)*likesAndNLPResult.getValue().score;
+          weightedMagnitude += (likesAndNLPResult.getKey() / totalLikes) * likesAndNLPResult.getValue().magnitude;
+          weightedScore += (likesAndNLPResult.getKey() / totalLikes) * likesAndNLPResult.getValue().score;
       }
 
       return new NLPResult(weightedMagnitude, weightedScore);
