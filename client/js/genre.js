@@ -3,12 +3,13 @@
  * and displays on youtube-genre.html
  */
 
-const genreBlock = document.getElementById('genres');
 
 /**
  * fetches genre count hashmap from /api/youtube and updates html
  */
 async function displayMusicGenre() {
+  const genreBlock = document.getElementById('genres');
+
   // keep track of num_videos in URL w/o reload
   history.pushState('', '', `youtube-genre.html`);
 
