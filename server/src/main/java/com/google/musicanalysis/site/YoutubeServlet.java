@@ -101,7 +101,8 @@ public class YoutubeServlet extends HttpServlet {
 
         // next Page Token must be an empty string for first http call
         String nextPageToken = "";
-        // make multiple calls to youtube API. A page token determines each call
+        // Make multiple paginated calls to youtube API. 
+        // Each call has a new page token
         while (nextPageToken != null) {
             youtubeResBody = getYoutubeRes(API_KEY, 
                                             accessToken.toString(), 
