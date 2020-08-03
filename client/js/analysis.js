@@ -48,14 +48,12 @@ function renderingHandler(videoAnalysis) {
   const commentsRenderTime = totalComments * COMMENT_APPEARANCE_TIME;
   const sentiment = determineSentiment(
       videoAnalysis.magnitudeAndScore.magnitude,
-      videoAnalysis.magnitudeAndScore.score
-      );
+      videoAnalysis.magnitudeAndScore.score);
   setTimeout(() => {
     addFeedbackResult(sentiment);
     createCard(videoAnalysis.videoId, 
                videoAnalysis.videoInfo.name, 
-               videoAnalysis.videoInfo.channel
-               );
+               videoAnalysis.videoInfo.channel);
   }, commentsRenderTime + FEEDBACK_APPEARANCE_TIME);
 }
 
