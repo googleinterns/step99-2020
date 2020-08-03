@@ -281,10 +281,6 @@ svg {
   padding-bottom: 10px;
 }
 
-#opening-wrapper > a {
-  text-decoration: none;
-}
-
 #info-box {
   width: 50%;
   min-width: 400px;
@@ -323,4 +319,8 @@ h4 > a {
 h4 > a:hover {
   color: #9f86c0;
   text-decoration: underline;
+}
+
+#opening-wrapper > a {
+  text-decoration: none;
 }
