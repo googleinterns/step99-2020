@@ -45,10 +45,6 @@ function renderingHandler(videoAnalysis) {
   const list = document.getElementById('list');
   const card = document.getElementById('videocard-wrapper');
    
-  if (videoAnalysis.commentArray.length == 0) {
-      alert("This video doesn't allow comments. Please try another.");
-  }
-
   removeAllChildNodes(charts);
   removeAllChildNodes(list);
   removeAllChildNodes(card);
