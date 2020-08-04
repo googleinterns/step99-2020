@@ -485,7 +485,8 @@ export class GdprChart extends HTMLElement {
    * @private
    */
   updateSeries(seriesContainer, history) {
-    for (const runContainer of seriesContainer.getElementsByClassName('series-run')) {
+    for (const runContainer of
+      seriesContainer.getElementsByClassName('series-run')) {
       const start = parseInt(runContainer.getAttribute('data-run-start'));
       const end = parseInt(runContainer.getAttribute('data-run-end'));
 
