@@ -15,7 +15,8 @@ window.onload = function() {
 async function fetchResponse() {
   const param = document.getElementById('searchbar').value;
   let response = null;
-  if (param == null) {
+  if (param === "") {
+    shakeSearchBar();
     return;
   }
 
@@ -317,3 +318,11 @@ function showLightbox() {
   target.classList.remove('hide-lightbox');
 }
 
+/**
+ * Shakes the search bar and make it glow
+ */
+function shakeSearchBar() {
+    const el = document.getElementById('searchbar');
+    el.classList.add('searchbarglow');
+    el.onanimationend = () => { el.classList.remove('searchbarglow') };
+}
