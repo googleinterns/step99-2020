@@ -43,10 +43,8 @@ function createHeatMapValues(data, dataLength) {
   const numRows = Math.ceil(Math.sqrt(dataLength));
 
   const heatMapValues = [];
-  let row;
   for (let i = 0; i < dataLength; i += numRows) {
-    row = new HeatMapRow(data.slice(i, i + numRows));
-    heatMapValues.push(row);
+    heatMapValues.push(new HeatMapRow(data.slice(i, i + numRows)));
   }
   return heatMapValues.reverse();
 }
