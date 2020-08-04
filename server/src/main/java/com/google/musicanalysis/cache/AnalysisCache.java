@@ -14,6 +14,7 @@ import java.io.ObjectOutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.Map;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -22,6 +23,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SealedObject;
 import javax.crypto.spec.SecretKeySpec;
+import java.time.Instant;
 
 enum FileStatus {
   SUCCESS,
@@ -32,6 +34,8 @@ enum FileStatus {
 /** Implementation of server side cache that stores API requests to save time and API quota. */
 public class AnalysisCache {
   private static final String CACHE_FILE = "cachedData.txt";
+  private static final long ONE_DAY_IN_NANOSECONDS = (long)(8.64 * Math.pow(10, 13));
+
   private static HashMap<String, CacheValue> cacheMap = new HashMap<String, CacheValue>();
   private static Cipher cipher;
   private static FileStatus currentFileStatus;
@@ -98,6 +102,18 @@ public class AnalysisCache {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public static void cleanDayOldEntries() {
+    long now = Instant.now().getEpochSecond();
+
+    for (Map.Entry cachePair : cacheMap.entrySet()) { 
+      CacheValue currentCachedData = (CacheValue)cachePair.getValue();
+      long timeOfCacheEntry = currentCachedData.timestamp.getEpochSecond();
+      if (now - timeOfCacheEntry >= ONE_DAY_IN_NANOSECONDS) {
+        delete((String)cachePair.getKey());
+      }
+    } 
   }
 
   public static void add(String requestUrl, VideoAnalysis responseData) {
