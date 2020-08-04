@@ -2,6 +2,8 @@ const COMMENT_APPEARANCE_TIME = 1500;
 const COMMENT_TO_STOP_AT = 5;
 const FEEDBACK_APPEARANCE_TIME = 1500;
 
+/* global getData */
+
 window.onload = function() {
   // Listen for submission click
   const formSubmit = document.getElementById('sendbutton');
@@ -51,9 +53,9 @@ function renderingHandler(videoAnalysis) {
       videoAnalysis.magnitudeAndScore.score);
   setTimeout(() => {
     addFeedbackResult(sentiment);
-    createCard(videoAnalysis.videoId, 
-               videoAnalysis.videoInfo.name, 
-               videoAnalysis.videoInfo.channel);
+    createCard(videoAnalysis.videoId,
+        videoAnalysis.videoInfo.name,
+        videoAnalysis.videoInfo.channel);
   }, commentsRenderTime + FEEDBACK_APPEARANCE_TIME);
 }
 
@@ -162,16 +164,6 @@ function removeAllChildNodes(parent) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild);
   }
-}
-
-/**
- * Toggles the comment header
- *
- */
-function showCommentHeader() {
-  const el = document.getElementById('commentHeader');
-  el.classList.toggle('hidden', false);
-  el.classList.toggle('fade', true);
 }
 
 /**
@@ -287,6 +279,8 @@ function createSVGElement(el) {
  *
  * @param {boolean} isLightboxClosed determines whether the lightbox is open
  */
+// this function is referenced from HTML
+// eslint-disable-next-line no-unused-vars
 function toggleLightboxVisibility(isLightboxClosed) {
   if (isLightboxClosed === true) {
     showLightbox();

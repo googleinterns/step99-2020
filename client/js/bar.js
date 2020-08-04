@@ -20,6 +20,7 @@ const GRAPH_LEFT_PADDING = 2.5;
 
 /**
  * creates SVG bar chart given chart values and categories
+ *
  * @param {number[]} chartValues array of bar values/lengths
  * @param {string[]} chartCategories array of bar categories/labels
  */
