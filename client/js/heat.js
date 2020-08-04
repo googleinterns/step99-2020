@@ -28,9 +28,8 @@ const likedMusicBinaryHist = makeBinaryArr(LIKED_MUSIC_HIST, TOTAL_LIKED);
 function makeBinaryArr(arr, total) {
   // first fill with 0s then 1s
   const binaryArr = [...Array(total)].fill(0);
-  for (let i = 0; i < arr.length; i++) {
-    const el = arr[i];
-    binaryArr[el] = 1;
+  for (const heatIndex of arr) {
+    binaryArr[heatIndex] = 1;
   }
   return binaryArr;
 }
@@ -45,10 +44,8 @@ function createHeatMapValues(data) {
   const numRows = Math.ceil(Math.sqrt(data.length));
 
   const heatMapValues = [];
-  let row;
   for (let i = 0; i < data.length; i += numRows) {
-    row = new HeatMapRow(data.slice(i, i + numRows));
-    heatMapValues.push(row);
+    heatMapValues.push(new HeatMapRow(data.slice(i, i + numRows)));
   }
   return heatMapValues.reverse();
 }
@@ -91,8 +88,9 @@ function createHeatMap(allBinaryData) {
   chart.render();
 }
 
-GENRE_ANALYSIS.then((DATA) => {
+GENRE_ANALYSIS.then((genreAnalysisInfo) => {
   const LIKED_MUSIC_BINARY_HIST = 
-    makeBinaryArr(DATA.likedMusicHistory, DATA.totalLiked);
+    makeBinaryArr(genreAnalysisInfo.likedMusicHistory, 
+                  genreAnalysisInfo.totalLiked);
   createHeatMap(LIKED_MUSIC_BINARY_HIST);
 });
