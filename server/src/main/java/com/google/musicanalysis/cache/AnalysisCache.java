@@ -34,7 +34,7 @@ enum FileStatus {
 /** Implementation of server side cache that stores API requests to save time and API quota. */
 public class AnalysisCache {
   private static final String CACHE_FILE = "cachedData.txt";
-  private static final long ONE_DAY_IN_NANOSECONDS = (long)(8.64 * Math.pow(10, 13));
+  private static final long ONE_DAY_IN_SECONDS = 86400;
 
   private static HashMap<String, CacheValue> cacheMap = new HashMap<String, CacheValue>();
   private static Cipher cipher;
@@ -110,7 +110,7 @@ public class AnalysisCache {
     for (Map.Entry cachePair : cacheMap.entrySet()) { 
       CacheValue currentCachedData = (CacheValue)cachePair.getValue();
       long timeOfCacheEntry = currentCachedData.timestamp.getEpochSecond();
-      if (now - timeOfCacheEntry >= ONE_DAY_IN_NANOSECONDS) {
+      if (now - timeOfCacheEntry >= ONE_DAY_IN_SECONDS) {
         delete((String)cachePair.getKey());
       }
     } 
