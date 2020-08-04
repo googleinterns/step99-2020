@@ -54,9 +54,9 @@ function createBarChart(chartValues, chartCategories, maxChartVal) {
   }
 }
 
-GENRE_ANALYSIS.then((DATA) => {
+GENRE_ANALYSIS.then((genreAnalysisInfo) => {
   createBarChart(
-      Object.values(DATA.genreData),
-      Object.keys(DATA.genreData),
-      DATA.maxGenreCount);
+      Object.values(genreAnalysisInfo.genreData),
+      Object.keys(genreAnalysisInfo.genreData),
+      genreAnalysisInfo.maxGenreCount);
 });
