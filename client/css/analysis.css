@@ -93,7 +93,7 @@ input:focus, button:focus {
 
 .card-image {
   width: auto;
-  height: 140px;
+  height: 8.75rem;
 
   border-radius: 5px;
 }
