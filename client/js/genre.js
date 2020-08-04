@@ -3,8 +3,6 @@
  * and displays on youtube-genre.html
  */
 
-document.body.onload = fetchMusicGenre();
-
 /**
  * fetches and returns genre analysis object from /api/youtube
  *
