@@ -1,13 +1,26 @@
 package com.google.musicanalysis.cache;
 
 import com.google.musicanalysis.types.*;
+import com.google.musicanalysis.util.Secrets;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SealedObject;
+import javax.crypto.spec.SecretKeySpec;
 
 enum FileStatus {
   SUCCESS,
@@ -17,19 +30,39 @@ enum FileStatus {
 
 /** Implementation of server side cache that stores API requests to save time and API quota. */
 public class AnalysisCache {
-  private HashMap<String, AnalysisGroup> responseMap;
+  private static final String CACHE_FILE = "cachedData.txt";
+  private static HashMap<String, AnalysisGroup> responseMap = new HashMap<String, AnalysisGroup>();
+  private static Cipher cipher;
 
-  /* Constructor */
-  public AnalysisCache() {
-    this.responseMap = new HashMap<String, AnalysisGroup>();
+  private static volatile AnalysisCache AnalysisCacheObject;
+
+  private AnalysisCache() throws NoSuchAlgorithmException, NoSuchPaddingException {
+    this.cipher = Cipher.getInstance("Blowfish");
   }
 
-  /** Loads the cache file so that the code can manipulate its contents */
-  public void loadCache() {
+  // Singleton paradigm ensures cache can only be loaded once
+  public static AnalysisCache getInstance()
+      throws NoSuchAlgorithmException, NoSuchPaddingException {
+    if (AnalysisCacheObject == null) {
+      // Ensures thread safe
+      synchronized (AnalysisCache.class) {
+        if (AnalysisCacheObject == null) {
+          AnalysisCacheObject = new AnalysisCache();
+        }
+      }
+    }
+    return AnalysisCacheObject;
+  }
+
+  public static void loadCache()
+      throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
     try {
-      FileInputStream inFile = new FileInputStream("cachedData.txt");
+      cipher.init(Cipher.DECRYPT_MODE, generateKey());
+      CipherInputStream inFile =
+          new CipherInputStream(new BufferedInputStream(new FileInputStream(CACHE_FILE)), cipher);
       ObjectInputStream inData = new ObjectInputStream(inFile);
-      responseMap = (HashMap<String, AnalysisGroup>) inData.readObject();
+      SealedObject encodedResponse = (SealedObject) inData.readObject();
+      cacheMap = (HashMap<String, CacheValue>) encodedResponse.getObject(cipher);
       inData.close();
       inFile.close();
     } catch (IOException e) {
@@ -41,12 +74,15 @@ public class AnalysisCache {
     }
   }
 
-  /** Closes the cache file and stores it */
-  public void saveCache() {
+  public static void saveCache() throws InvalidKeyException, IllegalBlockSizeException {
     try {
-      FileOutputStream outFile = new FileOutputStream("cachedData.txt");
+      cipher.init(Cipher.ENCRYPT_MODE, generateKey());
+      SealedObject sealedObject = new SealedObject(responseMap, cipher);
+      CipherOutputStream outFile =
+          new CipherOutputStream(
+              new BufferedOutputStream(new FileOutputStream(CACHE_FILE)), cipher);
       ObjectOutputStream outData = new ObjectOutputStream(outFile);
-      outData.writeObject(this.responseMap);
+      outData.writeObject(sealedObject);
       outData.close();
       outFile.close();
     } catch (IOException e) {
@@ -54,41 +90,22 @@ public class AnalysisCache {
     }
   }
 
-  /**
-   * Adds a <query, responseData> pair to the cache
-   *
-   * @param requestQuery the query string from the requestURL
-   * @param responseData the response data associated with the query
-   */
-  public void add(String requestQuery, AnalysisGroup responseData) {
-    this.responseMap.put(requestQuery, responseData);
+  public static void add(String requestUrl, AnalysisGroup responseData) {
+    responseMap.put(requestUrl, responseData);
   }
 
-  /**
-   * Searches for a match in the cache given a query string.
-   *
-   * @param requestQuery the query string from the requestURL
-   */
-  public AnalysisGroup search(String requestQuery) {
+  public static AnalysisGroup search(String requestUrl) {
     // map.get() returns null if not match
-    return this.responseMap.get(requestQuery);
+    return responseMap.get(requestUrl);
   }
 
-  /**
-   * Deletes a key, value pair from the cache given a query string.
-   *
-   * @param requestQuery the query string from the requestURL
-   */
-  public void delete(String requestQuery) {
-    this.responseMap.remove(requestQuery);
+  public static void delete(String requestUrl) {
+    responseMap.remove(requestUrl);
   }
 
-  private int createFile() {
-    // TODO: use this function to to create a file for the cache if needed.
-    //       This will allow for multiple cache files for different types of
-    //       data.
+  private static FileStatus createFile() {
     try {
-      File file = new File("cachedData.txt");
+      File file = new File(CACHE_FILE);
       if (file.createNewFile()) {
         return FileStatus.CREATED;
       } else {
@@ -98,5 +115,12 @@ public class AnalysisCache {
       e.printStackTrace();
     }
     return FileStatus.SUCCESS;
+  }
+
+  private static SecretKeySpec generateKey() throws IOException {
+    String key = Secrets.getSecretString("CACHE_ENCRYPTION_KEY");
+    byte[] keyData = key.getBytes();
+    SecretKeySpec keySpec = new SecretKeySpec(keyData, "Blowfish");
+    return keySpec;
   }
 }

@@ -10,6 +10,9 @@ export class GdprChart extends HTMLElement {
 
     this.attachShadow({mode: 'open'});
 
+    /**
+     * Horizontal zoom. There is no vertical scrolling.
+     */
     this.zoom = 1;
 
     /** @type {Map<string, number[]>} */
@@ -512,20 +515,20 @@ export class GdprChart extends HTMLElement {
     const points = history
         .slice(start, end)
         .map((val, idx) => ({
-          x: (idx + start) * RUN_SCALE_X,
+          x: (idx + start) * RUN_SCALE_X * this.zoom,
           y: val * RUN_SCALE_Y,
         }));
 
     const pointsStr = points
-        .map(({x, y}) => `${x * this.zoom}, ${y}`)
+        .map(({x, y}) => `${x}, ${y}`)
         .join(' ');
 
     const [startCap, line, endCap] = runContainer.children;
 
     line.setAttribute('points', pointsStr);
 
-    startCap.setAttribute('cx', points[0].x * this.zoom + 'px');
-    endCap.setAttribute('cx', points[points.length - 1].x * this.zoom + 'px');
+    startCap.setAttribute('cx', points[0].x + 'px');
+    endCap.setAttribute('cx', points[points.length - 1].x + 'px');
   }
 
   /**
