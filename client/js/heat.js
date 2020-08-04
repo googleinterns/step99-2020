@@ -26,9 +26,8 @@ const likedMusicBinaryHist = makeBinaryArr(LIKED_MUSIC_HIST, TOTAL_LIKED);
 function makeBinaryArr(arr, total) {
   // first fill with 0s then 1s
   const binaryArr = [...Array(total)].fill(0);
-  for (let i = 0; i < arr.length; i++) {
-    const el = arr[i];
-    binaryArr[el] = 1;
+  for (const heatIndex of arr) {
+    binaryArr[heatIndex] = 1;
   }
   return binaryArr;
 }
