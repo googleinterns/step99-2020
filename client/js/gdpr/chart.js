@@ -456,10 +456,10 @@ export class GdprChart extends HTMLElement {
     this.svg.setAttribute(
         'viewBox',
         '0 ' +
-      // shift down so that lines are vertically centered
-      RUN_SCALE_Y * 0.5 + ' ' +
-      this.dates.length * RUN_SCALE_X * this.zoom + ' ' +
-      NUM_POSITIONS * RUN_SCALE_Y,
+        // shift down so that lines are vertically centered
+        RUN_SCALE_Y * 0.5 + ' ' +
+        this.dates.length * RUN_SCALE_X * this.zoom + ' ' +
+        NUM_POSITIONS * RUN_SCALE_Y,
     );
 
     const seriesElements =
