@@ -15,7 +15,7 @@ window.onload = function() {
 async function fetchResponse() {
   const param = document.getElementById('searchbar').value;
   let response = null;
-  if (param === "") {
+  if (param === '') {
     shakeSearchBar();
     return;
   }
@@ -27,7 +27,7 @@ async function fetchResponse() {
   }
   if (response) {
     if (response.status == 500) {
-      alert("The video you selected is incompatible with this tool. Please try again.");
+      alert('The video you selected is incompatible with this tool. Please try again.');
       return;
     }
     renderingHandler(response);
@@ -44,7 +44,7 @@ function renderingHandler(videoAnalysis) {
   const charts = document.getElementById('charts');
   const list = document.getElementById('list');
   const card = document.getElementById('videocard-wrapper');
-   
+
   removeAllChildNodes(charts);
   removeAllChildNodes(list);
   removeAllChildNodes(card);
@@ -53,14 +53,14 @@ function renderingHandler(videoAnalysis) {
   const commentsRenderTime = totalComments * COMMENT_APPEARANCE_TIME;
   const sentiment = determineSentiment(
       videoAnalysis.magnitudeAndScore.magnitude,
-      videoAnalysis.magnitudeAndScore.score
-      );
+      videoAnalysis.magnitudeAndScore.score,
+  );
   setTimeout(() => {
     addFeedbackResult(sentiment);
-    createCard(videoAnalysis.videoId, 
-               videoAnalysis.videoInfo.name, 
-               videoAnalysis.videoInfo.channel
-               );
+    createCard(videoAnalysis.videoId,
+        videoAnalysis.videoInfo.name,
+        videoAnalysis.videoInfo.channel,
+    );
   }, commentsRenderTime + FEEDBACK_APPEARANCE_TIME);
 }
 
@@ -326,7 +326,9 @@ function showLightbox() {
  * Shakes the search bar and make it glow
  */
 function shakeSearchBar() {
-    const el = document.getElementById('searchbar');
-    el.classList.add('searchbarglow');
-    el.onanimationend = () => { el.classList.remove('searchbarglow') };
+  const el = document.getElementById('searchbar');
+  el.classList.add('searchbarglow');
+  el.onanimationend = () => {
+    el.classList.remove('searchbarglow');
+  };
 }
