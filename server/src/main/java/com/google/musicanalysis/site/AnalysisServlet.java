@@ -209,8 +209,8 @@ public class AnalysisServlet extends HttpServlet {
               .getAsInt();
 
       String filteredComment = filterComment(topComment);
-      Comment commentAndLikes = new Comment(filteredComment, likes);
-      commentList.add(commentAndLikes);
+      Comment comment = new Comment(filteredComment, likes);
+      commentList.add(comment);
     }
 
     return commentList;
@@ -226,19 +226,19 @@ public class AnalysisServlet extends HttpServlet {
   private String convertToString(ArrayList<Comment> comments) {
     StringBuilder res = new StringBuilder();
 
-    for (Comment commentAndLikes : comments) {
-      String comment = commentAndLikes.text;
+    for (Comment comment : comments) {
+      String commentText = comment.text;
 
-      comment = comment.replace("\"", "");
+      commentText = commentText.replace("\"", "");
       // Make sure each comment is treated as its own sentence
       // Not sure char datatype works with regex so used String
-      String lastCharacter = comment.substring(comment.length() - 1);
+      String lastCharacter = commentText.substring(commentText.length() - 1);
       if (!lastCharacter.matches("\\.|!|\\?")) {
-        comment += ". ";
+        commentText += ". ";
       } else {
-        comment += " ";
+        commentText += " ";
       }
-      res.append(comment);
+      res.append(commentText);
     }
 
     return res.toString();
@@ -253,12 +253,20 @@ public class AnalysisServlet extends HttpServlet {
   private String filterComment(String comment) {
     String filteredComment = comment;
 
-    // Handles non-ASCII characters, newlines,
-    // trimmed quotes, embedded escaped quotes.
-    // Order matters.
+    // Removes 4683 different emojis and symbols so that NL and Perspective don't crash
+    // \u00a9 : copyright character
+    // \u00ae : registered sign
+    // \u2000-\u3300 : char code ranges 8192 to 13056
+    // \ud83c,d,e [\ud000-\udfff] : The emoji ranges
     filteredComment = filteredComment.replaceAll("(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])", "");
+    
+    // changes the newlines to a readable format by the front end
     filteredComment = String.join("\n", filteredComment.split("\\\\n"));
+    
+    // Trims the quotes off the edges
     filteredComment = filteredComment.substring(1, filteredComment.length() - 1);
+    
+    // Removes embedded escaped quotes so that NL and Perspective don't mess up
     filteredComment = filteredComment.replace("\\\"", "");
 
     return filteredComment;

@@ -8,7 +8,7 @@ public class Comment implements Serializable {
   public Integer likes;
 
   public Comment(String text, Integer likes) {
-    this.text = comment;
+    this.text = text;
     this.likes = likes;
   }
 }
