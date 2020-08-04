@@ -3,12 +3,10 @@
  * and displays on youtube-genre.html
  */
 
-document.body.onload = fetchMusicGenre();
-
 /**
  * fetches and returns genre analysis object from /api/youtube
  *
- * @returns {JSON object} of youtube genreData and stats
+ * @returns {Promise<object>} An obj containing Youtube genre data and stats
  */
 async function fetchMusicGenre() {
   const response = await fetch('/api/youtube');

@@ -4,6 +4,30 @@ body {
   background-size: 24rem;
 }
 
-#get-started {
-  padding: 1rem 0;
+#gdpr-visualization {
+  display: grid;
+  grid-template-columns: 60% 40%;
+  align-items: center;
+  width: 100vw;
+
+  /* 70rem is max-width of <main>, 5rem is padding, element will take up entire
+  horizontal width of screen and spill out of center column */
+  margin: 2rem calc((min(70rem, 100vw) - 100vw) / 2 - 5rem);
+}
+
+#gdpr-chart, #gdpr-table {
+  background-color: var(--color-background);
+}
+
+#gdpr-table {
+  box-shadow: 0 0 1rem rgba(0 0 0 / 0.25);
+}
+
+#btn-get-started, #btn-data-upload {
+  display: block;
+  margin: 1rem 0;
+}
+
+#input-data-upload {
+  display: none;
 }
