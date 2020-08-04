@@ -89,8 +89,8 @@ function createHeatMap(allBinaryData) {
 }
 
 GENRE_ANALYSIS.then((genreAnalysisInfo) => {
-  const LIKED_MUSIC_BINARY_HIST = 
-    makeBinaryArr(genreAnalysisInfo.likedMusicHistory, 
-                  genreAnalysisInfo.totalLiked);
+  const LIKED_MUSIC_BINARY_HIST = makeBinaryArr(
+      genreAnalysisInfo.likedMusicHistory,
+      genreAnalysisInfo.totalLiked);
   createHeatMap(LIKED_MUSIC_BINARY_HIST);
 });
