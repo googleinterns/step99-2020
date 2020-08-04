@@ -26,6 +26,10 @@ async function fetchResponse() {
     console.error(e);
   }
   if (response) {
+    if (response.status == 500) {
+      alert("The video you selected is incompatible with this tool. Please try again.");
+      return;
+    }
     renderingHandler(response);
   }
 }
@@ -40,6 +44,10 @@ function renderingHandler(videoAnalysis) {
   const charts = document.getElementById('charts');
   const list = document.getElementById('list');
   const card = document.getElementById('videocard-wrapper');
+   
+  if (videoAnalysis.commentArray.length == 0) {
+      alert("This video doesn't allow comments. Please try another.");
+  }
 
   removeAllChildNodes(charts);
   removeAllChildNodes(list);

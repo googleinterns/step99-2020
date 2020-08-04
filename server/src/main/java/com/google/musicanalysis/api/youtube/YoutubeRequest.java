@@ -44,7 +44,7 @@ public class YoutubeRequest {
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     int response = con.getResponseCode();
     if (response != 200) {
-      throw new IOException("couldn't find video id");
+      throw new IOException("issue with getting video in Youtube Request");
     }
 
     BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));
