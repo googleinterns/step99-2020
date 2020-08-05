@@ -92,6 +92,7 @@ function createHeatMap(allBinaryData) {
 }
 
 GENRE_ANALYSIS.then((DATA) => {
+  console.log(DATA);
   const LIKED_MUSIC_BINARY_HIST = 
     makeBinaryArr(DATA.likedMusicHistory, DATA.totalLiked);
   createHeatMap(LIKED_MUSIC_BINARY_HIST);

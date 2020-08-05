@@ -3,8 +3,9 @@ package com.google.musicanalysis.site;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.Gson;
-import java.util.ArrayList;
+import java.util.LinkedHashMap;  
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.Math;
@@ -25,7 +26,8 @@ public class YoutubeGenres {
   public int maxGenreCount = 0;
   // element of value x means xth latest video is music
   // needed for heat map
-  public ArrayList<Integer> likedMusicHistory = new ArrayList<Integer>();
+  LinkedHashMap<Integer, String> likedMusicHistory = 
+    new LinkedHashMap<Integer, String>();
 
   public YoutubeGenres() {
 
@@ -76,7 +78,7 @@ public class YoutubeGenres {
 
         if (isMusic) {
           // likedMusicHistory records video numbers that are music
-          likedMusicHistory.add(firstVideoCount + i);
+          this.updateMusicHistory(firstVideoCount + i, video);
 
           if (totalSubgenres == 0) {
             // video only classified as Music so we update as "Other music"
@@ -111,5 +113,17 @@ public class YoutubeGenres {
     int count = this.genreData.containsKey(topic) ? this.genreData.get(topic) : 0;
     this.genreData.put(topic, count + 1);
     maxGenreCount = Math.max(count + 1, maxGenreCount);
+  }
+
+  /**
+ * updates this.genreData Linked Hashmap with order and video id 
+ * @param order the order which the youtube video was listened to in liked history
+ * @param video Youtube video information 
+ */
+  private void updateMusicHistory(int order, JsonObject video) {
+    JsonPrimitive videoId = video.getAsJsonPrimitive("id");
+    String videoIdStr = videoId.getAsString();
+    
+    this.likedMusicHistory.put(order, videoIdStr);
   }
 }
