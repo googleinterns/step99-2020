@@ -119,9 +119,9 @@ public class AnalysisServlet extends HttpServlet {
       if (totalLikes == 0) {
           // If there are no likes on any comment, we they all need
           // to be weighted equally. There's not enough data to confidently
-          // determine a communities reaction. Setting totallikes++ to avoid error.
+          // determine a communities reaction.
           // This will rarely hit.
-          totalLikes++;
+          return new NLPResult(0, 0);
       }
 
       double weightedMagnitude = 0;
