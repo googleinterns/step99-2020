@@ -49,6 +49,23 @@ btnUploadFile.addEventListener('click', async () => {
 
   const records = await getStreamingData(fileUpload);
 
+  const currentYear = new Date().getFullYear();
+
+  const thisYearRecords = records
+      .filter((record) => record.endTime.getFullYear() === currentYear);
+  const lastYearRecords = records
+      .filter((record) => record.endTime.getFullYear() === currentYear - 1);
+  const oldRecords = records
+      .filter((record) => record.endTime.getFullYear() < currentYear - 1);
+
+  const thisYearTime = thisYearRecords
+      .reduce((time, record) => time + record.msPlayed, 0);
+  const lastYearTime = lastYearRecords
+      .reduce((time, record) => time + record.msPlayed, 0);
+  const oldTime = oldRecords
+      .reduce((time, record) => time + record.msPlayed, 0);
+  const totalTime = thisYearTime + lastYearTime + oldTime;
+
   const collatedRecords = collateStreamingData(records);
 
   const rankings = getStreamingHistory(collatedRecords);
