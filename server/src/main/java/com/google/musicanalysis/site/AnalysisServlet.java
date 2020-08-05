@@ -23,7 +23,7 @@ public class AnalysisServlet extends HttpServlet {
       throws ServletException, IOException {
 
     String input = req.getParameter("name");
-   
+
     assert input == null : "Something went wrong with sending to backend.";
 
     // Use like this: {url_parameter, value}
@@ -59,9 +59,9 @@ public class AnalysisServlet extends HttpServlet {
 
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     
-    HashMap<Integer, NLPResult> unweightedNLPMap = new HashMap<>();
+    HashMap<NLPResult, Integer> unweightedNLPMap = new HashMap<>();
     for (CommentLikes commentAndLikes: commentArray) {
-        unweightedNLPMap.put(commentAndLikes.likes, analyzeWithNLP(commentAndLikes.comment));
+        unweightedNLPMap.put(analyzeWithNLP(commentAndLikes.comment), commentAndLikes.likes);
     }
     NLPResult weightedSentiment = createWeightedSentiment(unweightedNLPMap);
 
@@ -109,19 +109,35 @@ public class AnalysisServlet extends HttpServlet {
    * @param unweightedNLPMap the unweighted map of <like, nlp> pairs
    * @return A weighted NLPResult object
    */
-  private NLPResult createWeightedSentiment(HashMap<Integer, NLPResult> unweightedNLPMap) {
+  private NLPResult createWeightedSentiment(HashMap<NLPResult, Integer> unweightedNLPMap) {
       double totalLikes = 0;
 
-      for (Map.Entry<Integer, NLPResult> likesAndNLPResult : unweightedNLPMap.entrySet()) {
-          totalLikes += (double) likesAndNLPResult.getKey();
+      for (Map.Entry<NLPResult, Integer> likesAndNLPResult : unweightedNLPMap.entrySet()) {
+          totalLikes += (double) likesAndNLPResult.getValue();
+      }
+      
+      if (totalLikes == 0) {
+          // If there are no likes on any comment, we they all need
+          // to be weighted equally. There's not enough data to confidently
+          // determine a communities reaction. Setting totallikes++ to avoid error.
+          // This will rarely hit.
+          totalLikes++;
       }
 
       double weightedMagnitude = 0;
       double weightedScore = 0;
 
-      for (Map.Entry<Integer, NLPResult> likesAndNLPResult : unweightedNLPMap.entrySet()) {
-          weightedMagnitude += (likesAndNLPResult.getKey() / totalLikes) * likesAndNLPResult.getValue().magnitude;
-          weightedScore += (likesAndNLPResult.getKey() / totalLikes) * likesAndNLPResult.getValue().score;
+      for (Map.Entry<NLPResult, Integer> likesAndNLPResult : unweightedNLPMap.entrySet()) {
+          double eachCommentLikeCount = likesAndNLPResult.getValue(); 
+          // If a comment has no likes, this implementation would
+          // not count it's magnitude at all. This seems like a potential
+          // problem, however, if there are no likes on the comments,
+          // there hasn't been enough community interaction to determine
+          // a sentiment, so the tool would return "MIXED".
+          // This situation would rarely be the case, since the relevance
+          // feature selects the most releveant, popular comments anyway.
+          weightedMagnitude += (eachCommentLikeCount / totalLikes) * likesAndNLPResult.getKey().magnitude;
+          weightedScore += (eachCommentLikeCount / totalLikes) * likesAndNLPResult.getKey().score;
       }
 
       return new NLPResult(weightedMagnitude, weightedScore);
