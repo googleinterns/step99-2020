@@ -257,6 +257,17 @@ public class AnalysisServlet extends HttpServlet {
     // \u00a9 : copyright character
     // \u00ae : registered sign
     // \u2000-\u3300 : char code ranges 8192 to 13056
+    //    this range includes: 
+    //     superscripts and subscripts, currency symbols, combining datacritical marks for symbols,
+    //     letterlike symbols, number forms, arrows, mathematical operators, miscellaneous technical,
+    //     control pictures, optical character recognition, enclosed alphanumerics, 
+    //     box drawing, block elements, geometric shapes, miscellaneous symbols,
+    //     dingbats, braille patterns, glagolitic, coptic, georgian supplement,
+    //     and more. Please see:
+    //     https://utf8-chartable.de/unicode-utf8-table.pl
+    //     for all the charcters in this range
+    //                         
+    // 
     // \ud83c,d,e [\ud000-\udfff] : The emoji ranges
     filteredComment = filteredComment.replaceAll("(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])", "");
     
