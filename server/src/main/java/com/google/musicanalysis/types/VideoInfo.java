@@ -1,12 +1,6 @@
 package com.google.musicanalysis.types;
-import java.time.temporal.TemporalAccessor;
-import java.time.format.DateTimeFormatter;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.TimeZone;
-import java.util.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.io.Serializable;
 
 /**
