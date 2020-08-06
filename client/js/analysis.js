@@ -10,7 +10,7 @@ const TEN_MINUTES_IN_SECONDS = 3600;
  * are made within 10 mins of eachother.
  */
 var siteHeaders = new Headers();
-siteHeader.set('Cache-control', `max-age=${TEN_MINUTES_IN_SECONDS}`);
+siteHeaders.set('Cache-control', `max-age=${TEN_MINUTES_IN_SECONDS}`);
 
 window.onload = function() {
   // Listen for submission click
