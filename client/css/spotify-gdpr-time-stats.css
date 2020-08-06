@@ -1,0 +1,46 @@
+#main-container {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+#gdpr-time-stats-hero {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  margin: 2rem 0;
+
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+#gdpr-time-stats-hero p {
+  margin: 1rem 0;
+}
+
+#gdpr-time-stats-total {
+  color: var(--color-accent-primary-1);
+  font-size: 5rem;
+  font-family: 'Work Sans', sans-serif;
+}
+
+#gdpr-time-stats-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+
+  font-weight: 900;
+}
+
+#gdpr-time-stats-breakdown section {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
+.gdpr-time-stats-breakdown-number {
+  color: var(--color-accent-primary-2);
+  font-size: 3rem;
+  font-family: 'Work Sans', sans-serif;
+}

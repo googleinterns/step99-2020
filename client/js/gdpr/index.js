@@ -12,6 +12,7 @@ import {
 import {showPicker} from '../file-upload/gdrive-picker.js';
 import './chart.js';
 import './table.js';
+import './time-stats.js';
 
 const {zip} = window;
 
@@ -22,6 +23,9 @@ const chart = document.getElementById('gdpr-chart');
 
 /** @type {import('./table.js').GdprTable} */
 const table = document.getElementById('gdpr-table');
+
+/** @type {import('./time-stats.js').GdprTimeStats} */
+const timeStats = document.getElementById('gdpr-time-stats');
 
 const btnUploadFile =
   /** @type {HTMLButtonElement} */
@@ -47,31 +51,7 @@ btnUploadFile.addEventListener('click', async () => {
   const fileUpload = inputUpload.files.item(0);
   if (!fileUpload) return;
 
-  const records = await getStreamingData(fileUpload);
-
-  const currentYear = new Date().getFullYear();
-
-  const thisYearRecords = records
-      .filter((record) => record.endTime.getFullYear() === currentYear);
-  const lastYearRecords = records
-      .filter((record) => record.endTime.getFullYear() === currentYear - 1);
-  const oldRecords = records
-      .filter((record) => record.endTime.getFullYear() < currentYear - 1);
-
-  const thisYearTime = thisYearRecords
-      .reduce((time, record) => time + record.msPlayed, 0);
-  const lastYearTime = lastYearRecords
-      .reduce((time, record) => time + record.msPlayed, 0);
-  const oldTime = oldRecords
-      .reduce((time, record) => time + record.msPlayed, 0);
-  const totalTime = thisYearTime + lastYearTime + oldTime;
-
-  const collatedRecords = collateStreamingData(records);
-
-  const rankings = getStreamingHistory(collatedRecords);
-
-  chart.load(rankings.history, rankings.dates);
-  table.load(rankings.history, rankings.dates);
+  await processUpload(fileUpload);
 });
 
 const btnPickFile =
@@ -81,12 +61,23 @@ const btnPickFile =
 btnPickFile.addEventListener('click', async () => {
   const fileUpload = await showPicker();
 
-  const records = await getStreamingData(fileUpload);
+  await processUpload(fileUpload);
+});
+
+/**
+ * Processes a GPDR data file uploaded by the user and displays the
+ * visualization.
+ *
+ * @param {Blob} blob The file that was uploaded.
+ */
+async function processUpload(blob) {
+  const records = await getStreamingData(blob);
 
   const collatedRecords = collateStreamingData(records);
 
   const rankings = getStreamingHistory(collatedRecords);
 
+  timeStats.load(records);
   chart.load(rankings.history, rankings.dates);
   table.load(rankings.history, rankings.dates);
-});
+}
