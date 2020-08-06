@@ -1,6 +1,7 @@
 const COMMENT_APPEARANCE_TIME = 1500;
 const COMMENT_TO_STOP_AT = 5;
 const FEEDBACK_APPEARANCE_TIME = 1500;
+const COOLDOWN_TIME = 1000;
 
 window.onload = function() {
   // Listen for submission click
@@ -13,6 +14,7 @@ window.onload = function() {
  *
  */
 async function fetchResponse() {
+  buttonCoolDown();
   const param = document.getElementById('searchbar').value;
   let response = null;
   if (param === '') {
@@ -332,3 +334,14 @@ function shakeSearchBar() {
     el.classList.remove('searchbarglow');
   };
 }
+
+/**
+ * Sets a cooldown period for the submit button
+ */ 
+ function buttonCoolDown() {
+    buttonElement = document.getElementById('sendbutton');
+    buttonElement.disabled = true;
+    setTimeout(() => {
+      buttonElement.disabled = false;
+    }, COOLDOWN_TIME);
+ }

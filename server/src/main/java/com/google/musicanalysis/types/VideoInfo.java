@@ -2,6 +2,11 @@ package com.google.musicanalysis.types;
 import java.time.temporal.TemporalAccessor;
 import java.time.format.DateTimeFormatter;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.TimeZone;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.io.Serializable;
 
 /**
@@ -17,7 +22,8 @@ public class VideoInfo implements Serializable {
     this.name = name;
     this.channel = channel;
     // Necessary steps to get time in workable format
-    TemporalAccessor accessor = DateTimeFormatter.ISO_INSTANT.parse(timeString);
-    this.publishedDate = Instant.from(accessor);
+    // timeString.substring() removes wrapped quotes.
+    OffsetDateTime odt = OffsetDateTime.parse(timeString.substring(1, timeString.length()-1));
+    this.publishedDate = odt.toInstant();
   }
 }
