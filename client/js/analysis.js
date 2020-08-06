@@ -2,6 +2,15 @@ const COMMENT_APPEARANCE_TIME = 1500;
 const COMMENT_TO_STOP_AT = 5;
 const FEEDBACK_APPEARANCE_TIME = 1500;
 const COOLDOWN_TIME = 1000;
+const TEN_MINUTES_IN_SECONDS = 3600;
+
+/**
+ * Sets the headers for the cache.
+ * We only want to pull from the client-side cache if two requests
+ * are made within 10 mins of eachother.
+ */
+var siteHeaders = new Headers();
+siteHeader.set('Cache-control', `max-age=${TEN_MINUTES_IN_SECONDS}`);
 
 window.onload = function() {
   // Listen for submission click
