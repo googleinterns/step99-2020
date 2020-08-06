@@ -41,6 +41,11 @@ export class GdprTimeStats extends HTMLElement {
           <p>hours before last year</p>
         </section>
       </div>
+      <div id="gdpr-time-stats-artists">
+        <h3>Breakdown by artist</h3>
+        <div id="gdpr-time-stats-artists-graph">
+        </div>
+      </div>
     `;
 
     const stylesheet = document.createElement('link');
@@ -50,6 +55,11 @@ export class GdprTimeStats extends HTMLElement {
     this.shadowRoot.append(stylesheet, this.mainContainer);
   }
 
+  /**
+   * Loads raw GDPR data into this time statistics control.
+   *
+   * @param {import("./analysis").GDPRRecord[]} records The GDPR data to load.
+   */
   load(records) {
     const currentYear = new Date().getFullYear();
 
@@ -69,6 +79,19 @@ export class GdprTimeStats extends HTMLElement {
 
     const totalTime = thisYearTime + lastYearTime + oldTime;
 
+    const timeByArtist = records
+        .reduce((map, record) => {
+          map.set(
+              record.artistName,
+              (map.get(record.artistName) || 0) + record.msPlayed,
+          );
+          return map;
+        }, new Map());
+
+    const timeByArtistSorted = Array.from(timeByArtist)
+        .sort((entryA, entryB) => entryB[1] - entryA[1])
+        .slice(0, 50);
+
     this.shadowRoot.getElementById('gdpr-time-stats-total').innerText =
       (totalTime / MS_PER_HOUR).toFixed(0);
 
@@ -80,6 +103,25 @@ export class GdprTimeStats extends HTMLElement {
 
     this.shadowRoot.getElementById('gdpr-time-stats-old').innerText =
       (oldTime / MS_PER_HOUR).toFixed(0);
+
+    const artistGraph =
+      this.shadowRoot.getElementById('gdpr-time-stats-artists-graph');
+
+    for (const [artistName, msPlayed] of timeByArtistSorted) {
+      const bar = document.createElement('div');
+      // how much this artist has been played in comparison to first-place
+      // artist
+      const proportion = msPlayed / timeByArtistSorted[0][1];
+
+      const hoursPlayed = msPlayed / MS_PER_HOUR;
+
+      bar.style.width = `${proportion * 100}%`;
+      bar.innerHTML = `
+        <span class='artist-name'>${artistName}</span>
+        <span class='artist-time'>${hoursPlayed.toFixed(1)} hours</span>`;
+
+      artistGraph.appendChild(bar);
+    }
   }
 }
 
