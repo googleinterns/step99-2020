@@ -17,15 +17,27 @@ export class GdprTimeStats extends HTMLElement {
       </div>
       <div id="gdpr-time-stats-breakdown">
         <section>
-          <span id="gdpr-time-stats-this-year" class="gdpr-time-stats-breakdown-number">?</span>
+          <span
+            id="gdpr-time-stats-this-year"
+            class="gdpr-time-stats-breakdown-number">
+            ?
+          </span>
           <p>hours this year so far</p>
         </section>
         <section>
-          <span id="gdpr-time-stats-last-year" class="gdpr-time-stats-breakdown-number">?</span>
+          <span
+            id="gdpr-time-stats-last-year"
+            class="gdpr-time-stats-breakdown-number">
+            ?
+          </span>
           <p>hours last year</p>
         </section>
         <section>
-          <span id="gdpr-time-stats-old" class="gdpr-time-stats-breakdown-number">?</span>
+          <span
+            id="gdpr-time-stats-old"
+            class="gdpr-time-stats-breakdown-number">
+            ?
+          </span>
           <p>hours before last year</p>
         </section>
       </div>
