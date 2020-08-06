@@ -10,14 +10,6 @@ class HeatMapRow {
   }
 }
 
-// data will be from backend next time
-const TOTAL_LIKED = 13;
-// element value of x means xth latest video is music
-const LIKED_MUSIC_HIST = [1, 4, 7];
-
-// ith value of 1 means ith latest video is music
-const likedMusicBinaryHist = makeBinaryArr(LIKED_MUSIC_HIST, TOTAL_LIKED);
-
 /**
  * converts an array to binary arr
  * @param {number[]} arr values will be indices that hold 1 in output arr
@@ -50,6 +42,8 @@ function createHeatMapValues(data) {
     row = new HeatMapRow(data.slice(i, i + numRows));
     heatMapValues.push(row);
   }
+
+  // heat map reverses the correct order
   return heatMapValues.reverse();
 }
 
@@ -89,11 +83,27 @@ function createHeatMap(allBinaryData) {
 
   const chart = new ApexCharts(document.querySelector('#heat-map'), options);
   chart.render();
+  const gridSqs = document.querySelectorAll('.apexcharts-heatmap-rect');
+  console.log(gridSqs);
+  for (let i = 0; i < gridSqs.length; i++) {
+    gridSqs[i].addEventListener('click', (e) => {
+      console.log(e.target);
+      window.open('https://www.youtube.com/watch?v=VZRun0cbvHA');
+    });
+  }
+}
+
+function getOrderInGrid(i, j, rowSize) {
+  return i * rowSize + j;
+  // i = 1 (row) =>  2
+  // j = 2 (col) => 3
+  // rowSize = 3
+  // 5
 }
 
 GENRE_ANALYSIS.then((DATA) => {
   console.log(DATA);
-  const LIKED_MUSIC_BINARY_HIST = 
-    makeBinaryArr(DATA.likedMusicHistory, DATA.totalLiked);
+  const LIKED_MUSIC_BINARY_HIST =
+    makeBinaryArr(Object.keys(DATA.likedMusicHistory), DATA.totalLiked);
   createHeatMap(LIKED_MUSIC_BINARY_HIST);
 });
