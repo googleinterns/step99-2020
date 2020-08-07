@@ -60,7 +60,7 @@ function renderingHandler(videoAnalysis) {
   const card = document.getElementById('videocard-wrapper');
   const featuredComments = document.getElementById('commentHeader');
   featuredComments.classList.remove('hidden');
-  
+
   removeAllChildNodes(charts);
   removeAllChildNodes(list);
   removeAllChildNodes(card);
@@ -140,7 +140,7 @@ function createCard(id, name, channel) {
  */
 function renderComments(array) {
   const totalComments = Math.min(COMMENT_TO_STOP_AT, array.length);
-  console.log(array);
+
   for (let i = 0; i < totalComments; i++) {
     const filteredValue = array[i].text.replace('\n/g', ' -- ');
     setTimeout(() => {
