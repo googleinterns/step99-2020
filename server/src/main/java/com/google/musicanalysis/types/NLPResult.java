@@ -7,8 +7,8 @@ import java.io.Serializable;
  * end
  */
 public class NLPResult implements Serializable {
-  double magnitude;
-  double score;
+  public double magnitude;
+  public double score;
 
   public NLPResult(double magnitude, double score) {
     this.magnitude = magnitude;
