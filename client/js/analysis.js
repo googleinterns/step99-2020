@@ -58,7 +58,9 @@ function renderingHandler(videoAnalysis) {
   const charts = document.getElementById('charts');
   const list = document.getElementById('list');
   const card = document.getElementById('videocard-wrapper');
-
+  const featuredComments = document.getElementById('commentHeader');
+  featuredComments.classList.remove('hidden');
+  
   removeAllChildNodes(charts);
   removeAllChildNodes(list);
   removeAllChildNodes(card);
@@ -138,8 +140,9 @@ function createCard(id, name, channel) {
  */
 function renderComments(array) {
   const totalComments = Math.min(COMMENT_TO_STOP_AT, array.length);
+  console.log(array);
   for (let i = 0; i < totalComments; i++) {
-    const filteredValue = array[i].comment.replace('\n/g', ' -- ');
+    const filteredValue = array[i].text.replace('\n/g', ' -- ');
     setTimeout(() => {
       addListElement(filteredValue);
     }, (i+1) * COMMENT_APPEARANCE_TIME);

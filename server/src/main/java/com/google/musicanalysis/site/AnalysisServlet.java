@@ -41,6 +41,7 @@ public class AnalysisServlet extends HttpServlet {
 
     commentArgs.put("part", "snippet");
     commentArgs.put("videoId", userInput);
+    commentArgs.put("order", "relevance");
     String commentsJson;
     
     // Runs input through the cache first
@@ -78,13 +79,13 @@ public class AnalysisServlet extends HttpServlet {
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     
     HashMap<NLPResult, Integer> unweightedNLPMap = new HashMap<>();
-    for (CommentLikes commentAndLikes: commentArray) {
-        unweightedNLPMap.put(analyzeWithNLP(commentAndLikes.comment), commentAndLikes.likes);
+    for (Comment comment: commentArray) {
+        unweightedNLPMap.put(analyzeWithNLP(comment.text), comment.likes);
     }
     NLPResult weightedSentiment = createWeightedSentiment(unweightedNLPMap);
 
     VideoAnalysis servletResults =
-        new VideoAnalysis(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo);
+        new VideoAnalysis(perspectiveMap, weightedSentiment, commentArray, videoId, videoInfo);
     
     // Only add to the cache if the video is more than 10 days old,
     // and there are at least 20 comments
