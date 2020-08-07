@@ -13,14 +13,14 @@
   <body>
     <div id="content">
 
-        <div id="opening" class = "center">
+        <div id="opening" class="center">
             <div id="opening-wrapper">
                 <h1>Youtube Comment Analysis.</h1>
                 <ul>
                    <li>Enter a video name to see what people think!</li>
-                    <li>Click <a href="#info" target="_self">here</a> to learn more.</li>
+                    <li>Click <a onclick="toggleLightboxVisibility(true)">here</a> to learn more.</li>
                 </ul>
-                <div class="lightbox" id="info">
+                <div class="lightbox hide-lightbox" id="info">
                     <div id="info-box">
                         <h1>Welcome to my project!</h1>
                         <h3>Introduction</h3>
@@ -53,7 +53,8 @@
                                 The score value contributes to the corresponding adjective:
                                 Positive, Negative, or Mixed. If a video is "Clearly" one
                                 of these values, NLP returned a high magnitude rating and thus is confident 
-                                that the given data supports its score. Click <a href="https://cloud.google.com/natural-language/docs/basics#interpreting_sentiment_analysis_values">
+                                that the given data supports its score. Click 
+                                <a href="https://cloud.google.com/natural-language/docs/basics#interpreting_sentiment_analysis_values">
                                 here</a> for the official documentation.
                             </p>
                         </p>
@@ -63,7 +64,8 @@
                                 Perspective returns a series of probabilities which correspond to attributes such
                                 as Toxicity, Insult, Identity Attack, etc. These probabilities indicate how likely
                                 the text is to have these effects on the readers. It is important to note that all
-                                attributes except for Toxicity are in the experimental phase right now. Click <a href="https://github.com/conversationai/perspectiveapi/blob/master/2-api/models.md#all-attribute-types">
+                                attributes except for Toxicity are in the experimental phase right now. Click 
+                                <a href="https://github.com/conversationai/perspectiveapi/blob/master/2-api/models.md#all-attribute-types">
                                 here</a> for further explanation. 
                             </p>
                         </p>
@@ -72,7 +74,8 @@
                             I've implemented techniques like caching, pattern-matching, 
                             search, and string manipulation to provide the best possible experience
                             and just to have some fun with this. 
-                            The code is all open source and can be found <a href="https://github.com/googleinterns/step99-2020">
+                            The code is all open source and can be found 
+                            <a href="https://github.com/googleinterns/step99-2020">
                             here</a>.
                         </p>
                         <h3>Limitations</h3>
@@ -94,7 +97,7 @@
                             </ul>
                         </p>
                         <h3 id="right-header"> - Seun Omonije </h3>
-                        <h4><a href="#_" target="_self">Click here to close.</a></h4>
+                        <h4><a onclick="toggleLightboxVisibility(false)"">Click here to close.</a></h4>
                     </div>
                 </a>
             </div>

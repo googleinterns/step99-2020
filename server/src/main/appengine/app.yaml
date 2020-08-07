@@ -3,7 +3,6 @@ entrypoint: 'java -cp "*" com.google.musicanalysis.jettymain.Main site.war'
 env_variables:
   DOMAIN: http://capstone-t99-2020.appspot.com
 handlers:
-- url: /.*
-  static_dir: /client
-  login: optional
-  secure: optional
+ - url: /(.*/?)*
+   script: auto
+   secure: always

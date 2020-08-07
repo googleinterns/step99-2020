@@ -1,5 +1,6 @@
 package com.google.musicanalysis.api.youtube;
 
+import com.google.musicanalysis.util.Secrets;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,14 +19,15 @@ import java.util.Map;
  */
 public class YoutubeRequest {
   private static final String BASE_URL = "https://www.googleapis.com/youtube/v3/";
-  private static final String API_KEY = "&key=";
+  private static String API_KEY = "&key=";
 
   private String operation;
   private HashMap<String, String> parameters;
 
-  public YoutubeRequest(String operation, HashMap<String, String> parameters) {
+  public YoutubeRequest(String operation, HashMap<String, String> parameters) throws IOException {
     this.operation = operation;
     this.parameters = parameters;
+    this.API_KEY += Secrets.getSecretString("YOUTUBE_ANALYSIS_KEY");
   }
 
   /**
@@ -41,8 +43,8 @@ public class YoutubeRequest {
 
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     int response = con.getResponseCode();
-    if (response > 400) {
-      return "unreadable";
+    if (response != 200) {
+      throw new IOException("not a video id");
     }
 
     BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));

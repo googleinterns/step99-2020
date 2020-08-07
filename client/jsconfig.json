@@ -3,7 +3,9 @@
     "checkJs": true,
     "target": "es2020",
     "module": "es2020",
-    "strict": true
+    "strictPropertyInitialization": true,
+    "strictNullChecks": true,
+    "strictBindCallApply": true
   },
   "exclude": ["node_modules", "**/node_modules/*"]
 }
