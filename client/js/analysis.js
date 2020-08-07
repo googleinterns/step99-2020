@@ -2,7 +2,7 @@ const COMMENT_APPEARANCE_TIME = 1500;
 const COMMENT_TO_STOP_AT = 5;
 const FEEDBACK_APPEARANCE_TIME = 1500;
 const COOLDOWN_TIME = 1000;
-const TEN_MINUTES_IN_SECONDS = 3600;
+const TEN_MINUTES_IN_SECONDS = 60 * 10;
 
 /**
  * Sets the headers for the cache.
@@ -38,6 +38,7 @@ async function fetchResponse() {
   }
   if (response) {
     if (response.status == 500) {
+      // This will hit when comments are disabled for the video.
       alert('The video you selected is incompatible with this tool. Please try again.');
       return;
     }
