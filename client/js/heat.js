@@ -8,7 +8,7 @@ class HeatMapRow {
   }
 }
 
-// data will be from backend next time
+// TODO: retrieve data from the backend instead of using a hardcoded value
 const TOTAL_LIKED = 13;
 // element value of x means xth latest video is music
 const LIKED_MUSIC_HIST = [1, 4, 7];
@@ -24,7 +24,6 @@ const likedMusicBinaryHist = makeBinaryArr(LIKED_MUSIC_HIST, TOTAL_LIKED);
  * corresponds to value i in input arr
  */
 function makeBinaryArr(arr, total) {
-  // first fill with 0s then 1s
   const binaryArr = [...Array(total)].fill(0);
   for (const heatIndex of arr) {
     binaryArr[heatIndex] = 1;
@@ -46,6 +45,7 @@ function createHeatMapValues(data, dataLength) {
   for (let i = 0; i < dataLength; i += numRows) {
     heatMapValues.push(new HeatMapRow(data.slice(i, i + numRows)));
   }
+  // heat map renders in reverse order
   return heatMapValues.reverse();
 }
 
