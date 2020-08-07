@@ -3,8 +3,10 @@
  * or fetches from the respective APIs
  *
  * @param {string} url the url string to send
- * @returns {object} the response object
+ * @returns {Promise<object>} the response object
  */
+// this function is used in analysis.js
+// eslint-disable-next-line no-unused-vars
 async function getData(url) {
   const cacheVersion = 1;
   const cacheName = `analysisCache-${cacheVersion}`;
@@ -27,7 +29,7 @@ async function getData(url) {
  *
  * @param {Cache} cacheName the name of the cache to search
  * @param {string} url the url string, which is the key
- * @returns {object} response object from the cache
+ * @returns {Promise<object>} response object from the cache
  */
 async function getCachedData(cacheName, url) {
   const cacheStorage = await caches.open(cacheName);

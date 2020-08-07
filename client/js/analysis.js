@@ -12,6 +12,8 @@ const TEN_MINUTES_IN_SECONDS = 60 * 10;
 var siteHeaders = new Headers();
 siteHeaders.set('Cache-control', `max-age=${TEN_MINUTES_IN_SECONDS}`);
 
+/* global getData */
+
 window.onload = function() {
   // Listen for submission click
   const formSubmit = document.getElementById('sendbutton');
@@ -137,7 +139,7 @@ function createCard(id, name, channel) {
 function renderComments(array) {
   const totalComments = Math.min(COMMENT_TO_STOP_AT, array.length);
   for (let i = 0; i < totalComments; i++) {
-    const filteredValue = array[i].replace('\n', '');
+    const filteredValue = array[i].comment.replace('\n/g', ' -- ');
     setTimeout(() => {
       addListElement(filteredValue);
     }, (i+1) * COMMENT_APPEARANCE_TIME);
@@ -161,9 +163,9 @@ function determineSentiment(magnitude, score) {
     isClear = 'CLEARLY ';
   }
 
-  if (score < -0.2) {
+  if (score < -0.35) {
     tone = 'NEGATIVE';
-  } else if (score > 0.2) {
+  } else if (score > 0.35) {
     tone = 'POSITIVE';
   } else {
     tone = 'MIXED';
@@ -181,16 +183,6 @@ function removeAllChildNodes(parent) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild);
   }
-}
-
-/**
- * Toggles the comment header
- *
- */
-function showCommentHeader() {
-  const el = document.getElementById('commentHeader');
-  el.classList.toggle('hidden', false);
-  el.classList.toggle('fade', true);
 }
 
 /**
@@ -306,6 +298,8 @@ function createSVGElement(el) {
  *
  * @param {boolean} isLightboxClosed determines whether the lightbox is open
  */
+// this function is referenced from HTML
+// eslint-disable-next-line no-unused-vars
 function toggleLightboxVisibility(isLightboxClosed) {
   if (isLightboxClosed === true) {
     showLightbox();

@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -26,6 +27,9 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     long ONE_DAY_IN_SECONDS = 86400;
+    long MIN_FRESHNESS_TO_CACHE = 10 * ONE_DAY_IN_SECONDS;
+    long MIN_COMMENT_ACTIVITY_TO_CACHE = 20;
+
     String userInput = req.getParameter("name");
 
     // Use like this: {url_parameter, value}
@@ -63,7 +67,7 @@ public class AnalysisServlet extends HttpServlet {
         commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
     }
 
-    ArrayList<String> commentArray = retrieveComments(commentsJson);
+    ArrayList<Comment> commentArray = retrieveComments(commentsJson);
     String cumulativeComments = convertToString(commentArray);
 
     nameArgs.put("part", "snippet");
@@ -72,7 +76,12 @@ public class AnalysisServlet extends HttpServlet {
     VideoInfo videoInfo = getVideoInfo(nameJson);
 
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
-    NLPResult commentsSentiment = analyzeWithNLP(cumulativeComments);
+    
+    HashMap<NLPResult, Integer> unweightedNLPMap = new HashMap<>();
+    for (CommentLikes commentAndLikes: commentArray) {
+        unweightedNLPMap.put(analyzeWithNLP(commentAndLikes.comment), commentAndLikes.likes);
+    }
+    NLPResult weightedSentiment = createWeightedSentiment(unweightedNLPMap);
 
     VideoAnalysis servletResults =
         new VideoAnalysis(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo);
@@ -81,8 +90,8 @@ public class AnalysisServlet extends HttpServlet {
     // and there are at least 20 comments
     long now = Instant.now().getEpochSecond();
     long instantVideoWasPublished = videoInfo.publishedDate.getEpochSecond();
-    if (now - instantVideoWasPublished > 10*ONE_DAY_IN_SECONDS 
-          && commentArray.size() == 20 ) {
+    if (now - instantVideoWasPublished > MIN_FRESHNESS_TO_CACHE 
+          && commentArray.size() == MIN_COMMENT_ACTIVITY_TO_CACHE) {
         AnalysisCache.add(userInput, servletResults);
     }
 
@@ -132,6 +141,48 @@ public class AnalysisServlet extends HttpServlet {
             Double.valueOf(sentimentObject.get("score").toString()));
 
     return nlpResults;
+  }
+
+  /**
+   * Takes the given map of sentiments and creates a common weighted 
+   * sentiment according to the number of likes each comment receives
+   * out of the sum of the likes of the comments
+   *
+   * @param unweightedNLPMap the unweighted map of <like, nlp> pairs
+   * @return A weighted NLPResult object
+   */
+  private NLPResult createWeightedSentiment(HashMap<NLPResult, Integer> unweightedNLPMap) {
+      double totalLikes = 0;
+
+      for (Map.Entry<NLPResult, Integer> likesAndNLPResult : unweightedNLPMap.entrySet()) {
+          totalLikes += (double) likesAndNLPResult.getValue();
+      }
+      
+      if (totalLikes == 0) {
+          // If there are no likes on any comment, we they all need
+          // to be weighted equally. There's not enough data to confidently
+          // determine a communities reaction.
+          // This will rarely hit.
+          return new NLPResult(0, 0);
+      }
+
+      double weightedMagnitude = 0;
+      double weightedScore = 0;
+
+      for (Map.Entry<NLPResult, Integer> likesAndNLPResult : unweightedNLPMap.entrySet()) {
+          double eachCommentLikeCount = likesAndNLPResult.getValue(); 
+          // If a comment has no likes, this implementation would
+          // not count it's magnitude at all. This seems like a potential
+          // problem, however, if there are no likes on the comments,
+          // there hasn't been enough community interaction to determine
+          // a sentiment, so the tool would return "MIXED".
+          // This situation would rarely be the case, since the relevance
+          // feature selects the most releveant, popular comments anyway.
+          weightedMagnitude += (eachCommentLikeCount / totalLikes) * likesAndNLPResult.getKey().magnitude;
+          weightedScore += (eachCommentLikeCount / totalLikes) * likesAndNLPResult.getKey().score;
+      }
+
+      return new NLPResult(weightedMagnitude, weightedScore);
   }
 
   /**
@@ -226,8 +277,8 @@ public class AnalysisServlet extends HttpServlet {
    * @param response The JSON string to be parsed.
    * @return An ArrayList with each comment
    */
-  private ArrayList<String> retrieveComments(String response) {
-    ArrayList<String> commentList = new ArrayList<>();
+  private ArrayList<Comment> retrieveComments(String response) {
+    ArrayList<Comment> commentList = new ArrayList<>();
 
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
@@ -242,8 +293,17 @@ public class AnalysisServlet extends HttpServlet {
               .get("textOriginal")
               .toString();
 
-      // Remove all non-ASCII characters
-      commentList.add(topComment.replaceAll("[^\\x00-\\x7F]", ""));
+      Integer likes =
+          el.getAsJsonObject()
+              .getAsJsonObject("snippet")
+              .getAsJsonObject("topLevelComment")
+              .getAsJsonObject("snippet")
+              .get("likeCount")
+              .getAsInt();
+
+      String filteredComment = filterComment(topComment);
+      Comment comment = new Comment(filteredComment, likes);
+      commentList.add(comment);
     }
 
     return commentList;
@@ -256,30 +316,56 @@ public class AnalysisServlet extends HttpServlet {
    * @param comments The array to be condensed.
    * @return A properly formatted String
    */
-  private String convertToString(ArrayList<String> comments) {
+  private String convertToString(ArrayList<Comment> comments) {
     StringBuilder res = new StringBuilder();
 
-    for (String comment : comments) {
-      comment = comment.replace("\"", "");
-      // One letter comments should not be considered as sentences since
-      // they bring no value to the analysis. 
-      if (comment.length() <= 1){
-          continue;
-      }
+    for (Comment comment : comments) {
+      String commentText = comment.text;
+
+      commentText = commentText.replace("\"", "");
       // Make sure each comment is treated as its own sentence
       // Not sure char datatype works with regex so used String
-      String lastCharacter = comment.substring(comment.length() - 1);
+      String lastCharacter = commentText.substring(commentText.length() - 1);
       if (!lastCharacter.matches("\\.|!|\\?")) {
-        comment += ". ";
+        commentText += ". ";
       } else {
-        comment += " ";
+        commentText += " ";
       }
-      res.append(comment);
+      res.append(commentText);
     }
 
     return res.toString();
   }
 
+  /**
+   * Filters out a comment string so that it's readable and doesn't break the frontend.
+   *
+   * @param comment The comment to be filtered.
+   * @return A properly formatted comment
+   */
+  private String filterComment(String comment) {
+    String filteredComment = comment;
+
+    // Removes 4683 different emojis and symbols so that NL and Perspective don't crash
+    // \u00a9 : copyright character
+    // \u00ae : registered sign
+    // \u2000-\u3300 : superscripts and subscripts, and other symbols we can ignore.
+    //                         
+    // 
+    // \ud83c,d,e [\ud000-\udfff] : The emoji ranges
+    filteredComment = filteredComment.replaceAll("(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])", "");
+    
+    // changes the newlines to a readable format by the front end
+    filteredComment = String.join("\n", filteredComment.split("\\\\n"));
+    
+    // Trims the quotes off the edges
+    filteredComment = filteredComment.substring(1, filteredComment.length() - 1);
+    
+    // Removes embedded escaped quotes so that NL and Perspective don't mess up
+    filteredComment = filteredComment.replace("\\\"", "");
+
+    return filteredComment;
+  }
   /**
    * Generic function to check for whitespace in a string
    * 
