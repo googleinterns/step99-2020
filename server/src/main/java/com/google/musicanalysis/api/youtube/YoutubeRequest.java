@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class YoutubeRequest {
   private static final String BASE_URL = "https://www.googleapis.com/youtube/v3/";
-  private static String API_KEY = "&key=";
+  private static String API_KEY;
 
   private String operation;
   private HashMap<String, String> parameters;
@@ -27,7 +27,7 @@ public class YoutubeRequest {
   public YoutubeRequest(String operation, HashMap<String, String> parameters) throws IOException {
     this.operation = operation;
     this.parameters = parameters;
-    this.API_KEY += Secrets.getSecretString("YOUTUBE_ANALYSIS_KEY");
+    this.API_KEY = String.format("&key=%s", Secrets.getSecretString("YOUTUBE_ANALYSIS_KEY"));
   }
 
   /**
@@ -44,7 +44,7 @@ public class YoutubeRequest {
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     int response = con.getResponseCode();
     if (response != 200) {
-      throw new IOException("couldn't find video id");
+      throw new IOException("issue with getting video in Youtube Request");
     }
 
     BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));

@@ -1,6 +1,16 @@
 const COMMENT_APPEARANCE_TIME = 1500;
 const COMMENT_TO_STOP_AT = 5;
 const FEEDBACK_APPEARANCE_TIME = 1500;
+const COOLDOWN_TIME = 1000;
+const TEN_MINUTES_IN_SECONDS = 60 * 10;
+
+/**
+ * Sets the headers for the cache.
+ * We only want to pull from the client-side cache if two requests
+ * are made within 10 mins of eachother.
+ */
+var siteHeaders = new Headers();
+siteHeaders.set('Cache-control', `max-age=${TEN_MINUTES_IN_SECONDS}`);
 
 /* global getData */
 
@@ -15,9 +25,11 @@ window.onload = function() {
  *
  */
 async function fetchResponse() {
+  buttonCoolDown();
   const param = document.getElementById('searchbar').value;
   let response = null;
-  if (param == null) {
+  if (param === '') {
+    shakeSearchBar();
     return;
   }
 
@@ -27,6 +39,11 @@ async function fetchResponse() {
     console.error(e);
   }
   if (response) {
+    if (response.status == 500) {
+      // This will hit when comments are disabled for the video.
+      alert('The video you selected is incompatible with this tool. Please try again.');
+      return;
+    }
     renderingHandler(response);
   }
 }
@@ -50,12 +67,14 @@ function renderingHandler(videoAnalysis) {
   const commentsRenderTime = totalComments * COMMENT_APPEARANCE_TIME;
   const sentiment = determineSentiment(
       videoAnalysis.magnitudeAndScore.magnitude,
-      videoAnalysis.magnitudeAndScore.score);
+      videoAnalysis.magnitudeAndScore.score,
+  );
   setTimeout(() => {
     addFeedbackResult(sentiment);
     createCard(videoAnalysis.videoId,
         videoAnalysis.videoInfo.name,
-        videoAnalysis.videoInfo.channel);
+        videoAnalysis.videoInfo.channel,
+    );
   }, commentsRenderTime + FEEDBACK_APPEARANCE_TIME);
 }
 
@@ -309,3 +328,24 @@ function showLightbox() {
   target.classList.remove('hide-lightbox');
 }
 
+/**
+ * Shakes the search bar and make it glow
+ */
+function shakeSearchBar() {
+  const el = document.getElementById('searchbar');
+  el.classList.add('searchbarglow');
+  el.onanimationend = () => {
+    el.classList.remove('searchbarglow');
+  };
+}
+
+/**
+ * Sets a cooldown period for the submit button
+ */ 
+ function buttonCoolDown() {
+    buttonElement = document.getElementById('sendbutton');
+    buttonElement.disabled = true;
+    setTimeout(() => {
+      buttonElement.disabled = false;
+    }, COOLDOWN_TIME);
+ }
