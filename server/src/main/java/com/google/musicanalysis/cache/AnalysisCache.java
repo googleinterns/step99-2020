@@ -34,7 +34,7 @@ enum FileStatus {
 /** Implementation of server side cache that stores API requests to save time and API quota. */
 public class AnalysisCache {
   private static final String CACHE_FILE = "cachedData.txt";
-  private static final long ONE_DAY_IN_SECONDS = 86400;
+  private static final long ONE_DAY_IN_SECONDS = 24 * 60 * 60;
 
   private static HashMap<String, CacheValue> cacheMap = new HashMap<String, CacheValue>();
   private static Cipher cipher;
@@ -60,7 +60,11 @@ public class AnalysisCache {
     }
     return AnalysisCacheObject;
   }
-
+  
+  /**
+   * Loads the cache hashmap from the cache file
+   *
+   */
   public static void loadCache()
       throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
     try {
@@ -88,6 +92,10 @@ public class AnalysisCache {
     }
   }
 
+  /**
+   * Saves and writes the cache hashmap into the file
+   *
+   */
   public static void saveCache() throws InvalidKeyException, IllegalBlockSizeException {
     try {
       cipher.init(Cipher.ENCRYPT_MODE, generateKey());
@@ -104,6 +112,10 @@ public class AnalysisCache {
     }
   }
 
+  /**
+   * Cleans entries that are a day or more old
+   *
+   */
   public static void cleanDayOldEntries() {
     long now = Instant.now().getEpochSecond();
 
@@ -116,15 +128,32 @@ public class AnalysisCache {
     } 
   }
 
+  /**
+   * Addsa value to the cache
+   *
+   * @param requestUrl the request url
+   * @param responseData a VideoAnalysis object with all the data
+   */
   public static void add(String requestUrl, VideoAnalysis responseData) {
     cacheMap.put(requestUrl, new CacheValue(responseData));
   }
-
+ 
+  /**
+   * Retrieves a value from the cache
+   *
+   * @param requestUrl the request url
+   * @return a cached value pair
+   */
   public static CacheValue retrieve(String requestUrl) {
     // map.get() returns null if not match
     return cacheMap.get(requestUrl);
   }
 
+  /**
+   * Deletes a value from the cache
+   *
+   * @param requestUrl the request url
+   */
   public static void delete(String requestUrl) {
     cacheMap.remove(requestUrl);
   }
