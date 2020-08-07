@@ -19,12 +19,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.regex.Matcher; 
 import java.util.regex.Pattern; 
+import java.time.Instant;
 
 @WebServlet("/api/analysis")
 public class AnalysisServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
+    long ONE_DAY_IN_SECONDS = 86400;
+    long MIN_FRESHNESS_TO_CACHE = 10 * ONE_DAY_IN_SECONDS;
+    long MIN_COMMENT_ACTIVITY_TO_CACHE = 20;
 
     String userInput = req.getParameter("name");
 
@@ -39,6 +43,15 @@ public class AnalysisServlet extends HttpServlet {
     commentArgs.put("videoId", userInput);
     String commentsJson;
     
+    // Runs input through the cache first
+    CacheValue cachedData = AnalysisCache.retrieve(userInput);
+    if (cachedData != null) {
+      String json = convertToJsonUsingGson(cachedData.responseData);
+      res.setContentType("application/json;");
+      res.getWriter().println(json);
+      return;
+    }
+
     // Test if its a youtube id from the beginning
     if (userInput.length() == 11 && !thereIsWhiteSpace(userInput)) {
         try {
@@ -72,7 +85,15 @@ public class AnalysisServlet extends HttpServlet {
 
     VideoAnalysis servletResults =
         new VideoAnalysis(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo);
-    AnalysisCache.add(userInput, servletResults);
+    
+    // Only add to the cache if the video is more than 10 days old,
+    // and there are at least 20 comments
+    long now = Instant.now().getEpochSecond();
+    long instantVideoWasPublished = videoInfo.publishedDate.getEpochSecond();
+    if (now - instantVideoWasPublished > MIN_FRESHNESS_TO_CACHE 
+          && commentArray.size() == MIN_COMMENT_ACTIVITY_TO_CACHE) {
+        AnalysisCache.add(userInput, servletResults);
+    }
 
     String json = convertToJsonUsingGson(servletResults);
     res.setContentType("application/json;");
@@ -219,9 +240,12 @@ public class AnalysisServlet extends HttpServlet {
     JsonObject videoData = object.getAsJsonObject("snippet");
     JsonElement videoName = videoData.get("title");
     JsonElement channelName = videoData.get("channelTitle");
+    JsonElement publishedTime = videoData.get("publishedAt");
 
     return new VideoInfo(
-        videoName.toString().replace("\"", ""), channelName.toString().replace("\"", ""));
+        videoName.toString().replace("\"", ""), 
+        channelName.toString().replace("\"", ""),
+        publishedTime.toString());
   }
 
   private String getVideoId(String response) {

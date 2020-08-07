@@ -18,6 +18,7 @@ public class WarmupListener implements ServletContextListener {
       // Only instance of the cache allowed
       AnalysisCache.getInstance();
       AnalysisCache.loadCache();
+      AnalysisCache.cleanDayOldEntries();
     } catch (InvalidKeyException
         | IllegalBlockSizeException
         | NoSuchAlgorithmException

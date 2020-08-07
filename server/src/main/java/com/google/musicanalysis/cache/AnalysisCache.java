@@ -14,6 +14,7 @@ import java.io.ObjectOutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.Map;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -22,6 +23,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SealedObject;
 import javax.crypto.spec.SecretKeySpec;
+import java.time.Instant;
 
 enum FileStatus {
   SUCCESS,
@@ -32,6 +34,8 @@ enum FileStatus {
 /** Implementation of server side cache that stores API requests to save time and API quota. */
 public class AnalysisCache {
   private static final String CACHE_FILE = "cachedData.txt";
+  private static final long ONE_DAY_IN_SECONDS = 24 * 60 * 60;
+
   private static HashMap<String, CacheValue> cacheMap = new HashMap<String, CacheValue>();
   private static Cipher cipher;
   private static FileStatus currentFileStatus;
@@ -56,7 +60,10 @@ public class AnalysisCache {
     }
     return AnalysisCacheObject;
   }
-
+  
+  /**
+   * Loads the cache hashmap from the cache file
+   */
   public static void loadCache()
       throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
     try {
@@ -84,6 +91,9 @@ public class AnalysisCache {
     }
   }
 
+  /**
+   * Saves and writes the cache hashmap into the file
+   */
   public static void saveCache() throws InvalidKeyException, IllegalBlockSizeException {
     try {
       cipher.init(Cipher.ENCRYPT_MODE, generateKey());
@@ -100,15 +110,47 @@ public class AnalysisCache {
     }
   }
 
+  /**
+   * Cleans entries that are a day or more old
+   */
+  public static void cleanDayOldEntries() {
+    long now = Instant.now().getEpochSecond();
+
+    for (Map.Entry cachePair : cacheMap.entrySet()) { 
+      CacheValue currentCachedData = (CacheValue)cachePair.getValue();
+      long timeOfCacheEntry = currentCachedData.timestamp.getEpochSecond();
+      if (now - timeOfCacheEntry >= ONE_DAY_IN_SECONDS) {
+        delete((String)cachePair.getKey());
+      }
+    } 
+  }
+
+  /**
+   * Adds a value to the cache
+   *
+   * @param requestUrl the request url
+   * @param responseData a VideoAnalysis object with all the data
+   */
   public static void add(String requestUrl, VideoAnalysis responseData) {
     cacheMap.put(requestUrl, new CacheValue(responseData));
   }
-
-  public static CacheValue search(String requestUrl) {
+ 
+  /**
+   * Retrieves a value from the cache
+   *
+   * @param requestUrl the request url
+   * @return a cached value pair
+   */
+  public static CacheValue retrieve(String requestUrl) {
     // map.get() returns null if not match
     return cacheMap.get(requestUrl);
   }
 
+  /**
+   * Deletes a value from the cache
+   *
+   * @param requestUrl the request url
+   */
   public static void delete(String requestUrl) {
     cacheMap.remove(requestUrl);
   }
