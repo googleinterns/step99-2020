@@ -1,7 +1,7 @@
 class HeatMapRow {
   /**
    * format for a row for heat map values obj
-   * @param {number[]} data The array of 0s and 1s for a row in a heat map
+   * @param {number[]} data binary arr of days where music was listened to
    */
   constructor(data) {
     this.data = data;
@@ -10,7 +10,7 @@ class HeatMapRow {
 
 // TODO: retrieve data from the backend instead of using a hardcoded value
 const TOTAL_LIKED = 13;
-// element value of x means xth latest video is music
+// list of day indices where music was played
 const LIKED_MUSIC_HIST = [1, 4, 7];
 
 // ith value of 1 means ith latest video is music
