@@ -3,12 +3,12 @@ package com.google.musicanalysis.types;
 import java.io.Serializable;
 
 /** Groups together a comment with its likes */
-public class CommentLikes implements Serializable {
-  public String comment;
+public class Comment implements Serializable {
+  public String text;
   public Integer likes;
 
-  public CommentLikes(String comment, Integer likes) {
-    this.comment = comment;
+  public Comment(String text, Integer likes) {
+    this.text = text;
     this.likes = likes;
   }
 }

@@ -4,8 +4,10 @@ import com.google.gson.*;
 import com.google.musicanalysis.api.naturallanguage.*;
 import com.google.musicanalysis.api.perspective.*;
 import com.google.musicanalysis.api.youtube.*;
+import com.google.musicanalysis.cache.*;
 import com.google.musicanalysis.types.*;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,6 +17,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.regex.Matcher; 
+import java.util.regex.Pattern; 
 
 @WebServlet("/api/analysis")
 public class AnalysisServlet extends HttpServlet {
@@ -22,40 +26,41 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
 
-    String input = req.getParameter("name");
-
-    assert input == null : "Something went wrong with sending to backend.";
+    String userInput = req.getParameter("name");
 
     // Use like this: {url_parameter, value}
     HashMap<String, String> videoArgs = new HashMap<>();
     HashMap<String, String> commentArgs = new HashMap<>();
     HashMap<String, String> nameArgs = new HashMap<>();
 
-    String videoId = input; // assume user enters id
+    String videoId = userInput; // assume user enters id
 
     commentArgs.put("part", "snippet");
-    commentArgs.put("order", "relevance");
-    commentArgs.put("videoId", input);
-    String commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
-
-    if (commentsJson.equals("unreadable")) {
-      // We need to search for the id and get the comments again
-      videoArgs.put("q", input);
-      videoArgs.put("type", "video");
-      String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
-      videoId = getVideoId(videoIdJson);
-
-      commentArgs.replace("videoId", videoId);
-      commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+    commentArgs.put("videoId", userInput);
+    String commentsJson;
+    
+    // Test if its a youtube id from the beginning
+    if (userInput.length() == 11 && !thereIsWhiteSpace(userInput)) {
+        try {
+            commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+        } catch (IOException err) {
+            videoId = getFirstVideoFromSearch(userInput);
+            commentArgs.replace("videoId", videoId);
+            commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
+        }
+    } else {
+        videoId = getFirstVideoFromSearch(userInput);
+        commentArgs.replace("videoId", videoId);
+        commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
     }
 
-    ArrayList<CommentLikes> commentArray = retrieveComments(commentsJson);
+    ArrayList<Comment> commentArray = retrieveComments(commentsJson);
     String cumulativeComments = convertToString(commentArray);
 
     nameArgs.put("part", "snippet");
     nameArgs.put("id", videoId);
     String nameJson = new YoutubeRequest("videos", nameArgs).getResult();
-    NameAndChannel videoInfo = getNameAndChannel(nameJson);
+    VideoInfo videoInfo = getVideoInfo(nameJson);
 
     HashMap<String, String> perspectiveMap = analyzeWithPerspective(cumulativeComments);
     
@@ -65,18 +70,34 @@ public class AnalysisServlet extends HttpServlet {
     }
     NLPResult weightedSentiment = createWeightedSentiment(unweightedNLPMap);
 
-    String json =
-        convertToJsonUsingGson(
-            new AnalysisGroup(perspectiveMap, weightedSentiment, commentArray, videoId, videoInfo));
+    AnalysisGroup servletResults =
+        new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo);
+    AnalysisCache.add(input, servletResults);
+
+    String json = convertToJsonUsingGson(servletResults);
     res.setContentType("application/json;");
     res.getWriter().println(json);
   }
 
   /** @param arr the array that will be converted to json */
-  private String convertToJsonUsingGson(AnalysisGroup group) {
+  private String convertToJsonUsingGson(VideoAnalysis group) {
     Gson gson = new Gson();
     String json = gson.toJson(group);
     return json;
+  }
+
+  /**
+   * Helper function that gets the first video from Youtube search request
+   *
+   * @param videoParam the video parameter to put in the url
+   * @return the video id as string
+   */
+  private String getFirstVideoFromSearch(String videoParam) throws MalformedURLException, IOException {
+      HashMap<String, String> videoArgs = new HashMap<>();
+      videoArgs.put("q", videoParam);
+      videoArgs.put("type", "video");
+      String videoIdJson = new YoutubeRequest("search", videoArgs).getResult();
+      return getVideoId(videoIdJson);
   }
 
   /**
@@ -185,21 +206,21 @@ public class AnalysisServlet extends HttpServlet {
     return perspectiveResults;
   }
 
-  private NameAndChannel getNameAndChannel(String response) {
+  private VideoInfo getVideoInfo(String response) {
 
     // Accessing the items JSON Array
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
     JsonArray itemsArray = jObject.getAsJsonArray("items");
-    JsonElement el = itemsArray.get(0);
+    JsonElement firstVideo = itemsArray.get(0);
 
     // Grabbing the name and channel
-    JsonObject object = el.getAsJsonObject();
-    JsonObject data = object.getAsJsonObject("snippet");
-    JsonElement videoName = data.get("title");
-    JsonElement channelName = data.get("channelTitle");
+    JsonObject object = firstVideo.getAsJsonObject();
+    JsonObject videoData = object.getAsJsonObject("snippet");
+    JsonElement videoName = videoData.get("title");
+    JsonElement channelName = videoData.get("channelTitle");
 
-    return new NameAndChannel(
+    return new VideoInfo(
         videoName.toString().replace("\"", ""), channelName.toString().replace("\"", ""));
   }
 
@@ -214,8 +235,8 @@ public class AnalysisServlet extends HttpServlet {
     for (JsonElement el : itemsArray) {
       // Grabbing each item and adding to a result array
       JsonObject object = el.getAsJsonObject();
-      JsonObject data = object.getAsJsonObject("id");
-      JsonElement videoId = data.get("videoId");
+      JsonObject idObject = object.getAsJsonObject("id");
+      JsonElement videoId = idObject.get("videoId");
 
       if (videoId != null) {
         searchResults.add(videoId.toString().replace("\"", ""));
@@ -232,8 +253,8 @@ public class AnalysisServlet extends HttpServlet {
    * @param response The JSON string to be parsed.
    * @return An ArrayList with each comment
    */
-  private ArrayList<CommentLikes> retrieveComments(String response) {
-    ArrayList<CommentLikes> commentList = new ArrayList<>();
+  private ArrayList<Comment> retrieveComments(String response) {
+    ArrayList<Comment> commentList = new ArrayList<>();
 
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
@@ -257,8 +278,8 @@ public class AnalysisServlet extends HttpServlet {
               .getAsInt();
 
       String filteredComment = filterComment(topComment);
-      CommentLikes commentAndLikes = new CommentLikes(filteredComment, likes);
-      commentList.add(commentAndLikes);
+      Comment comment = new Comment(filteredComment, likes);
+      commentList.add(comment);
     }
 
     return commentList;
@@ -271,22 +292,22 @@ public class AnalysisServlet extends HttpServlet {
    * @param comments The array to be condensed.
    * @return A properly formatted String
    */
-  private String convertToString(ArrayList<CommentLikes> comments) {
+  private String convertToString(ArrayList<Comment> comments) {
     StringBuilder res = new StringBuilder();
 
-    for (CommentLikes commentAndLikes : comments) {
-      String comment = commentAndLikes.comment;
+    for (Comment comment : comments) {
+      String commentText = comment.text;
 
-      comment = comment.replace("\"", "");
+      commentText = commentText.replace("\"", "");
       // Make sure each comment is treated as its own sentence
       // Not sure char datatype works with regex so used String
-      String lastCharacter = comment.substring(comment.length() - 1);
+      String lastCharacter = commentText.substring(commentText.length() - 1);
       if (!lastCharacter.matches("\\.|!|\\?")) {
-        comment += ". ";
+        commentText += ". ";
       } else {
-        comment += " ";
+        commentText += " ";
       }
-      res.append(comment);
+      res.append(commentText);
     }
 
     return res.toString();
@@ -301,14 +322,35 @@ public class AnalysisServlet extends HttpServlet {
   private String filterComment(String comment) {
     String filteredComment = comment;
 
-    // Handles non-ASCII characters, newlines,
-    // trimmed quotes, embedded escaped quotes.
-    // Order matters.
-    filteredComment = filteredComment.replaceAll("[^\\x00-\\x7F]", "");
+    // Removes 4683 different emojis and symbols so that NL and Perspective don't crash
+    // \u00a9 : copyright character
+    // \u00ae : registered sign
+    // \u2000-\u3300 : superscripts and subscripts, and other symbols we can ignore.
+    //                         
+    // 
+    // \ud83c,d,e [\ud000-\udfff] : The emoji ranges
+    filteredComment = filteredComment.replaceAll("(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])", "");
+    
+    // changes the newlines to a readable format by the front end
     filteredComment = String.join("\n", filteredComment.split("\\\\n"));
+    
+    // Trims the quotes off the edges
     filteredComment = filteredComment.substring(1, filteredComment.length() - 1);
+    
+    // Removes embedded escaped quotes so that NL and Perspective don't mess up
     filteredComment = filteredComment.replace("\\\"", "");
 
     return filteredComment;
+  }
+  /**
+   * Generic function to check for whitespace in a string
+   * 
+   * @param string The string to be searched
+   * @return whether or not there's any whitespace
+   */
+  private boolean thereIsWhiteSpace(String string) {
+    Pattern pattern = Pattern.compile("\\s");
+    Matcher matcher = pattern.matcher(string);
+    return matcher.find();
   }
 }
