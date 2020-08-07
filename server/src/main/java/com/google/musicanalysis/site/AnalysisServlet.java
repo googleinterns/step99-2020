@@ -26,6 +26,9 @@ public class AnalysisServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse res)
       throws ServletException, IOException {
     long ONE_DAY_IN_SECONDS = 86400;
+    long MIN_FRESHNESS_TO_CACHE = 10 * ONE_DAY_IN_SECONDS;
+    long MIN_COMMENT_ACTIVITY_TO_CACHE = 20;
+
     String userInput = req.getParameter("name");
 
     // Use like this: {url_parameter, value}
@@ -81,8 +84,8 @@ public class AnalysisServlet extends HttpServlet {
     // and there are at least 20 comments
     long now = Instant.now().getEpochSecond();
     long instantVideoWasPublished = videoInfo.publishedDate.getEpochSecond();
-    if (now - instantVideoWasPublished > 10*ONE_DAY_IN_SECONDS 
-          && commentArray.size() == 20 ) {
+    if (now - instantVideoWasPublished > MIN_FRESHNESS_TO_CACHE 
+          && commentArray.size() == MIN_COMMENT_ACTIVITY_TO_CACHE) {
         AnalysisCache.add(userInput, servletResults);
     }
 

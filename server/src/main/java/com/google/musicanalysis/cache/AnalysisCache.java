@@ -63,7 +63,6 @@ public class AnalysisCache {
   
   /**
    * Loads the cache hashmap from the cache file
-   *
    */
   public static void loadCache()
       throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
@@ -94,7 +93,6 @@ public class AnalysisCache {
 
   /**
    * Saves and writes the cache hashmap into the file
-   *
    */
   public static void saveCache() throws InvalidKeyException, IllegalBlockSizeException {
     try {
@@ -114,7 +112,6 @@ public class AnalysisCache {
 
   /**
    * Cleans entries that are a day or more old
-   *
    */
   public static void cleanDayOldEntries() {
     long now = Instant.now().getEpochSecond();
@@ -129,7 +126,7 @@ public class AnalysisCache {
   }
 
   /**
-   * Addsa value to the cache
+   * Adds a value to the cache
    *
    * @param requestUrl the request url
    * @param responseData a VideoAnalysis object with all the data
