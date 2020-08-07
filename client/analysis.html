@@ -41,11 +41,11 @@
                         <h3>Method</h3>
                         <p>
                             In order to ensure the most accurate analysis while handling the minimum amount
-                            of data, this tool takes 20 random comments from the Youtube API, aggregates them
-                            into a single string of sentences, and runs the chunk through both the NLP and
-                            Perspective APIs. Here is what each API is responsible for:
+                            of data, this tool takes the 20 most relevant comments from the Youtube API,
+                            weights each comment based off of the number of likes it receives, then creates
+                            an overall score proportional to the number of likes.
+                            Here is what each API is responsible for:
                         </p>
-                        <!--Potentially, we will take the most popular comments.-->
                         <p>
                             NLP
                             <p class="indent">    

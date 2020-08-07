@@ -11,14 +11,14 @@ import java.io.Serializable;
 public class VideoAnalysis implements Serializable {
   public final HashMap<String, String> perspectiveMap;
   public final NLPResult magnitudeAndScore;
-  public final ArrayList<String> commentArray;
+  public final ArrayList<Comment> commentArray;
   public final String videoId;
   public final VideoInfo videoInfo;
 
   public VideoAnalysis(
       HashMap<String, String> perspectiveMap,
       NLPResult magnitudeAndScore,
-      ArrayList<String> commentArray,
+      ArrayList<Comment> commentArray,
       String videoId,
       VideoInfo videoInfo) {
     this.perspectiveMap = perspectiveMap;
