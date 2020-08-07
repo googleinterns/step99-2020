@@ -4,10 +4,10 @@ import java.time.Instant;
 import java.io.Serializable;
 
 public class CacheValue implements Serializable {
-    public final AnalysisGroup responseData;
+    public final VideoAnalysis responseData;
     public final Instant timestamp;
 
-    public CacheValue(AnalysisGroup responseData) {
+    public CacheValue(VideoAnalysis responseData) {
         this.responseData = responseData;
         this.timestamp = Instant.now();
     }

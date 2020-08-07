@@ -2,6 +2,8 @@ const COMMENT_APPEARANCE_TIME = 1500;
 const COMMENT_TO_STOP_AT = 5;
 const FEEDBACK_APPEARANCE_TIME = 1500;
 
+/* global getData */
+
 window.onload = function() {
   // Listen for submission click
   const formSubmit = document.getElementById('sendbutton');
@@ -14,12 +16,13 @@ window.onload = function() {
  */
 async function fetchResponse() {
   const param = document.getElementById('searchbar').value;
+  let response = null;
   if (param == null) {
     return;
   }
 
   try {
-    const response = await getData(`/api/analysis?name=${param}`);
+    response = await getData(`/api/analysis?name=${param}`);
   } catch (e) {
     console.error(e);
   }
@@ -45,11 +48,14 @@ function renderingHandler(videoAnalysis) {
   renderDonutCharts(videoAnalysis.perspectiveMap);
   const totalComments = renderComments(videoAnalysis.commentArray);
   const commentsRenderTime = totalComments * COMMENT_APPEARANCE_TIME;
-  const sentiment = determineSentiment(videoAnalysis.magnitudeAndScore.magnitude,
+  const sentiment = determineSentiment(
+      videoAnalysis.magnitudeAndScore.magnitude,
       videoAnalysis.magnitudeAndScore.score);
   setTimeout(() => {
     addFeedbackResult(sentiment);
-    createCard(videoAnalysis.videoId, videoAnalysis.videoInfo.name, videoAnalysis.videoInfo.channel);
+    createCard(videoAnalysis.videoId,
+        videoAnalysis.videoInfo.name,
+        videoAnalysis.videoInfo.channel);
   }, commentsRenderTime + FEEDBACK_APPEARANCE_TIME);
 }
 
@@ -69,9 +75,9 @@ function renderDonutCharts(map) {
 /**
  * Creates the card that displays on a result match
  *
- * @param {String} id the id of the wanted video
- * @param {String} name the name of the wanted video
- * @param {String} channel the name of the wanted channel
+ * @param {string} id the id of the wanted video
+ * @param {string} name the name of the wanted video
+ * @param {string} channel the name of the wanted channel
  */
 function createCard(id, name, channel) {
   const el = document.getElementById('videocard-wrapper');
@@ -145,7 +151,7 @@ function determineSentiment(magnitude, score) {
   } else {
     tone = 'MIXED';
   }
-  
+
   return isClear + tone;
 }
 
@@ -158,16 +164,6 @@ function removeAllChildNodes(parent) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild);
   }
-}
-
-/**
- * Toggles the comment header
- *
- */
-function showCommentHeader() {
-  const el = document.getElementById('commentHeader');
-  el.classList.toggle('hidden', false);
-  el.classList.toggle('fade', true);
 }
 
 /**
@@ -270,7 +266,6 @@ function buildCircle() {
 /**
  * Helper function that creates an SVG element
  *
- * @returns {SVGElement} the wanted SVG element
  *
  * @param {string} el the string for the svg element
  * @returns {SVGElement} the svg element
@@ -282,8 +277,10 @@ function createSVGElement(el) {
 /**
  * Toggles the display class for the lightbox
  *
- * @param {boolean} isLightboxClosed determines whether or not the lightbox is open
+ * @param {boolean} isLightboxClosed determines whether the lightbox is open
  */
+// this function is referenced from HTML
+// eslint-disable-next-line no-unused-vars
 function toggleLightboxVisibility(isLightboxClosed) {
   if (isLightboxClosed === true) {
     showLightbox();

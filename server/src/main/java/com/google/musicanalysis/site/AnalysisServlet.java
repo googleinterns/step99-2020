@@ -70,9 +70,9 @@ public class AnalysisServlet extends HttpServlet {
     }
     NLPResult weightedSentiment = createWeightedSentiment(unweightedNLPMap);
 
-    AnalysisGroup servletResults =
-        new AnalysisGroup(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo);
-    AnalysisCache.add(input, servletResults);
+    VideoAnalysis servletResults =
+        new VideoAnalysis(perspectiveMap, commentsSentiment, commentArray, videoId, videoInfo);
+    AnalysisCache.add(userInput, servletResults);
 
     String json = convertToJsonUsingGson(servletResults);
     res.setContentType("application/json;");
