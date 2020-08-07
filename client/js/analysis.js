@@ -114,7 +114,7 @@ function createCard(id, name, channel) {
 function renderComments(array) {
   const totalComments = Math.min(COMMENT_TO_STOP_AT, array.length);
   for (let i = 0; i < totalComments; i++) {
-    const filteredValue = array[i].replace('\n', '');
+    const filteredValue = array[i].comment.replace('\n/g', ' -- ');
     setTimeout(() => {
       addListElement(filteredValue);
     }, (i+1) * COMMENT_APPEARANCE_TIME);

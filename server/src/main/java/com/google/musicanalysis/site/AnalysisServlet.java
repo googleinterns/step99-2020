@@ -53,7 +53,7 @@ public class AnalysisServlet extends HttpServlet {
         commentsJson = new YoutubeRequest("commentThreads", commentArgs).getResult();
     }
 
-    ArrayList<String> commentArray = retrieveComments(commentsJson);
+    ArrayList<Comment> commentArray = retrieveComments(commentsJson);
     String cumulativeComments = convertToString(commentArray);
 
     nameArgs.put("part", "snippet");
@@ -205,8 +205,8 @@ public class AnalysisServlet extends HttpServlet {
    * @param response The JSON string to be parsed.
    * @return An ArrayList with each comment
    */
-  private ArrayList<String> retrieveComments(String response) {
-    ArrayList<String> commentList = new ArrayList<>();
+  private ArrayList<Comment> retrieveComments(String response) {
+    ArrayList<Comment> commentList = new ArrayList<>();
 
     JsonElement jElement = JsonParser.parseString(response);
     JsonObject jObject = jElement.getAsJsonObject();
@@ -221,8 +221,17 @@ public class AnalysisServlet extends HttpServlet {
               .get("textOriginal")
               .toString();
 
-      // Remove all non-ASCII characters
-      commentList.add(topComment.replaceAll("[^\\x00-\\x7F]", ""));
+      Integer likes =
+          el.getAsJsonObject()
+              .getAsJsonObject("snippet")
+              .getAsJsonObject("topLevelComment")
+              .getAsJsonObject("snippet")
+              .get("likeCount")
+              .getAsInt();
+
+      String filteredComment = filterComment(topComment);
+      Comment comment = new Comment(filteredComment, likes);
+      commentList.add(comment);
     }
 
     return commentList;
@@ -235,30 +244,56 @@ public class AnalysisServlet extends HttpServlet {
    * @param comments The array to be condensed.
    * @return A properly formatted String
    */
-  private String convertToString(ArrayList<String> comments) {
+  private String convertToString(ArrayList<Comment> comments) {
     StringBuilder res = new StringBuilder();
 
-    for (String comment : comments) {
-      comment = comment.replace("\"", "");
-      // One letter comments should not be considered as sentences since
-      // they bring no value to the analysis. 
-      if (comment.length() <= 1){
-          continue;
-      }
+    for (Comment comment : comments) {
+      String commentText = comment.text;
+
+      commentText = commentText.replace("\"", "");
       // Make sure each comment is treated as its own sentence
       // Not sure char datatype works with regex so used String
-      String lastCharacter = comment.substring(comment.length() - 1);
+      String lastCharacter = commentText.substring(commentText.length() - 1);
       if (!lastCharacter.matches("\\.|!|\\?")) {
-        comment += ". ";
+        commentText += ". ";
       } else {
-        comment += " ";
+        commentText += " ";
       }
-      res.append(comment);
+      res.append(commentText);
     }
 
     return res.toString();
   }
 
+  /**
+   * Filters out a comment string so that it's readable and doesn't break the frontend.
+   *
+   * @param comment The comment to be filtered.
+   * @return A properly formatted comment
+   */
+  private String filterComment(String comment) {
+    String filteredComment = comment;
+
+    // Removes 4683 different emojis and symbols so that NL and Perspective don't crash
+    // \u00a9 : copyright character
+    // \u00ae : registered sign
+    // \u2000-\u3300 : superscripts and subscripts, and other symbols we can ignore.
+    //                         
+    // 
+    // \ud83c,d,e [\ud000-\udfff] : The emoji ranges
+    filteredComment = filteredComment.replaceAll("(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])", "");
+    
+    // changes the newlines to a readable format by the front end
+    filteredComment = String.join("\n", filteredComment.split("\\\\n"));
+    
+    // Trims the quotes off the edges
+    filteredComment = filteredComment.substring(1, filteredComment.length() - 1);
+    
+    // Removes embedded escaped quotes so that NL and Perspective don't mess up
+    filteredComment = filteredComment.replace("\\\"", "");
+
+    return filteredComment;
+  }
   /**
    * Generic function to check for whitespace in a string
    * 
