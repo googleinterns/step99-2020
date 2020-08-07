@@ -9,7 +9,7 @@ const TEN_MINUTES_IN_SECONDS = 60 * 10;
  * We only want to pull from the client-side cache if two requests
  * are made within 10 mins of eachother.
  */
-var siteHeaders = new Headers();
+const siteHeaders = new Headers();
 siteHeaders.set('Cache-control', `max-age=${TEN_MINUTES_IN_SECONDS}`);
 
 /* global getData */
@@ -41,7 +41,8 @@ async function fetchResponse() {
   if (response) {
     if (response.status == 500) {
       // This will hit when comments are disabled for the video.
-      alert('The video you selected is incompatible with this tool. Please try again.');
+      alert(`The video you selected is incompatible with this tool. 
+            Please try again.`);
       return;
     }
     renderingHandler(response);
@@ -344,11 +345,11 @@ function shakeSearchBar() {
 
 /**
  * Sets a cooldown period for the submit button
- */ 
- function buttonCoolDown() {
-    buttonElement = document.getElementById('sendbutton');
-    buttonElement.disabled = true;
-    setTimeout(() => {
-      buttonElement.disabled = false;
-    }, COOLDOWN_TIME);
- }
+ */
+function buttonCoolDown() {
+  const buttonElement = document.getElementById('sendbutton');
+  buttonElement.disabled = true;
+  setTimeout(() => {
+    buttonElement.disabled = false;
+  }, COOLDOWN_TIME);
+}
