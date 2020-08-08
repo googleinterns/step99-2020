@@ -96,9 +96,13 @@ public class YoutubeServlet extends HttpServlet {
         JsonObject likedVideoRes;
         JsonArray videos;
         YoutubeGenres genreAnalysis = new YoutubeGenres();
+        // needed to keep track of likedMusicHistory for heat map
+        int videosRetrieved = 0;
 
         // next Page Token must be an empty string for first http call
         String nextPageToken = "";
+        // Make multiple paginated calls to youtube API. 
+        // Each call has a new page token
         while (nextPageToken != null) {
             youtubeResBody = getYoutubeRes(API_KEY, 
                                             accessToken.toString(), 
@@ -111,7 +115,9 @@ public class YoutubeServlet extends HttpServlet {
             }
 
             videos = likedVideoRes.getAsJsonArray("items");
-            genreAnalysis.calculateMusicCount(videos);
+            // videosRetrieved keeps track of music video order in genreAnalysis
+            videosRetrieved += genreAnalysis
+                                .calculateMusicCount(videos, videosRetrieved);
 
             nextPageToken = getNextPageToken(likedVideoRes);
         }

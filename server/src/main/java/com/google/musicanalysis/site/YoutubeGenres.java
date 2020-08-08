@@ -4,6 +4,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 import com.google.gson.Gson;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.lang.Math;
@@ -22,6 +23,9 @@ public class YoutubeGenres {
   public HashMap<String, Integer> genreData = new HashMap<String, Integer>();
   public int totalMusic = 0;
   public int maxGenreCount = 0;
+  // element of value x means xth latest video is music
+  // needed for heat map
+  public ArrayList<Integer> likedMusicHistory = new ArrayList<Integer>();
 
   public YoutubeGenres() {
 
@@ -31,9 +35,12 @@ public class YoutubeGenres {
  * parses through youtube liked videos json array,
  * updates hash map to contain frequency count of each music genre
  * @param videos json array of youtube liked videos
+ * @param firstVideoCount the number of videos retrieved before this http call
+ * @return number of videos retrieved in this call
  */
-  protected void calculateMusicCount(JsonArray videos) {
-    for (int i = 0; i < videos.size(); i++) {
+  protected int calculateMusicCount(JsonArray videos, int firstVideoCount) {
+    int videosSize = videos.size();
+    for (int i = 0; i < videosSize; i++) {
         JsonObject video = videos.get(i).getAsJsonObject();
         JsonObject topicDetails = video.getAsJsonObject("topicDetails");
 
@@ -68,12 +75,17 @@ public class YoutubeGenres {
             }
         }
 
-        if (isMusic && totalSubgenres == 0) {
+        if (isMusic) {
+          // likedMusicHistory records video numbers that are music
+          likedMusicHistory.add(firstVideoCount + i);
+
+          if (totalSubgenres == 0) {
             // video only classified as Music so we update as "Other music"
-            this.updateGenre("Other music");
+            this.updateGenre("Other music");            
+          }
         }
     }
-    return;
+    return videosSize;
   }
 
 /**
