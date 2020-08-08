@@ -3,7 +3,7 @@
  */
 
 import {SVG_NS} from '/js/util.js';
-import {GENRE_ANALYSIS_PROMISE} from '/js/genre.js';
+import {fetchMusicGenre} from '/js/genre.js';
 
 const GRAPH_HEIGHT = 100;
 const GRAPH_LEFT_PADDING = 2.5;
@@ -54,7 +54,7 @@ function createBarChart(chartValues, chartCategories, maxChartVal) {
   }
 }
 
-GENRE_ANALYSIS_PROMISE.then((genreAnalysisInfo) => {
+fetchMusicGenre().then((genreAnalysisInfo) => {
   createBarChart(
       Object.values(genreAnalysisInfo.genreData),
       Object.keys(genreAnalysisInfo.genreData),

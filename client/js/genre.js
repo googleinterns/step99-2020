@@ -8,7 +8,7 @@
  *
  * @returns {Promise<object>} An obj containing Youtube genre data and stats
  */
-async function fetchMusicGenre() {
+export async function fetchMusicGenre() {
   const response = await fetch('/api/youtube');
   if (response.status == 401) {
     // no oauth login so redirect to new page
@@ -18,5 +18,3 @@ async function fetchMusicGenre() {
   const genreCount = await response.text();
   return JSON.parse(genreCount);
 }
-
-export const GENRE_ANALYSIS_PROMISE = fetchMusicGenre();
