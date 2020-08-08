@@ -39,6 +39,10 @@
   fill: var(--color-accent-special);
 }
 
+.bar-value {
+  fill: #FF69B4	;
+}
+
 #bar-text {
   display: flex;
   flex-flow: column nowrap;
