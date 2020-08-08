@@ -17,9 +17,9 @@ const BAR_PERCENT_PADDING = 1 - BAR_PERCENT_FILL;
  *
  * @param {number[]} chartValues array of bar values/lengths
  * @param {string[]} chartCategories array of bar categories/labels
- * @param {number} maxChartVal largest value of chartValues
  */
-function createBarChart(chartValues, chartCategories, maxChartVal) {
+function createBarChart(chartValues, chartCategories) {
+  const maxChartVal = Math.max(...chartValues);
   const barContainerHeight = GRAPH_HEIGHT / chartValues.length;
 
   const barThickness = BAR_PERCENT_FILL * barContainerHeight;
@@ -57,6 +57,5 @@ function createBarChart(chartValues, chartCategories, maxChartVal) {
 fetchMusicGenre().then((genreAnalysisInfo) => {
   createBarChart(
       Object.values(genreAnalysisInfo.genreData),
-      Object.keys(genreAnalysisInfo.genreData),
-      genreAnalysisInfo.maxGenreCount);
+      Object.keys(genreAnalysisInfo.genreData));
 });
