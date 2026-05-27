@@ -4,7 +4,7 @@
   "description": "2020 STEP Internship Capstone",
   "main": "index.html",
   "dependencies": {
-    "eslint": "^7.2.0",
+    "eslint": "^7.32.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-jsdoc": "^27.1.2",
     "stylelint": "^13.6.1",
